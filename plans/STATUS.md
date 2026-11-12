@@ -11,7 +11,7 @@ All gates are signed by the product owner / tech lead (same person).
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
-| 2 Design | G2 Design review and screens | 2a Done (merged 2026-11-12); 2b in review; 2c not started | | docs/stage-2a-architecture, #3 · docs/stage-2b-design |
+| 2 Design | G2 Design review and screens | 2a Done (merged 2026-11-12); 2b in review; 2c not started | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 |
 | 3 Plan | G3 Milestone scope and dates | Not started | | |
 
 | Milestone | Scope | Status | Exit date |
@@ -63,7 +63,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 | Part | Docs | Status |
 |---|---|---|
 | 2a | [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md), [ADR-001–014](../docs/adr/README.md) (all accepted), [contracts 0.1.0](../docs/contracts/README.md) | Done (PR #3, merged 2026-11-12) |
-| 2b | [UI_DESIGN.md](../docs/product/UI_DESIGN.md), [TECH_STACK.md](../docs/architecture/TECH_STACK.md), [SECURITY.md](../docs/architecture/SECURITY.md), [OBSERVABILITY.md](../docs/architecture/OBSERVABILITY.md), ADR-015–019 | In review |
+| 2b | [UI_DESIGN.md](../docs/product/UI_DESIGN.md), [TECH_STACK.md](../docs/architecture/TECH_STACK.md), [SECURITY.md](../docs/architecture/SECURITY.md), [OBSERVABILITY.md](../docs/architecture/OBSERVABILITY.md), ADR-015–019 | In review (PR #4) |
 | 2c | Screens S-01–S-16 (R1/R2), tokens.md: Studio UI tokens and, per A-31, the video house style | Not started |
 
 | G2 check (2a + 2b scope) | Result |
