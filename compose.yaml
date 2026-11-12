@@ -1,0 +1,2 @@
+# Stub. Local stack (every service plus database) is defined in M0.
+services: {}
