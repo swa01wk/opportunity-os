@@ -1,0 +1,91 @@
+{
+  "$comment": "Capability catalogue: the only operations a VideoSpec may use. Read by the storyboard task (list_capabilities tool), the capability preflight (R-07) and the compiler. From M0 it is generated from media/scenes and backend/demonstrations; this is the agreed draft.",
+  "catalogueVersion": "0.1.0",
+  "format": { "width": 1080, "height": 1920, "fps": 30, "minDurationFrames": 900, "maxDurationFrames": 2700 },
+  "limits": {
+    "maxObjects": 300,
+    "maxVisibleObjectsPerFrame": 120,
+    "maxActionsPerScene": 120,
+    "maxScenes": 24,
+    "maxTexLengthPerTerm": 120,
+    "maxFlashesPerSecond": 3
+  },
+  "families": [
+    {
+      "name": "MathExpression",
+      "kind": "object",
+      "version": "0.1.0",
+      "summary": "Equation with addressable terms (fractions, operators, powers). Terms link to the objects they stand for.",
+      "objectType": "MathExpression"
+    },
+    {
+      "name": "NumberSequence",
+      "kind": "object",
+      "version": "0.1.0",
+      "summary": "Identifiable numbers with stable meaning and colour; optional operator between terms.",
+      "objectType": "NumberSequence"
+    },
+    {
+      "name": "GeometricArrangement",
+      "kind": "object",
+      "version": "0.1.0",
+      "summary": "Bounded grid, ring, line or group layouts of unit cells, with named groups.",
+      "objectType": "GeometricArrangement",
+      "layouts": ["grid", "ring", "line", "group"],
+      "maxCells": 400
+    },
+    {
+      "name": "ObjectTransform",
+      "kind": "action",
+      "version": "0.1.0",
+      "summary": "Move, rotate, scale, regroup and explicitly map terms.",
+      "ops": {
+        "move": { "params": ["to"] },
+        "rotate": { "params": ["byDeg"], "bounds": { "byDeg": [-360, 360] } },
+        "scale": { "params": ["toPct"], "bounds": { "toPct": [10, 400] } },
+        "regroup": { "params": ["toGroupId"] },
+        "mapTerms": { "params": ["mapping"], "maxPairs": 40 }
+      }
+    },
+    {
+      "name": "FocusHighlight",
+      "kind": "action",
+      "version": "0.1.0",
+      "summary": "Reveal, hide, highlight, outline, emphasise, dim and undim.",
+      "ops": {
+        "reveal": { "params": ["stagger"] },
+        "hide": { "params": [] },
+        "highlight": { "params": [] },
+        "outline": { "params": [] },
+        "emphasize": { "params": [] },
+        "dim": { "params": [] },
+        "undim": { "params": [] }
+      }
+    },
+    {
+      "name": "CaptionAndTakeaway",
+      "kind": "object+action",
+      "version": "0.1.0",
+      "summary": "On-screen question, labels and takeaway text (TextBlock), plus the narration caption track.",
+      "objectType": "TextBlock",
+      "ops": { "showText": { "params": [] }, "hideText": { "params": [] } }
+    }
+  ],
+  "easingTokens": ["ease.standard", "ease.enter", "ease.exit", "ease.linear"],
+  "demonstrationFunctions": [
+    {
+      "name": "odd_square_layers",
+      "version": "0.1.0",
+      "summary": "Layers of an n×n square built from consecutive odd numbers (PRD §10.1). Layer k adds 2k−1 cells: one row of k plus one column of k sharing a corner.",
+      "kind": "generalConstruction",
+      "params": {
+        "n": { "type": "integer", "minimum": 1, "maximum": 12 }
+      },
+      "results": {
+        "layers": "array of { k, cellCount (2k−1), cumulative (k²), cells: [{ col, row }] }",
+        "total": "n²"
+      },
+      "arithmetic": "exact"
+    }
+  ]
+}

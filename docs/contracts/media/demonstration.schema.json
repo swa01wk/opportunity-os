@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opportunityos.invalid/contracts/media/demonstration.schema.json",
+  "x-version": "0.1.0",
+  "title": "DemonstrationModel",
+  "description": "A reviewed, versioned computation whose results a VideoSpec displays (R-11, R-12, PRD §9.2, §15). Results are produced only by allowlisted functions in backend/demonstrations/, never by a model. A model may propose parameters; the function computes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "function", "functionVersion", "domain", "params", "arithmetic", "results", "resultsSha256", "kind"],
+  "properties": {
+    "id": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "version": { "type": "integer", "minimum": 1 },
+    "function": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{2,63}$",
+      "description": "Name of an allowlisted function, listed in capabilities.json → demonstrationFunctions."
+    },
+    "functionVersion": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "kind": {
+      "enum": ["generalConstruction", "example", "approximation", "illustrative"],
+      "description": "Mirrors Scene.demonstrationKind (R-13)."
+    },
+    "domain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description"],
+      "properties": {
+        "description": { "type": "string", "maxLength": 200, "description": "e.g. 'n is a positive integer, 1 ≤ n ≤ 12'." },
+        "units": { "type": "string", "maxLength": 40 }
+      }
+    },
+    "params": {
+      "type": "object",
+      "maxProperties": 20,
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "integer" },
+          { "type": "string", "maxLength": 64 },
+          { "type": "boolean" }
+        ]
+      },
+      "description": "Function inputs. Validated against the function's own parameter schema in capabilities.json."
+    },
+    "arithmetic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": { "enum": ["exact", "tolerance"] },
+        "tolerance": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?$" },
+        "rounding": { "enum": ["none", "half_even", "half_up", "truncate"] },
+        "displayDecimals": { "type": "integer", "minimum": 0, "maximum": 6 }
+      }
+    },
+    "results": {
+      "type": "object",
+      "description": "Function output. Shape is defined per function in capabilities.json. Numbers are exact decimal strings or integers."
+    },
+    "resultsSha256": { "$ref": "../common.schema.json#/$defs/Sha256" },
+    "derivationRef": {
+      "$ref": "../common.schema.json#/$defs/Uuid",
+      "description": "Claim/evidence record holding the reviewed derivation or reference required before publishing (PRD §10.2)."
+    },
+    "reviewStatus": { "enum": ["unreviewed", "approved", "needs_specialist", "rejected"] }
+  }
+}

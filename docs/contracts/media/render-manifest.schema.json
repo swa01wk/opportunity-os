@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opportunityos.invalid/contracts/media/render-manifest.schema.json",
+  "x-version": "0.1.0",
+  "title": "RenderManifest",
+  "description": "Everything that determined a rendered output, so it can be explained, reused and reproduced within tolerance (R-30, R-32, NFR-03, PRD §9.3). Immutable once written.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifestVersion", "manifestId", "projectId", "outputKind", "quality", "output", "format", "inputs", "toolchain", "scenes", "checks", "createdAt"],
+  "properties": {
+    "manifestVersion": { "const": "0.1.0" },
+    "manifestId": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "projectId": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "outputKind": { "enum": ["scene_clip", "preview", "master"] },
+    "quality": { "enum": ["draft", "final"] },
+    "output": { "$ref": "../common.schema.json#/$defs/BlobRef" },
+    "format": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height", "fps", "durationFrames"],
+      "properties": {
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "fps": { "const": 30 },
+        "durationFrames": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["videoSpec", "brandKit", "effectiveInputSha256"],
+      "properties": {
+        "videoSpec": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+        "narrationTiming": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+        "captionTrack": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+        "brandKit": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+        "demonstrations": { "type": "array", "items": { "$ref": "../common.schema.json#/$defs/VersionRef" } },
+        "assets": { "type": "array", "items": { "$ref": "../common.schema.json#/$defs/BlobRef" } },
+        "effectiveInputSha256": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "description": "Hash of every effective input below plus toolchain; the cache key (R-32)."
+        }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["remotion", "chromeHeadlessShell", "sceneLibrary", "codec", "fonts"],
+      "properties": {
+        "remotion": { "$ref": "../common.schema.json#/$defs/SemVer" },
+        "chromeHeadlessShell": { "type": "string", "maxLength": 40 },
+        "ffmpeg": { "type": "string", "maxLength": 40 },
+        "sceneLibrary": { "$ref": "../common.schema.json#/$defs/SemVer" },
+        "components": {
+          "type": "object",
+          "additionalProperties": { "$ref": "../common.schema.json#/$defs/SemVer" },
+          "description": "Component family → version actually used."
+        },
+        "katex": { "$ref": "../common.schema.json#/$defs/SemVer" },
+        "codec": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["video", "pixelFormat", "audio"],
+          "properties": {
+            "video": { "enum": ["h264"] },
+            "crf": { "type": "integer", "minimum": 0, "maximum": 51 },
+            "pixelFormat": { "enum": ["yuv420p"] },
+            "audio": { "enum": ["aac"] },
+            "audioBitrateKbps": { "type": "integer" }
+          }
+        },
+        "fonts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["family", "sha256"],
+            "properties": {
+              "family": { "type": "string", "maxLength": 80 },
+              "sha256": { "$ref": "../common.schema.json#/$defs/Sha256" },
+              "licenceAssetId": { "$ref": "../common.schema.json#/$defs/Uuid" }
+            }
+          }
+        },
+        "seed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sceneId", "inputSha256", "startFrame", "endFrame", "clip", "reused"],
+        "properties": {
+          "sceneId": { "$ref": "../common.schema.json#/$defs/LocalId" },
+          "inputSha256": { "$ref": "../common.schema.json#/$defs/Sha256", "description": "Scene params, entry state, demonstration results, assets, brand, fonts, voice segment, component and renderer versions, timing." },
+          "entryStateSha256": { "$ref": "../common.schema.json#/$defs/Sha256" },
+          "exitStateSha256": { "$ref": "../common.schema.json#/$defs/Sha256" },
+          "startFrame": { "type": "integer", "minimum": 0 },
+          "endFrame": { "type": "integer", "minimum": 1 },
+          "clip": { "$ref": "../common.schema.json#/$defs/BlobRef" },
+          "reused": { "type": "boolean", "description": "true when the clip came from cache (R-32 evidence)." }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "result"],
+        "properties": {
+          "id": {
+            "enum": ["dimensions", "fps", "duration", "audio_present", "audio_loudness", "caption_bounds", "label_overflow", "safe_zones", "continuity", "flash_rate", "contrast", "demonstration_match"]
+          },
+          "result": { "enum": ["passed", "failed", "not_checked"] },
+          "detail": { "type": "string", "maxLength": 500 },
+          "target": { "$ref": "../common.schema.json#/$defs/ErrorTarget" }
+        }
+      },
+      "description": "Independent media checks (R-29, NFR-08). Masters need every check passed or a recorded reason."
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "renderMs": { "type": "integer", "minimum": 0 },
+        "peakMemoryMb": { "type": "integer", "minimum": 0 },
+        "cpuSeconds": { "type": "number", "minimum": 0 }
+      },
+      "description": "NFR-02 baseline data."
+    },
+    "createdAt": { "$ref": "../common.schema.json#/$defs/Timestamp" }
+  }
+}

@@ -1,0 +1,1309 @@
+{
+  "schemaVersion": "0.1.0",
+  "specId": "00000000-0000-4000-8000-000000000020",
+  "projectId": "00000000-0000-4000-8000-000000000010",
+  "storyboardVersion": {
+    "id": "00000000-0000-4000-8000-000000000021",
+    "version": 1,
+    "sha256": "e7d5d8290e5e5b5b6c9568292fe50101b7c88baf2bac2241245fe49838b4f6d9"
+  },
+  "scriptVersion": {
+    "id": "00000000-0000-4000-8000-000000000022",
+    "version": 1,
+    "sha256": "a59f4fad55c0f0ad46cf709f7923489b9d3a4adb4b7ebcc529b3f7c5c5c86419"
+  },
+  "format": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30
+  },
+  "brandKit": {
+    "id": "00000000-0000-4000-8000-000000000023",
+    "version": 1,
+    "sha256": "3dbd5809561d3d4cfbedf44aa570485c30024ce60206b8c76d59b0572fce14b0"
+  },
+  "timing": {
+    "status": "provisional"
+  },
+  "targetDurationFrames": 1350,
+  "demonstrations": [
+    {
+      "id": "00000000-0000-4000-8000-000000000030",
+      "version": 1,
+      "sha256": "7d39690ae8dad4bf7bf8933cc8136c751c4fdfb864e1ab989df634242ad3219a"
+    }
+  ],
+  "objects": [
+    {
+      "type": "TextBlock",
+      "id": "question",
+      "semanticRole": "opening question",
+      "role": "question",
+      "text": "Why do odd numbers build a square?",
+      "anchor": {
+        "x": 540,
+        "y": 200
+      },
+      "styleToken": "type.question"
+    },
+    {
+      "type": "NumberSequence",
+      "id": "sum",
+      "semanticRole": "first five odd numbers",
+      "operator": "plus",
+      "anchor": {
+        "x": 540,
+        "y": 360
+      },
+      "claimRefs": [
+        "00000000-0000-4000-8000-000000000040"
+      ],
+      "demonstrationRef": "00000000-0000-4000-8000-000000000030",
+      "terms": [
+        {
+          "id": "sum.t1",
+          "value": "1",
+          "colorToken": "color.layer.1",
+          "linkedObjectIds": [
+            "layer.1"
+          ],
+          "valueRef": "results.layers[0].cellCount"
+        },
+        {
+          "id": "sum.t2",
+          "value": "3",
+          "colorToken": "color.layer.2",
+          "linkedObjectIds": [
+            "layer.2"
+          ],
+          "valueRef": "results.layers[1].cellCount"
+        },
+        {
+          "id": "sum.t3",
+          "value": "5",
+          "colorToken": "color.layer.3",
+          "linkedObjectIds": [
+            "layer.3"
+          ],
+          "valueRef": "results.layers[2].cellCount"
+        },
+        {
+          "id": "sum.t4",
+          "value": "7",
+          "colorToken": "color.layer.4",
+          "linkedObjectIds": [
+            "layer.4"
+          ],
+          "valueRef": "results.layers[3].cellCount"
+        },
+        {
+          "id": "sum.t5",
+          "value": "9",
+          "colorToken": "color.layer.5",
+          "linkedObjectIds": [
+            "layer.5"
+          ],
+          "valueRef": "results.layers[4].cellCount"
+        }
+      ]
+    },
+    {
+      "type": "NumberSequence",
+      "id": "total",
+      "semanticRole": "running total of cells",
+      "operator": "none",
+      "anchor": {
+        "x": 540,
+        "y": 1240
+      },
+      "label": "total",
+      "demonstrationRef": "00000000-0000-4000-8000-000000000030",
+      "terms": [
+        {
+          "id": "total.k1",
+          "value": "1",
+          "valueRef": "results.layers[0].cumulative"
+        },
+        {
+          "id": "total.k2",
+          "value": "4",
+          "valueRef": "results.layers[1].cumulative"
+        },
+        {
+          "id": "total.k3",
+          "value": "9",
+          "valueRef": "results.layers[2].cumulative"
+        },
+        {
+          "id": "total.k4",
+          "value": "16",
+          "valueRef": "results.layers[3].cumulative"
+        },
+        {
+          "id": "total.k5",
+          "value": "25",
+          "valueRef": "results.layers[4].cumulative"
+        }
+      ]
+    },
+    {
+      "type": "GeometricArrangement",
+      "id": "square",
+      "semanticRole": "square built from odd-number layers",
+      "layout": "grid",
+      "origin": {
+        "x": 240,
+        "y": 560
+      },
+      "unitPx": 120,
+      "groups": [
+        {
+          "id": "layer.1",
+          "colorToken": "color.layer.1",
+          "label": "1",
+          "valueRef": "results.layers[0].cellCount"
+        },
+        {
+          "id": "layer.2",
+          "colorToken": "color.layer.2",
+          "label": "3",
+          "valueRef": "results.layers[1].cellCount"
+        },
+        {
+          "id": "layer.3",
+          "colorToken": "color.layer.3",
+          "label": "5",
+          "valueRef": "results.layers[2].cellCount"
+        },
+        {
+          "id": "layer.4",
+          "colorToken": "color.layer.4",
+          "label": "7",
+          "valueRef": "results.layers[3].cellCount"
+        },
+        {
+          "id": "layer.5",
+          "colorToken": "color.layer.5",
+          "label": "9",
+          "valueRef": "results.layers[4].cellCount"
+        }
+      ],
+      "cells": [
+        {
+          "id": "cell.c0r0",
+          "col": 0,
+          "row": 0,
+          "groupId": "layer.1"
+        },
+        {
+          "id": "cell.c1r0",
+          "col": 1,
+          "row": 0,
+          "groupId": "layer.2"
+        },
+        {
+          "id": "cell.c2r0",
+          "col": 2,
+          "row": 0,
+          "groupId": "layer.3"
+        },
+        {
+          "id": "cell.c3r0",
+          "col": 3,
+          "row": 0,
+          "groupId": "layer.4"
+        },
+        {
+          "id": "cell.c4r0",
+          "col": 4,
+          "row": 0,
+          "groupId": "layer.5"
+        },
+        {
+          "id": "cell.c0r1",
+          "col": 0,
+          "row": 1,
+          "groupId": "layer.2"
+        },
+        {
+          "id": "cell.c1r1",
+          "col": 1,
+          "row": 1,
+          "groupId": "layer.2"
+        },
+        {
+          "id": "cell.c2r1",
+          "col": 2,
+          "row": 1,
+          "groupId": "layer.3"
+        },
+        {
+          "id": "cell.c3r1",
+          "col": 3,
+          "row": 1,
+          "groupId": "layer.4"
+        },
+        {
+          "id": "cell.c4r1",
+          "col": 4,
+          "row": 1,
+          "groupId": "layer.5"
+        },
+        {
+          "id": "cell.c0r2",
+          "col": 0,
+          "row": 2,
+          "groupId": "layer.3"
+        },
+        {
+          "id": "cell.c1r2",
+          "col": 1,
+          "row": 2,
+          "groupId": "layer.3"
+        },
+        {
+          "id": "cell.c2r2",
+          "col": 2,
+          "row": 2,
+          "groupId": "layer.3"
+        },
+        {
+          "id": "cell.c3r2",
+          "col": 3,
+          "row": 2,
+          "groupId": "layer.4"
+        },
+        {
+          "id": "cell.c4r2",
+          "col": 4,
+          "row": 2,
+          "groupId": "layer.5"
+        },
+        {
+          "id": "cell.c0r3",
+          "col": 0,
+          "row": 3,
+          "groupId": "layer.4"
+        },
+        {
+          "id": "cell.c1r3",
+          "col": 1,
+          "row": 3,
+          "groupId": "layer.4"
+        },
+        {
+          "id": "cell.c2r3",
+          "col": 2,
+          "row": 3,
+          "groupId": "layer.4"
+        },
+        {
+          "id": "cell.c3r3",
+          "col": 3,
+          "row": 3,
+          "groupId": "layer.4"
+        },
+        {
+          "id": "cell.c4r3",
+          "col": 4,
+          "row": 3,
+          "groupId": "layer.5"
+        },
+        {
+          "id": "cell.c0r4",
+          "col": 0,
+          "row": 4,
+          "groupId": "layer.5"
+        },
+        {
+          "id": "cell.c1r4",
+          "col": 1,
+          "row": 4,
+          "groupId": "layer.5"
+        },
+        {
+          "id": "cell.c2r4",
+          "col": 2,
+          "row": 4,
+          "groupId": "layer.5"
+        },
+        {
+          "id": "cell.c3r4",
+          "col": 3,
+          "row": 4,
+          "groupId": "layer.5"
+        },
+        {
+          "id": "cell.c4r4",
+          "col": 4,
+          "row": 4,
+          "groupId": "layer.5"
+        },
+        {
+          "id": "cell.c5r4",
+          "col": 5,
+          "row": 4,
+          "groupId": "layer.5"
+        }
+      ],
+      "claimRefs": [
+        "00000000-0000-4000-8000-000000000040"
+      ],
+      "demonstrationRef": "00000000-0000-4000-8000-000000000030"
+    },
+    {
+      "type": "MathExpression",
+      "id": "formula",
+      "semanticRole": "general relationship",
+      "anchor": {
+        "x": 540,
+        "y": 480
+      },
+      "claimRefs": [
+        "00000000-0000-4000-8000-000000000040"
+      ],
+      "terms": [
+        {
+          "id": "formula.lhs",
+          "tex": "1+3+5+\\cdots+(2n-1)"
+        },
+        {
+          "id": "formula.rhs",
+          "tex": "=n^2"
+        }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "id": "takeaway",
+      "semanticRole": "closing insight",
+      "role": "takeaway",
+      "text": "Each odd number adds one L-shaped layer to the square.",
+      "anchor": {
+        "x": 540,
+        "y": 1340
+      },
+      "styleToken": "type.takeaway"
+    },
+    {
+      "type": "TextBlock",
+      "id": "brand",
+      "semanticRole": "discreet brand cue",
+      "role": "brandCue",
+      "text": "Signal Motion",
+      "anchor": {
+        "x": 540,
+        "y": 110
+      },
+      "styleToken": "type.brandcue"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene.hook",
+      "beat": "hook",
+      "durationFrames": 120,
+      "narration": {
+        "beatId": "beat.hook",
+        "segmentIds": [
+          "seg.hook.1"
+        ]
+      },
+      "demonstrationKind": "example",
+      "claimRefs": [
+        "00000000-0000-4000-8000-000000000040"
+      ],
+      "entryState": [
+        {
+          "targetId": "question",
+          "visible": false
+        },
+        {
+          "targetId": "sum",
+          "visible": false
+        },
+        {
+          "targetId": "total",
+          "visible": false
+        },
+        {
+          "targetId": "square",
+          "visible": false
+        },
+        {
+          "targetId": "formula",
+          "visible": false
+        },
+        {
+          "targetId": "takeaway",
+          "visible": false
+        },
+        {
+          "targetId": "brand",
+          "visible": false
+        }
+      ],
+      "actions": [
+        {
+          "id": "a.hook.q",
+          "family": "CaptionAndTakeaway",
+          "op": "showText",
+          "targets": [
+            "question"
+          ],
+          "startFrame": 0,
+          "endFrame": 15,
+          "easing": "ease.standard",
+          "anchor": {
+            "kind": "phrase",
+            "ref": "p.hook.1",
+            "edge": "start"
+          }
+        },
+        {
+          "id": "a.hook.sum",
+          "family": "FocusHighlight",
+          "op": "reveal",
+          "targets": [
+            "sum"
+          ],
+          "startFrame": 15,
+          "endFrame": 60,
+          "easing": "ease.standard",
+          "stagger": 6
+        },
+        {
+          "id": "a.hook.total",
+          "family": "FocusHighlight",
+          "op": "reveal",
+          "targets": [
+            "total.k5"
+          ],
+          "startFrame": 60,
+          "endFrame": 75,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.hook.outline",
+          "family": "FocusHighlight",
+          "op": "outline",
+          "targets": [
+            "square"
+          ],
+          "startFrame": 70,
+          "endFrame": 100,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.hook.dim",
+          "family": "FocusHighlight",
+          "op": "dim",
+          "targets": [
+            "square"
+          ],
+          "startFrame": 70,
+          "endFrame": 100,
+          "easing": "ease.standard"
+        }
+      ]
+    },
+    {
+      "id": "scene.setup",
+      "beat": "setup",
+      "durationFrames": 180,
+      "narration": {
+        "beatId": "beat.setup",
+        "segmentIds": [
+          "seg.setup.1",
+          "seg.setup.2"
+        ]
+      },
+      "demonstrationKind": "generalConstruction",
+      "claimRefs": [
+        "00000000-0000-4000-8000-000000000040"
+      ],
+      "entryState": [
+        {
+          "targetId": "question",
+          "visible": true
+        },
+        {
+          "targetId": "sum",
+          "visible": true
+        },
+        {
+          "targetId": "total",
+          "visible": true
+        },
+        {
+          "targetId": "square",
+          "visible": true,
+          "emphasis": "dimmed"
+        },
+        {
+          "targetId": "formula",
+          "visible": false
+        },
+        {
+          "targetId": "takeaway",
+          "visible": false
+        },
+        {
+          "targetId": "brand",
+          "visible": false
+        }
+      ],
+      "actions": [
+        {
+          "id": "a.setup.clear",
+          "family": "FocusHighlight",
+          "op": "hide",
+          "targets": [
+            "total.k5"
+          ],
+          "startFrame": 0,
+          "endFrame": 10,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.setup.undim",
+          "family": "FocusHighlight",
+          "op": "undim",
+          "targets": [
+            "square"
+          ],
+          "startFrame": 0,
+          "endFrame": 10,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.setup.l1",
+          "family": "FocusHighlight",
+          "op": "reveal",
+          "targets": [
+            "cell.c0r0"
+          ],
+          "startFrame": 10,
+          "endFrame": 30,
+          "easing": "ease.standard",
+          "anchor": {
+            "kind": "phrase",
+            "ref": "p.setup.1",
+            "edge": "start"
+          }
+        },
+        {
+          "id": "a.setup.t1",
+          "family": "FocusHighlight",
+          "op": "highlight",
+          "targets": [
+            "sum.t1"
+          ],
+          "startFrame": 10,
+          "endFrame": 60,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.setup.k1",
+          "family": "FocusHighlight",
+          "op": "reveal",
+          "targets": [
+            "total.k1"
+          ],
+          "startFrame": 30,
+          "endFrame": 45,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.setup.l2",
+          "family": "FocusHighlight",
+          "op": "reveal",
+          "targets": [
+            "cell.c1r0",
+            "cell.c0r1",
+            "cell.c1r1"
+          ],
+          "startFrame": 90,
+          "endFrame": 130,
+          "easing": "ease.standard",
+          "stagger": 4,
+          "anchor": {
+            "kind": "phrase",
+            "ref": "p.setup.2",
+            "edge": "start"
+          }
+        },
+        {
+          "id": "a.setup.t2",
+          "family": "FocusHighlight",
+          "op": "highlight",
+          "targets": [
+            "sum.t2"
+          ],
+          "startFrame": 90,
+          "endFrame": 150,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.setup.m2",
+          "family": "ObjectTransform",
+          "op": "mapTerms",
+          "targets": [
+            "total"
+          ],
+          "startFrame": 130,
+          "endFrame": 150,
+          "easing": "ease.standard",
+          "mapping": [
+            {
+              "from": "total.k1",
+              "to": "total.k2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scene.demo",
+      "beat": "demonstration",
+      "durationFrames": 360,
+      "narration": {
+        "beatId": "beat.demo",
+        "segmentIds": [
+          "seg.demo.1",
+          "seg.demo.2"
+        ]
+      },
+      "demonstrationKind": "generalConstruction",
+      "claimRefs": [
+        "00000000-0000-4000-8000-000000000040"
+      ],
+      "entryState": [
+        {
+          "targetId": "question",
+          "visible": true
+        },
+        {
+          "targetId": "sum",
+          "visible": true
+        },
+        {
+          "targetId": "total",
+          "visible": true
+        },
+        {
+          "targetId": "square",
+          "visible": true
+        },
+        {
+          "targetId": "layer.1",
+          "visible": true
+        },
+        {
+          "targetId": "layer.2",
+          "visible": true
+        },
+        {
+          "targetId": "layer.3",
+          "visible": false
+        },
+        {
+          "targetId": "layer.4",
+          "visible": false
+        },
+        {
+          "targetId": "layer.5",
+          "visible": false
+        },
+        {
+          "targetId": "total.k1",
+          "visible": false
+        },
+        {
+          "targetId": "total.k2",
+          "visible": true
+        },
+        {
+          "targetId": "total.k3",
+          "visible": false
+        },
+        {
+          "targetId": "total.k4",
+          "visible": false
+        },
+        {
+          "targetId": "total.k5",
+          "visible": false
+        },
+        {
+          "targetId": "formula",
+          "visible": false
+        },
+        {
+          "targetId": "takeaway",
+          "visible": false
+        },
+        {
+          "targetId": "brand",
+          "visible": false
+        }
+      ],
+      "actions": [
+        {
+          "id": "a.demo.l3",
+          "family": "FocusHighlight",
+          "op": "reveal",
+          "targets": [
+            "cell.c2r0",
+            "cell.c2r1",
+            "cell.c0r2",
+            "cell.c1r2",
+            "cell.c2r2"
+          ],
+          "startFrame": 20,
+          "endFrame": 80,
+          "easing": "ease.standard",
+          "stagger": 6,
+          "anchor": {
+            "kind": "phrase",
+            "ref": "p.demo.1",
+            "edge": "start"
+          }
+        },
+        {
+          "id": "a.demo.t3",
+          "family": "FocusHighlight",
+          "op": "highlight",
+          "targets": [
+            "sum.t3"
+          ],
+          "startFrame": 20,
+          "endFrame": 120,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.demo.m3",
+          "family": "ObjectTransform",
+          "op": "mapTerms",
+          "targets": [
+            "total"
+          ],
+          "startFrame": 90,
+          "endFrame": 110,
+          "easing": "ease.standard",
+          "mapping": [
+            {
+              "from": "total.k2",
+              "to": "total.k3"
+            }
+          ]
+        },
+        {
+          "id": "a.demo.l4",
+          "family": "FocusHighlight",
+          "op": "reveal",
+          "targets": [
+            "cell.c3r0",
+            "cell.c3r1",
+            "cell.c3r2",
+            "cell.c0r3",
+            "cell.c1r3",
+            "cell.c2r3",
+            "cell.c3r3"
+          ],
+          "startFrame": 190,
+          "endFrame": 260,
+          "easing": "ease.standard",
+          "stagger": 6,
+          "anchor": {
+            "kind": "phrase",
+            "ref": "p.demo.2",
+            "edge": "start"
+          }
+        },
+        {
+          "id": "a.demo.t4",
+          "family": "FocusHighlight",
+          "op": "highlight",
+          "targets": [
+            "sum.t4"
+          ],
+          "startFrame": 190,
+          "endFrame": 300,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.demo.m4",
+          "family": "ObjectTransform",
+          "op": "mapTerms",
+          "targets": [
+            "total"
+          ],
+          "startFrame": 270,
+          "endFrame": 290,
+          "easing": "ease.standard",
+          "mapping": [
+            {
+              "from": "total.k3",
+              "to": "total.k4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scene.explain",
+      "beat": "explanation",
+      "durationFrames": 330,
+      "narration": {
+        "beatId": "beat.explain",
+        "segmentIds": [
+          "seg.explain.1",
+          "seg.explain.2"
+        ]
+      },
+      "demonstrationKind": "generalConstruction",
+      "claimRefs": [
+        "00000000-0000-4000-8000-000000000040"
+      ],
+      "entryState": [
+        {
+          "targetId": "question",
+          "visible": true
+        },
+        {
+          "targetId": "sum",
+          "visible": true
+        },
+        {
+          "targetId": "total",
+          "visible": true
+        },
+        {
+          "targetId": "square",
+          "visible": true
+        },
+        {
+          "targetId": "layer.1",
+          "visible": true
+        },
+        {
+          "targetId": "layer.2",
+          "visible": true
+        },
+        {
+          "targetId": "layer.3",
+          "visible": true
+        },
+        {
+          "targetId": "layer.4",
+          "visible": true
+        },
+        {
+          "targetId": "layer.5",
+          "visible": false
+        },
+        {
+          "targetId": "total.k1",
+          "visible": false
+        },
+        {
+          "targetId": "total.k2",
+          "visible": false
+        },
+        {
+          "targetId": "total.k3",
+          "visible": false
+        },
+        {
+          "targetId": "total.k4",
+          "visible": true
+        },
+        {
+          "targetId": "total.k5",
+          "visible": false
+        },
+        {
+          "targetId": "formula",
+          "visible": false
+        },
+        {
+          "targetId": "takeaway",
+          "visible": false
+        },
+        {
+          "targetId": "brand",
+          "visible": false
+        }
+      ],
+      "actions": [
+        {
+          "id": "a.ex.l5",
+          "family": "FocusHighlight",
+          "op": "reveal",
+          "targets": [
+            "cell.c4r0",
+            "cell.c4r1",
+            "cell.c4r2",
+            "cell.c4r3",
+            "cell.c0r4",
+            "cell.c1r4",
+            "cell.c2r4",
+            "cell.c3r4",
+            "cell.c4r4"
+          ],
+          "startFrame": 10,
+          "endFrame": 90,
+          "easing": "ease.standard",
+          "stagger": 6,
+          "anchor": {
+            "kind": "phrase",
+            "ref": "p.explain.1",
+            "edge": "start"
+          }
+        },
+        {
+          "id": "a.ex.t5",
+          "family": "FocusHighlight",
+          "op": "highlight",
+          "targets": [
+            "sum.t5"
+          ],
+          "startFrame": 10,
+          "endFrame": 120,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.ex.dim",
+          "family": "FocusHighlight",
+          "op": "dim",
+          "targets": [
+            "layer.1",
+            "layer.2",
+            "layer.3",
+            "layer.4"
+          ],
+          "startFrame": 120,
+          "endFrame": 140,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.ex.row",
+          "family": "FocusHighlight",
+          "op": "highlight",
+          "targets": [
+            "cell.c0r4",
+            "cell.c1r4",
+            "cell.c2r4",
+            "cell.c3r4",
+            "cell.c4r4"
+          ],
+          "startFrame": 140,
+          "endFrame": 300,
+          "easing": "ease.standard",
+          "anchor": {
+            "kind": "phrase",
+            "ref": "p.explain.2",
+            "edge": "start"
+          }
+        },
+        {
+          "id": "a.ex.col",
+          "family": "FocusHighlight",
+          "op": "outline",
+          "targets": [
+            "cell.c4r0",
+            "cell.c4r1",
+            "cell.c4r2",
+            "cell.c4r3",
+            "cell.c4r4"
+          ],
+          "startFrame": 180,
+          "endFrame": 300,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.ex.corner",
+          "family": "FocusHighlight",
+          "op": "emphasize",
+          "targets": [
+            "cell.c4r4"
+          ],
+          "startFrame": 220,
+          "endFrame": 300,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.ex.m5",
+          "family": "ObjectTransform",
+          "op": "mapTerms",
+          "targets": [
+            "total"
+          ],
+          "startFrame": 300,
+          "endFrame": 320,
+          "easing": "ease.standard",
+          "mapping": [
+            {
+              "from": "total.k4",
+              "to": "total.k5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scene.payoff",
+      "beat": "payoff",
+      "durationFrames": 240,
+      "narration": {
+        "beatId": "beat.payoff",
+        "segmentIds": [
+          "seg.payoff.1"
+        ]
+      },
+      "demonstrationKind": "generalConstruction",
+      "claimRefs": [
+        "00000000-0000-4000-8000-000000000040"
+      ],
+      "entryState": [
+        {
+          "targetId": "question",
+          "visible": true
+        },
+        {
+          "targetId": "sum",
+          "visible": true
+        },
+        {
+          "targetId": "total",
+          "visible": true
+        },
+        {
+          "targetId": "square",
+          "visible": true
+        },
+        {
+          "targetId": "layer.1",
+          "visible": true
+        },
+        {
+          "targetId": "layer.2",
+          "visible": true
+        },
+        {
+          "targetId": "layer.3",
+          "visible": true
+        },
+        {
+          "targetId": "layer.4",
+          "visible": true
+        },
+        {
+          "targetId": "layer.5",
+          "visible": true
+        },
+        {
+          "targetId": "total.k1",
+          "visible": false
+        },
+        {
+          "targetId": "total.k2",
+          "visible": false
+        },
+        {
+          "targetId": "total.k3",
+          "visible": false
+        },
+        {
+          "targetId": "total.k4",
+          "visible": false
+        },
+        {
+          "targetId": "total.k5",
+          "visible": true
+        },
+        {
+          "targetId": "formula",
+          "visible": false
+        },
+        {
+          "targetId": "takeaway",
+          "visible": false
+        },
+        {
+          "targetId": "brand",
+          "visible": false
+        }
+      ],
+      "actions": [
+        {
+          "id": "a.pay.undim",
+          "family": "FocusHighlight",
+          "op": "undim",
+          "targets": [
+            "layer.1",
+            "layer.2",
+            "layer.3",
+            "layer.4"
+          ],
+          "startFrame": 0,
+          "endFrame": 15,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.pay.q",
+          "family": "FocusHighlight",
+          "op": "hide",
+          "targets": [
+            "question"
+          ],
+          "startFrame": 0,
+          "endFrame": 15,
+          "easing": "ease.standard"
+        },
+        {
+          "id": "a.pay.f",
+          "family": "FocusHighlight",
+          "op": "reveal",
+          "targets": [
+            "formula.lhs",
+            "formula.rhs"
+          ],
+          "startFrame": 20,
+          "endFrame": 80,
+          "easing": "ease.standard",
+          "stagger": 20,
+          "anchor": {
+            "kind": "phrase",
+            "ref": "p.payoff.1",
+            "edge": "start"
+          }
+        },
+        {
+          "id": "a.pay.link",
+          "family": "FocusHighlight",
+          "op": "highlight",
+          "targets": [
+            "formula.rhs",
+            "square"
+          ],
+          "startFrame": 90,
+          "endFrame": 200,
+          "easing": "ease.standard"
+        }
+      ]
+    },
+    {
+      "id": "scene.close",
+      "beat": "closure",
+      "durationFrames": 120,
+      "narration": {
+        "beatId": "beat.close",
+        "segmentIds": [
+          "seg.close.1"
+        ]
+      },
+      "demonstrationKind": "none",
+      "entryState": [
+        {
+          "targetId": "question",
+          "visible": false
+        },
+        {
+          "targetId": "sum",
+          "visible": true
+        },
+        {
+          "targetId": "total",
+          "visible": true
+        },
+        {
+          "targetId": "square",
+          "visible": true
+        },
+        {
+          "targetId": "formula",
+          "visible": true
+        },
+        {
+          "targetId": "layer.1",
+          "visible": true
+        },
+        {
+          "targetId": "layer.2",
+          "visible": true
+        },
+        {
+          "targetId": "layer.3",
+          "visible": true
+        },
+        {
+          "targetId": "layer.4",
+          "visible": true
+        },
+        {
+          "targetId": "layer.5",
+          "visible": true
+        },
+        {
+          "targetId": "total.k1",
+          "visible": false
+        },
+        {
+          "targetId": "total.k2",
+          "visible": false
+        },
+        {
+          "targetId": "total.k3",
+          "visible": false
+        },
+        {
+          "targetId": "total.k4",
+          "visible": false
+        },
+        {
+          "targetId": "total.k5",
+          "visible": true
+        },
+        {
+          "targetId": "takeaway",
+          "visible": false
+        },
+        {
+          "targetId": "brand",
+          "visible": false
+        }
+      ],
+      "actions": [
+        {
+          "id": "a.close.take",
+          "family": "CaptionAndTakeaway",
+          "op": "showText",
+          "targets": [
+            "takeaway"
+          ],
+          "startFrame": 0,
+          "endFrame": 20,
+          "easing": "ease.standard",
+          "anchor": {
+            "kind": "phrase",
+            "ref": "p.close.1",
+            "edge": "start"
+          }
+        },
+        {
+          "id": "a.close.brand",
+          "family": "CaptionAndTakeaway",
+          "op": "showText",
+          "targets": [
+            "brand"
+          ],
+          "startFrame": 60,
+          "endFrame": 80,
+          "easing": "ease.standard"
+        }
+      ]
+    }
+  ]
+}

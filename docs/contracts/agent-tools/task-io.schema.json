@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opportunityos.invalid/contracts/agent-tools/task-io.schema.json",
+  "x-version": "0.1.0",
+  "title": "Agent task inputs and outputs",
+  "description": "Input and output schemas for the three bounded model tasks (R-63, PRD §14.1). Outputs are proposals: they become draft records that a member reviews at Gates B and C. Nothing here is an approval.",
+  "$defs": {
+    "Series": { "enum": ["what_if", "wait_how_does_that_work", "solve_this", "inside_the_machine"] },
+    "BriefSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contractRef", "series", "audience", "viewerQuestion", "promise"],
+      "properties": {
+        "contractRef": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+        "series": { "$ref": "#/$defs/Series" },
+        "audience": { "type": "string", "maxLength": 300 },
+        "viewerQuestion": { "type": "string", "maxLength": 300 },
+        "promise": { "type": "string", "maxLength": 300 },
+        "proposedFamilies": { "type": "array", "maxItems": 6, "items": { "type": "string", "maxLength": 40 } },
+        "targetDurationSec": { "type": "integer", "minimum": 30, "maximum": 90 }
+      }
+    },
+    "ResearchInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["brief"],
+      "properties": {
+        "brief": { "$ref": "#/$defs/BriefSummary" },
+        "operatorSourceUrls": {
+          "type": "array",
+          "maxItems": 20,
+          "items": { "type": "string", "format": "uri", "maxLength": 2000 },
+          "description": "Sources the operator supplied; fetched first."
+        },
+        "existingClaims": {
+          "type": "array",
+          "maxItems": 100,
+          "items": { "type": "object", "additionalProperties": false, "required": ["claimId", "text"], "properties": { "claimId": { "$ref": "../common.schema.json#/$defs/Uuid" }, "text": { "type": "string", "maxLength": 500 } } }
+        }
+      }
+    },
+    "ResearchOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claims", "gaps"],
+      "properties": {
+        "claims": {
+          "type": "array",
+          "maxItems": 60,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["localId", "text", "claimType", "materiality", "evidence", "needsSpecialist"],
+            "properties": {
+              "localId": { "$ref": "../common.schema.json#/$defs/LocalId" },
+              "text": { "type": "string", "maxLength": 500 },
+              "claimType": { "enum": ["fact", "definition", "calculation", "derivation", "statistic", "historical", "opinion"] },
+              "materiality": { "enum": ["material", "supporting"] },
+              "evidence": {
+                "type": "array",
+                "maxItems": 6,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["sourceId", "stance", "locator"],
+                  "properties": {
+                    "sourceId": { "$ref": "../common.schema.json#/$defs/Uuid", "description": "Must be a sourceId returned by fetch_source in this task." },
+                    "stance": { "enum": ["supports", "partially_supports", "contradicts"] },
+                    "locator": { "type": "string", "maxLength": 200, "description": "Section heading, page, or a quote fragment that locates the text." },
+                    "excerpt": { "type": "string", "maxLength": 200, "description": "Under 25 words (A-25). Checked against the fetched text; a non-matching excerpt marks the citation invalid (R-08 AC2)." }
+                  }
+                }
+              },
+              "needsSpecialist": { "type": "boolean", "description": "Health, finance, advanced science or legal (A-04). Blocks approval until a specialist clears it (R-09)." },
+              "notes": { "type": "string", "maxLength": 500 }
+            }
+          }
+        },
+        "gaps": {
+          "type": "array",
+          "maxItems": 20,
+          "items": { "type": "string", "maxLength": 300 },
+          "description": "What could not be supported. Unsupported claims are listed here, not invented."
+        },
+        "suggestedDemonstration": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "function": { "type": "string", "maxLength": 64 },
+            "params": { "type": "object" },
+            "rationale": { "type": "string", "maxLength": 300 }
+          }
+        }
+      }
+    },
+    "ScriptInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["brief", "claims"],
+      "properties": {
+        "brief": { "$ref": "#/$defs/BriefSummary" },
+        "claims": {
+          "type": "array",
+          "maxItems": 60,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["claimId", "text", "reviewStatus"],
+            "properties": {
+              "claimId": { "$ref": "../common.schema.json#/$defs/Uuid" },
+              "text": { "type": "string", "maxLength": 500 },
+              "reviewStatus": { "enum": ["approved", "qualified"] }
+            }
+          },
+          "description": "Only approved or accurately qualified claims are given to the script task (R-09)."
+        },
+        "demonstration": { "$ref": "../media/demonstration.schema.json" },
+        "revisionRequest": { "type": "string", "maxLength": 1000, "description": "Operator instruction when revising an existing version." },
+        "previousScript": { "$ref": "#/$defs/ScriptOutput" }
+      }
+    },
+    "ScriptOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["series", "beats"],
+      "properties": {
+        "series": { "$ref": "#/$defs/Series" },
+        "title": { "type": "string", "maxLength": 100 },
+        "beats": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "kind", "intent", "segments"],
+            "properties": {
+              "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+              "kind": { "enum": ["hook", "setup", "demonstration", "explanation", "payoff", "closure"] },
+              "intent": { "type": "string", "maxLength": 200 },
+              "segments": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 10,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["id", "text", "claimIds"],
+                  "properties": {
+                    "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+                    "text": { "type": "string", "minLength": 1, "maxLength": 400 },
+                    "claimIds": { "type": "array", "maxItems": 10, "items": { "$ref": "../common.schema.json#/$defs/Uuid" } },
+                    "pronunciationHints": {
+                      "type": "array",
+                      "maxItems": 10,
+                      "items": { "type": "object", "additionalProperties": false, "required": ["text", "say"], "properties": { "text": { "type": "string", "maxLength": 40 }, "say": { "type": "string", "maxLength": 80 } } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "estimatedWords": { "type": "integer", "minimum": 0, "maximum": 400 }
+      }
+    },
+    "StoryboardInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["brief", "script", "brandKit", "demonstrations"],
+      "properties": {
+        "brief": { "$ref": "#/$defs/BriefSummary" },
+        "script": { "$ref": "#/$defs/ScriptOutput" },
+        "scriptRef": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+        "brandKit": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+        "demonstrations": { "type": "array", "maxItems": 8, "items": { "$ref": "../media/demonstration.schema.json" } },
+        "revisionRequest": { "type": "string", "maxLength": 1000 },
+        "previousSpec": { "$ref": "../media/video-spec.schema.json" }
+      }
+    },
+    "StoryboardOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["videoSpec", "unsupportedNeeds"],
+      "properties": {
+        "videoSpec": { "$ref": "../media/video-spec.schema.json", "description": "timing.status must be provisional." },
+        "sceneNotes": {
+          "type": "array",
+          "maxItems": 24,
+          "items": { "type": "object", "additionalProperties": false, "required": ["sceneId", "note"], "properties": { "sceneId": { "$ref": "../common.schema.json#/$defs/LocalId" }, "note": { "type": "string", "maxLength": 300 } } }
+        },
+        "unsupportedNeeds": {
+          "type": "array",
+          "maxItems": 20,
+          "items": { "type": "object", "additionalProperties": false, "required": ["description"], "properties": { "sceneId": { "$ref": "../common.schema.json#/$defs/LocalId" }, "description": { "type": "string", "maxLength": 300 } } },
+          "description": "Visual operations the catalogue lacks (R-07). Shown to the operator before any paid production."
+        }
+      }
+    }
+  }
+}

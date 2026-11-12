@@ -1,0 +1,32 @@
+{
+  "eventId": "00000000-0000-4000-8000-000000000050",
+  "type": "approval.recorded",
+  "eventVersion": 1,
+  "occurredAt": "2026-11-12T12:00:00Z",
+  "workspaceId": "00000000-0000-4000-8000-000000000001",
+  "projectId": "00000000-0000-4000-8000-000000000010",
+  "actor": {
+    "type": "member",
+    "id": "00000000-0000-4000-8000-000000000002",
+    "responsibility": "reviewer"
+  },
+  "subject": {
+    "type": "approval",
+    "id": "00000000-0000-4000-8000-000000000051"
+  },
+  "correlationId": "00000000-0000-4000-8000-000000000052",
+  "payload": {
+    "approvalId": "00000000-0000-4000-8000-000000000051",
+    "gate": "C_storyboard",
+    "decision": "approved",
+    "target": {
+      "type": "storyboard",
+      "ref": {
+        "id": "00000000-0000-4000-8000-000000000021",
+        "version": 1,
+        "sha256": "e7d5d8290e5e5b5b6c9568292fe50101b7c88baf2bac2241245fe49838b4f6d9"
+      }
+    },
+    "scope": "storyboard for preview and master"
+  }
+}

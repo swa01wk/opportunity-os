@@ -1,6 +1,1396 @@
-# Stub. Written in Stage 2.
 openapi: 3.1.0
 info:
   title: OpportunityOS API
-  version: 0.0.0
-paths: {}
+  version: 0.1.0
+  description: |
+    Studio-facing API for R1–R2 (PRD §13). Owned by `backend/` (ADR-004).
+    R3 endpoints (connections, connected publishing, experiments, opportunity lab) are added by the
+    spec that starts R3 (A-18).
+
+    Conventions
+    - Every request needs a bearer token from the auth provider (ADR-012); every resource is
+      scoped to the caller's workspace (R-01, NFR-04). Agents and services cannot call approval
+      or publication endpoints (R-43).
+    - Creates take an `Idempotency-Key` header; repeating the key returns the first response.
+    - Updates take `If-Match: "<rowVersion>"`; a stale version returns 412.
+    - Versioned records are immutable; "edit" creates a new version.
+    - Long work returns 202 with a run (`Run`); progress arrives on the SSE stream.
+    - Errors are RFC 9457 problem documents (`Problem`) with the R-53 error class and repair options.
+    - Money is minor units plus ISO currency. Times are UTC; display timezone is per destination.
+servers:
+  - url: http://localhost:8000/v1
+    description: Local (docker compose)
+security:
+  - bearer: []
+tags:
+  - name: workspace
+  - name: projects
+  - name: brief
+  - name: evidence
+  - name: demonstrations
+  - name: script
+  - name: storyboard
+  - name: narration
+  - name: renders
+  - name: revisions
+  - name: review
+  - name: approvals
+  - name: packages
+  - name: publications
+  - name: runs
+  - name: cost
+  - name: assets
+  - name: data
+
+paths:
+  /me:
+    get:
+      tags: [workspace]
+      operationId: getMe
+      summary: Current member, workspace and responsibilities
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Me' } } } }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /brand-kits:
+    get:
+      tags: [workspace]
+      operationId: listBrandKits
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/BrandKit' } } } } }
+  /brand-kits/{brandKitId}/versions:
+    parameters: [ { $ref: '#/components/parameters/brandKitId' } ]
+    post:
+      tags: [workspace]
+      operationId: createBrandKitVersion
+      summary: New brand-kit version; shows which draft scenes it would invalidate (R-02 AC2)
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BrandTokens' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/BrandKitVersion' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /projects:
+    get:
+      tags: [projects]
+      operationId: listProjects
+      parameters:
+        - { name: series, in: query, schema: { $ref: '#/components/schemas/Series' } }
+        - { name: state, in: query, schema: { $ref: '#/components/schemas/ProductionState' } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Project' } } } } }
+    post:
+      tags: [projects]
+      operationId: createProject
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ProjectCreate' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Project' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+  /projects/{projectId}:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [projects]
+      operationId: getProject
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Project' } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [projects]
+      operationId: updateProject
+      parameters: [ { $ref: '#/components/parameters/IfMatch' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ProjectUpdate' } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Project' } } } }
+        '412': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+  /projects/{projectId}/destination:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    put:
+      tags: [projects]
+      operationId: setDestination
+      summary: Destination channel profile (R-04). Reference channels cannot be destinations.
+      parameters: [ { $ref: '#/components/parameters/IfMatch' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/DestinationInput' } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Destination' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+  /projects/{projectId}/events:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [runs]
+      operationId: streamProjectEvents
+      summary: Server-Sent Events of DomainEvent for this project (ADR-010)
+      parameters:
+        - { name: Last-Event-ID, in: header, schema: { type: string } }
+      responses:
+        '200':
+          description: SSE stream; each `data:` line is a DomainEvent
+          content:
+            text/event-stream:
+              schema: { type: string }
+
+  /projects/{projectId}/contracts:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [brief]
+      operationId: createContractVersion
+      summary: Create or revise the Content Opportunity Contract (R-06)
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/OpportunityContractBody' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/OpportunityContract' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    get:
+      tags: [brief]
+      operationId: getCurrentContract
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/OpportunityContract' } } } }
+  /projects/{projectId}/preflight:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [brief]
+      operationId: runPreflight
+      summary: Capability, rights and budget preflight before paid dispatch (R-07)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [stage]
+              properties:
+                stage: { enum: [brief, storyboard, render] }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/PreflightResult' } } } }
+
+  /projects/{projectId}/research-runs:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [evidence]
+      operationId: startResearch
+      summary: Start the research task (requires Gate A approval of the current contract)
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operatorSourceUrls: { type: array, maxItems: 20, items: { type: string, format: uri } }
+      responses:
+        '202': { $ref: '#/components/responses/RunAccepted' }
+        default: { $ref: '#/components/responses/Problem' }
+  /projects/{projectId}/claims:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [evidence]
+      operationId: listClaims
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/ClaimStatus' } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Claim' } } } } }
+    post:
+      tags: [evidence]
+      operationId: createClaim
+      summary: Operator-entered claim with evidence
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ClaimCreate' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Claim' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+  /claims/{claimId}:
+    parameters: [ { $ref: '#/components/parameters/claimId' } ]
+    get:
+      tags: [evidence]
+      operationId: getClaim
+      summary: Claim with evidence, review state and every beat and scene using it (R-10)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ClaimDetail' } } } }
+    patch:
+      tags: [evidence]
+      operationId: reviewClaim
+      summary: Set review status. needs_specialist claims can only be cleared by a member with that specialist scope (R-09 AC2).
+      parameters: [ { $ref: '#/components/parameters/IfMatch' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ClaimReview' } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Claim' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /projects/{projectId}/demonstrations:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [demonstrations]
+      operationId: computeDemonstration
+      summary: Run an allowlisted demonstration function and store a new version (R-11)
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [function, params, kind]
+              properties:
+                function: { type: string }
+                params: { type: object }
+                kind: { enum: [generalConstruction, example, approximation, illustrative] }
+                demonstrationId: { $ref: '#/components/schemas/Uuid' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: 'media/demonstration.schema.json' } } } }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /projects/{projectId}/script-runs:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [script]
+      operationId: startScript
+      summary: Generate or revise the script from approved claims
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TaskRunRequest' }
+      responses:
+        '202': { $ref: '#/components/responses/RunAccepted' }
+        default: { $ref: '#/components/responses/Problem' }
+  /projects/{projectId}/scripts:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [script]
+      operationId: listScriptVersions
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/VersionSummary' } } } } }
+    post:
+      tags: [script]
+      operationId: saveScriptEdit
+      summary: Save a member edit as a new version; material changes reopen gates (R-14 AC2, R-42)
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [baseVersion, body]
+              properties:
+                baseVersion: { type: integer, minimum: 1 }
+                body: { $ref: 'agent-tools/task-io.schema.json#/$defs/ScriptOutput' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/ScriptVersion' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+  /scripts/{scriptId}/versions/{version}:
+    parameters: [ { $ref: '#/components/parameters/scriptId' }, { $ref: '#/components/parameters/version' } ]
+    get:
+      tags: [script]
+      operationId: getScriptVersion
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ScriptVersion' } } } }
+
+  /projects/{projectId}/storyboard-runs:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [storyboard]
+      operationId: startStoryboard
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TaskRunRequest' }
+      responses:
+        '202': { $ref: '#/components/responses/RunAccepted' }
+        default: { $ref: '#/components/responses/Problem' }
+  /projects/{projectId}/storyboards:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [storyboard]
+      operationId: listStoryboardVersions
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/VersionSummary' } } } } }
+    post:
+      tags: [storyboard]
+      operationId: saveStoryboardEdit
+      summary: Save an edited VideoSpec as a new version; it is validated by the compiler (R-18)
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [baseVersion, videoSpec]
+              properties:
+                baseVersion: { type: integer, minimum: 1 }
+                videoSpec: { $ref: 'media/video-spec.schema.json' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/StoryboardVersion' } } } }
+        '422': { $ref: '#/components/responses/Problem' }
+  /storyboards/{storyboardId}/versions/{version}:
+    parameters: [ { $ref: '#/components/parameters/storyboardId' }, { $ref: '#/components/parameters/version' } ]
+    get:
+      tags: [storyboard]
+      operationId: getStoryboardVersion
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/StoryboardVersion' } } } }
+  /capabilities:
+    get:
+      tags: [storyboard]
+      operationId: getCapabilities
+      summary: The capability catalogue (media/capabilities.json)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object } } } }
+
+  /projects/{projectId}/narration-takes:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [narration]
+      operationId: createNarrationTake
+      summary: Generate narration for the approved script, whole or per scene (R-25)
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                sceneIds: { type: array, maxItems: 24, items: { type: string } }
+      responses:
+        '202': { $ref: '#/components/responses/RunAccepted' }
+        default: { $ref: '#/components/responses/Problem' }
+    get:
+      tags: [narration]
+      operationId: listNarrationTakes
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/NarrationTake' } } } } }
+  /pronunciations:
+    get:
+      tags: [narration]
+      operationId: listPronunciations
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Pronunciation' } } } } }
+    put:
+      tags: [narration]
+      operationId: replacePronunciations
+      requestBody: { required: true, content: { application/json: { schema: { type: array, maxItems: 500, items: { $ref: '#/components/schemas/Pronunciation' } } } } }
+      responses:
+        '200': { description: OK }
+
+  /projects/{projectId}/renders:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [renders]
+      operationId: requestRender
+      summary: Draft preview or final master (R-28, R-29). A master requires measured timing and Gate C approval.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [kind]
+              properties:
+                kind: { enum: [preview, master] }
+                sceneIds: { type: array, maxItems: 24, items: { type: string }, description: 'Preview only: a subset, e.g. the hook (R-15).' }
+      responses:
+        '202': { $ref: '#/components/responses/RunAccepted' }
+        default: { $ref: '#/components/responses/Problem' }
+    get:
+      tags: [renders]
+      operationId: listRenders
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Render' } } } } }
+  /renders/{renderId}:
+    parameters: [ { $ref: '#/components/parameters/renderId' } ]
+    get:
+      tags: [renders]
+      operationId: getRender
+      summary: Render with manifest and a 15-minute signed playback URL
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Render' } } } }
+
+  /projects/{projectId}/revisions/impact:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [revisions]
+      operationId: previewRevisionImpact
+      summary: What would be rebuilt and reused, cost, timing shifts and reopened approvals (R-31). No side effects except storing the preview.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RevisionRequest' } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/RevisionImpact' } } } }
+  /revisions/{revisionId}/apply:
+    parameters: [ { $ref: '#/components/parameters/revisionId' } ]
+    post:
+      tags: [revisions]
+      operationId: applyRevision
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                option: { type: string, description: 'Chosen option from the impact preview, e.g. extend_total or shorten_other_beat (R-31 AC2).' }
+      responses:
+        '202': { $ref: '#/components/responses/RunAccepted' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /projects/{projectId}/compare:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [revisions]
+      operationId: compareVersions
+      summary: Compare two versions of script, storyboard or master (R-33)
+      parameters:
+        - { name: kind, in: query, required: true, schema: { enum: [script, storyboard, master] } }
+        - { name: from, in: query, required: true, schema: { type: integer } }
+        - { name: to, in: query, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Comparison' } } } }
+
+  /projects/{projectId}/findings:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [review]
+      operationId: listFindings
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Finding' } } } } }
+    post:
+      tags: [review]
+      operationId: raiseFinding
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/FindingCreate' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Finding' } } } }
+  /findings/{findingId}:
+    parameters: [ { $ref: '#/components/parameters/findingId' } ]
+    patch:
+      tags: [review]
+      operationId: disposeFinding
+      parameters: [ { $ref: '#/components/parameters/IfMatch' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [disposition]
+              properties:
+                disposition: { enum: [fixed, accepted, wont_fix] }
+                note: { type: string, maxLength: 500 }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Finding' } } } }
+  /renders/{renderId}/rubric:
+    parameters: [ { $ref: '#/components/parameters/renderId' } ]
+    post:
+      tags: [review]
+      operationId: scoreRubric
+      summary: Editorial rubric on a final master only (R-38)
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RubricInput' } } } }
+      responses:
+        '201': { description: Created }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /projects/{projectId}/approvals:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [approvals]
+      operationId: listApprovals
+      summary: Current and historical gate approvals, with invalidation reasons
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Approval' } } } } }
+    post:
+      tags: [approvals]
+      operationId: recordApproval
+      summary: |
+        Approve or return a gate (R-40, R-41). Members only (R-43). Refused when the target hash is
+        not the current version, blockers exist (unsupported claims R-09, open material findings R-37,
+        rights R-55 including narration generated without a commercial licence (ADR-013), unset audience setting R-04 AC2, failed policy checklist R-59) or the actor lacks
+        the responsibility (R-05).
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ApprovalInput' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Approval' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+  /projects/{projectId}/gates:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [approvals]
+      operationId: getGateStatus
+      summary: Per gate - current target, approval status and outstanding blockers
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/GateStatus' } } } } }
+
+  /projects/{projectId}/packages:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [packages]
+      operationId: createPackageVersion
+      summary: Build a package version from a master and metadata (R-45)
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PackageInput' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/PackageVersion' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+  /packages/{packageId}/versions/{version}:
+    parameters: [ { $ref: '#/components/parameters/packageId' }, { $ref: '#/components/parameters/version' } ]
+    get:
+      tags: [packages]
+      operationId: getPackageVersion
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/PackageVersion' } } } }
+  /packages/{packageId}/versions/{version}/exports:
+    parameters: [ { $ref: '#/components/parameters/packageId' }, { $ref: '#/components/parameters/version' } ]
+    post:
+      tags: [packages]
+      operationId: exportPackage
+      summary: Build the export bundle for a Gate D-approved package. Sets publication state AWAITING_MANUAL_UPLOAD; never "published" (R-46).
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      responses:
+        '202': { $ref: '#/components/responses/RunAccepted' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /exports/{exportId}:
+    parameters: [ { $ref: '#/components/parameters/exportId' } ]
+    get:
+      tags: [packages]
+      operationId: getExport
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ExportBundle' } } } }
+
+  /publications:
+    post:
+      tags: [publications]
+      operationId: recordManualPublication
+      summary: Record a manual upload with actual account, external ID, URL, time and evidence (R-47). Requires a current Gate E approval for this package and destination.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ManualPublicationInput' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Publication' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+    get:
+      tags: [publications]
+      operationId: listPublications
+      parameters:
+        - { name: projectId, in: query, schema: { $ref: '#/components/schemas/Uuid' } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Publication' } } } } }
+  /publications/{publicationId}/verifications:
+    parameters: [ { $ref: '#/components/parameters/publicationId' } ]
+    post:
+      tags: [publications]
+      operationId: recordVerification
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/VerificationInput' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Publication' } } } }
+  /publications/{publicationId}/corrections:
+    parameters: [ { $ref: '#/components/parameters/publicationId' } ]
+    post:
+      tags: [publications]
+      operationId: proposeCorrection
+      summary: Surface a problem in published content with a proposed repair plan; nothing external changes (R-49)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [problem]
+              properties:
+                problem: { type: string, maxLength: 2000 }
+                claimIds: { type: array, items: { $ref: '#/components/schemas/Uuid' } }
+      responses:
+        '201': { description: Created }
+  /publications/{publicationId}/metric-snapshots:
+    parameters: [ { $ref: '#/components/parameters/publicationId' } ]
+    post:
+      tags: [publications]
+      operationId: recordManualMetric
+      summary: Manual metric entry from YouTube Studio, labelled manual (KPI-06, A-09)
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MetricSnapshotInput' } } } }
+      responses:
+        '201': { description: Created }
+  /series/slate:
+    get:
+      tags: [publications]
+      operationId: getSeriesSlate
+      summary: Planned vs approved vs published per series against 4/4/2/2 (R-58, KPI-01)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/SeriesSlate' } } } }
+
+  /projects/{projectId}/runs:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [runs]
+      operationId: listRuns
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Run' } } } } }
+  /runs/{runId}:
+    parameters: [ { $ref: '#/components/parameters/runId' } ]
+    get:
+      tags: [runs]
+      operationId: getRun
+      summary: Run with attempts, failures, retries and spend (R-50)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/RunDetail' } } } }
+  /runs/{runId}/cancel:
+    parameters: [ { $ref: '#/components/parameters/runId' } ]
+    post:
+      tags: [runs]
+      operationId: cancelRun
+      summary: Stop further dispatch and release reserved budget (R-52)
+      responses:
+        '202': { description: Cancellation requested, content: { application/json: { schema: { $ref: '#/components/schemas/Run' } } } }
+  /runs/{runId}/resume:
+    parameters: [ { $ref: '#/components/parameters/runId' } ]
+    post:
+      tags: [runs]
+      operationId: resumeRun
+      summary: Resume a run paused for budget or approval, or retry a failed step within its retry ceiling (R-51)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                retryTaskKey: { type: string }
+      responses:
+        '202': { description: Resumed, content: { application/json: { schema: { $ref: '#/components/schemas/Run' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+  /runs/{runId}/takeover:
+    parameters: [ { $ref: '#/components/parameters/runId' } ]
+    post:
+      tags: [runs]
+      operationId: takeOverStep
+      summary: Manual takeover of a failed step; the member supplies the output and the run continues (R-51 AC2)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [taskKey, output]
+              properties:
+                taskKey: { type: string }
+                output: { type: object, description: 'Must validate against the task output schema.' }
+                note: { type: string, maxLength: 1000 }
+      responses:
+        '202': { description: Accepted, content: { application/json: { schema: { $ref: '#/components/schemas/Run' } } } }
+
+  /projects/{projectId}/budget:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [cost]
+      operationId: getBudget
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Budget' } } } }
+    put:
+      tags: [cost]
+      operationId: setAllowance
+      summary: Set the per-video allowance (Q-05). Null allowance blocks paid dispatch; development seeds a generous default from local configuration.
+      parameters: [ { $ref: '#/components/parameters/IfMatch' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [allowance]
+              properties:
+                allowance: { oneOf: [ { $ref: 'common.schema.json#/$defs/Money' }, { type: 'null' } ] }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Budget' } } } }
+  /projects/{projectId}/costs:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    get:
+      tags: [cost]
+      operationId: getCostReport
+      summary: Estimated vs actual per attempt, including failed and revised attempts (R-35)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/CostReport' } } } }
+  /projects/{projectId}/effort:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [cost]
+      operationId: recordEffort
+      summary: Active human minutes (R-36, KPI-04)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [activity, activeMinutes]
+              properties:
+                activity: { enum: [brief, research_review, script, storyboard, narration, review, revision, packaging, publishing, code_repair, other] }
+                activeMinutes: { type: integer, minimum: 0, maximum: 1440 }
+      responses:
+        '201': { description: Created }
+
+  /assets:
+    get:
+      tags: [assets]
+      operationId: listAssets
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Asset' } } } } }
+    post:
+      tags: [assets]
+      operationId: registerAsset
+      summary: Register an asset with origin, hash, licence and expiry (R-55). File is uploaded to the returned signed URL.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AssetInput' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/AssetCreated' } } } }
+
+  /projects/{projectId}/data-exports:
+    parameters: [ { $ref: '#/components/parameters/projectId' } ]
+    post:
+      tags: [data]
+      operationId: exportProjectData
+      summary: Export permitted records and artifacts in open formats (R-56)
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      responses:
+        '202': { $ref: '#/components/responses/RunAccepted' }
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IdempotencyKey: { name: Idempotency-Key, in: header, required: true, schema: { type: string, minLength: 8, maxLength: 128 } }
+    IfMatch: { name: If-Match, in: header, required: true, schema: { type: string }, description: 'Quoted rowVersion of the resource.' }
+    projectId: { name: projectId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    brandKitId: { name: brandKitId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    claimId: { name: claimId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    scriptId: { name: scriptId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    storyboardId: { name: storyboardId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    renderId: { name: renderId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    revisionId: { name: revisionId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    findingId: { name: findingId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    packageId: { name: packageId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    exportId: { name: exportId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    publicationId: { name: publicationId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    runId: { name: runId, in: path, required: true, schema: { $ref: '#/components/schemas/Uuid' } }
+    version: { name: version, in: path, required: true, schema: { type: integer, minimum: 1 } }
+
+  responses:
+    Problem:
+      description: Error (RFC 9457)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    RunAccepted:
+      description: Work accepted; follow the run or the event stream
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Run' }
+
+  schemas:
+    Uuid: { $ref: 'common.schema.json#/$defs/Uuid' }
+    Series: { enum: [what_if, wait_how_does_that_work, solve_this, inside_the_machine] }
+    ProductionState: { $ref: 'events/domain-event.schema.json#/$defs/ProductionState' }
+    Gate: { $ref: 'events/domain-event.schema.json#/$defs/Gate' }
+    Responsibility: { enum: [owner, editor, reviewer, publisher, analyst] }
+    ClaimStatus: { enum: [unreviewed, approved, qualified, unsupported, contradicted, needs_specialist, removed] }
+
+    Problem:
+      type: object
+      required: [type, title, status, code, errorClass]
+      properties:
+        type: { type: string, format: uri-reference }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+        code: { type: string, description: 'Stable machine code, e.g. APPROVAL_STALE, BUDGET_INSUFFICIENT, CLAIM_UNSUPPORTED, AUDIENCE_SETTING_REQUIRED.' }
+        errorClass: { $ref: 'common.schema.json#/$defs/ErrorClass' }
+        target: { $ref: 'common.schema.json#/$defs/ErrorTarget' }
+        blockers: { type: array, items: { $ref: '#/components/schemas/Blocker' } }
+        repairOptions:
+          type: array
+          items:
+            type: object
+            required: [action, label]
+            properties:
+              action: { enum: [retry, edit_target, resolve_claim, raise_budget, reconcile, take_over, cancel, contact_specialist] }
+              label: { type: string }
+        validationErrors: { type: array, items: { $ref: 'media/render-job.schema.json#/$defs/ValidationError' } }
+
+    Blocker:
+      type: object
+      required: [kind, message]
+      properties:
+        kind: { enum: [claim_unsupported, claim_needs_specialist, finding_open, rights_missing, rights_expired, voice_not_commercial, audience_setting_unset, policy_check_failed, stale_approval, budget_insufficient, capability_gap, timing_not_measured, checks_failed, rubric_below_threshold] }
+        message: { type: string }
+        target: { $ref: 'common.schema.json#/$defs/ErrorTarget' }
+
+    Me:
+      type: object
+      required: [memberId, workspaceId, displayName, responsibilities]
+      properties:
+        memberId: { $ref: '#/components/schemas/Uuid' }
+        workspaceId: { $ref: '#/components/schemas/Uuid' }
+        displayName: { type: string }
+        responsibilities: { type: array, items: { $ref: '#/components/schemas/Responsibility' } }
+        specialistScopes: { type: array, items: { type: string } }
+
+    BrandTokens:
+      type: object
+      description: 'Palette, type scale, equation typography, caption placement, safe zones, transitions, pacing, brand cue (R-23). Token values defined in docs/design/tokens.md (Stage 2c).'
+      required: [tokens]
+      properties:
+        tokens: { type: object }
+    BrandKit:
+      type: object
+      required: [id, name, headVersion]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        name: { type: string }
+        headVersion: { type: integer }
+    BrandKitVersion:
+      type: object
+      required: [ref, tokens]
+      properties:
+        ref: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        tokens: { type: object }
+        invalidatesDraftScenes: { type: array, items: { type: string } }
+
+    ProjectCreate:
+      type: object
+      additionalProperties: false
+      required: [title, series, brandKitId]
+      properties:
+        title: { type: string, maxLength: 120 }
+        series: { $ref: '#/components/schemas/Series' }
+        brandKitId: { $ref: '#/components/schemas/Uuid' }
+    ProjectUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        title: { type: string, maxLength: 120 }
+        brandKitVersion: { type: integer, minimum: 1 }
+        narrator: { $ref: '#/components/schemas/NarratorSettings' }
+    NarratorSettings:
+      type: object
+      required: [voiceId]
+      properties:
+        provider: { type: string, description: 'Set by configuration (ADR-013).' }
+        voiceId: { type: string }
+        speakingRate: { type: number, minimum: 0.8, maximum: 1.2 }
+    Project:
+      type: object
+      required: [id, title, series, state, rowVersion, brandKit]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        title: { type: string }
+        series: { $ref: '#/components/schemas/Series' }
+        state: { $ref: '#/components/schemas/ProductionState' }
+        stateReason: { type: string }
+        brandKit: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        narrator: { $ref: '#/components/schemas/NarratorSettings' }
+        destination: { $ref: '#/components/schemas/Destination' }
+        gates: { type: array, items: { $ref: '#/components/schemas/GateStatus' } }
+        spend: { $ref: '#/components/schemas/Budget' }
+        rowVersion: { type: integer }
+
+    DestinationInput:
+      type: object
+      additionalProperties: false
+      required: [platform, accountLabel, timezone]
+      properties:
+        platform: { enum: [youtube, instagram] }
+        accountLabel: { type: string, maxLength: 100 }
+        timezone: { type: string, default: Asia/Kolkata }
+        disclosure: { type: object }
+    Destination:
+      allOf:
+        - { $ref: '#/components/schemas/DestinationInput' }
+        - type: object
+          required: [id, rowVersion]
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            rowVersion: { type: integer }
+
+    OpportunityContractBody:
+      type: object
+      additionalProperties: false
+      required: [audience, viewerQuestion, promise, series, format, evidencePlan, proposedFamilies, hypothesis]
+      properties:
+        audience: { type: string, maxLength: 300 }
+        viewerQuestion: { type: string, maxLength: 300 }
+        promise: { type: string, maxLength: 300 }
+        series: { $ref: '#/components/schemas/Series' }
+        format: { type: object, properties: { targetDurationSec: { type: integer, minimum: 30, maximum: 90 } } }
+        evidencePlan: { type: string, maxLength: 1000 }
+        proposedFamilies: { type: array, items: { type: string } }
+        budgetAllowance: { $ref: 'common.schema.json#/$defs/Money' }
+        hypothesis: { type: string, maxLength: 500 }
+        measurementPlan: { type: object, properties: { primaryMetric: { type: string }, windowDays: { type: integer } } }
+    OpportunityContract:
+      type: object
+      required: [id, ref, body]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        ref: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        body: { $ref: '#/components/schemas/OpportunityContractBody' }
+    PreflightResult:
+      type: object
+      required: [ok, blockers]
+      properties:
+        ok: { type: boolean }
+        blockers: { type: array, items: { $ref: '#/components/schemas/Blocker' } }
+        estimate: { $ref: 'common.schema.json#/$defs/Money' }
+        remaining: { $ref: 'common.schema.json#/$defs/Money' }
+
+    ClaimCreate:
+      type: object
+      additionalProperties: false
+      required: [text, claimType, materiality]
+      properties:
+        text: { type: string, maxLength: 500 }
+        claimType: { enum: [fact, definition, calculation, derivation, statistic, historical, opinion] }
+        materiality: { enum: [material, supporting] }
+        evidence:
+          type: array
+          items:
+            type: object
+            required: [url, stance, locator]
+            properties:
+              url: { type: string, format: uri }
+              stance: { enum: [supports, partially_supports, contradicts] }
+              locator: { type: string, maxLength: 200 }
+              excerpt: { type: string, maxLength: 200 }
+    Claim:
+      type: object
+      required: [id, text, claimType, materiality, status, rowVersion]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        text: { type: string }
+        claimType: { type: string }
+        materiality: { enum: [material, supporting] }
+        status: { $ref: '#/components/schemas/ClaimStatus' }
+        specialistScope: { type: string }
+        qualification: { type: string }
+        rowVersion: { type: integer }
+    ClaimDetail:
+      allOf:
+        - { $ref: '#/components/schemas/Claim' }
+        - type: object
+          properties:
+            evidence:
+              type: array
+              items:
+                type: object
+                properties:
+                  source: { type: object, properties: { url: { type: string }, title: { type: string }, retrievedAt: { type: string, format: date-time } } }
+                  stance: { type: string }
+                  locator: { type: string }
+                  excerpt: { type: string }
+                  citationValid: { type: boolean }
+            usedIn:
+              type: array
+              items:
+                type: object
+                properties:
+                  kind: { enum: [script_segment, scene, demonstration] }
+                  ref: { type: string }
+    ClaimReview:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status: { $ref: '#/components/schemas/ClaimStatus' }
+        qualification: { type: string, maxLength: 500 }
+        specialistScope: { type: string, maxLength: 40 }
+
+    TaskRunRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        revisionRequest: { type: string, maxLength: 1000 }
+        baseVersion: { type: integer, minimum: 1 }
+    VersionSummary:
+      type: object
+      required: [ref, origin, createdAt]
+      properties:
+        ref: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        origin: { enum: [agent_task, member_edit] }
+        createdAt: { type: string, format: date-time }
+        approvedAtGate: { $ref: '#/components/schemas/Gate' }
+    ScriptVersion:
+      type: object
+      required: [ref, body]
+      properties:
+        ref: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        body: { $ref: 'agent-tools/task-io.schema.json#/$defs/ScriptOutput' }
+        reopenedGates: { type: array, items: { $ref: '#/components/schemas/Gate' } }
+    StoryboardVersion:
+      type: object
+      required: [ref, videoSpec, validation]
+      properties:
+        ref: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        scriptRef: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        videoSpec: { $ref: 'media/video-spec.schema.json' }
+        validation: { type: array, items: { $ref: 'media/render-job.schema.json#/$defs/ValidationError' } }
+        unsupportedNeeds: { type: array, items: { type: object } }
+        reopenedGates: { type: array, items: { $ref: '#/components/schemas/Gate' } }
+
+    NarrationTake:
+      type: object
+      required: [id, timing]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        scriptRef: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        timing: { $ref: 'media/timing.schema.json#/$defs/NarrationTiming' }
+        audioUrl: { type: string, format: uri, description: Signed, 15 minutes }
+        pacingChange: { type: object, description: 'Shown instead of a silent speed-up (R-26 AC2).', properties: { previousMs: { type: integer }, newMs: { type: integer } } }
+    Pronunciation:
+      type: object
+      required: [term, say]
+      properties:
+        term: { type: string, maxLength: 60 }
+        say: { type: string, maxLength: 120 }
+
+    Render:
+      type: object
+      required: [id, kind, status]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        kind: { enum: [preview, master] }
+        status: { enum: [requested, running, succeeded, failed, cancelled] }
+        manifest: { $ref: 'media/render-manifest.schema.json' }
+        playbackUrl: { type: string, format: uri }
+        cost: { $ref: 'common.schema.json#/$defs/Money' }
+
+    RevisionRequest:
+      type: object
+      additionalProperties: false
+      required: [request, target]
+      properties:
+        request: { type: string, maxLength: 1000, description: 'e.g. "hold the row-and-column explanation two seconds longer and make the corner clearer".' }
+        target:
+          type: object
+          properties:
+            claimId: { $ref: '#/components/schemas/Uuid' }
+            sceneId: { type: string }
+            objectId: { type: string }
+    RevisionImpact:
+      type: object
+      required: [revisionId, rebuild, reuse, estimate, reopenedGates, options]
+      properties:
+        revisionId: { $ref: '#/components/schemas/Uuid' }
+        rebuild: { type: array, items: { type: string }, description: 'Artifacts to regenerate: e.g. tts:scene.explanation, clip:scene.explanation, captions, assembly, mix.' }
+        reuse: { type: array, items: { type: string } }
+        estimate: { $ref: 'common.schema.json#/$defs/Money' }
+        timingShifts: { type: array, items: { type: object, properties: { sceneId: { type: string }, deltaFrames: { type: integer } } } }
+        reopenedGates: { type: array, items: { $ref: '#/components/schemas/Gate' } }
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              label: { type: string }
+              totalDurationFrames: { type: integer }
+    Comparison:
+      type: object
+      properties:
+        kind: { type: string }
+        from: { type: integer }
+        to: { type: integer }
+        changes: { type: array, items: { type: object } }
+
+    FindingCreate:
+      type: object
+      additionalProperties: false
+      required: [target, severity, text]
+      properties:
+        target: { $ref: 'common.schema.json#/$defs/ErrorTarget' }
+        severity: { enum: [material_factual, rights_blocker, quality, minor] }
+        text: { type: string, maxLength: 2000 }
+    Finding:
+      allOf:
+        - { $ref: '#/components/schemas/FindingCreate' }
+        - type: object
+          required: [id, disposition, rowVersion]
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            disposition: { enum: [open, fixed, accepted, wont_fix] }
+            rowVersion: { type: integer }
+    RubricInput:
+      type: object
+      additionalProperties: false
+      required: [scores, mutedReviewPassed]
+      properties:
+        scores:
+          type: object
+          additionalProperties: false
+          required: [correctness, clarity, originality, readability, promisePayoff]
+          properties:
+            correctness: { type: integer, minimum: 1, maximum: 5 }
+            clarity: { type: integer, minimum: 1, maximum: 5 }
+            originality: { type: integer, minimum: 1, maximum: 5 }
+            readability: { type: integer, minimum: 1, maximum: 5 }
+            promisePayoff: { type: integer, minimum: 1, maximum: 5 }
+        mutedReviewPassed: { type: boolean }
+        notes: { type: string, maxLength: 2000 }
+
+    ApprovalInput:
+      type: object
+      additionalProperties: false
+      required: [gate, decision, target, responsibility]
+      properties:
+        gate: { $ref: '#/components/schemas/Gate' }
+        decision: { enum: [approved, returned] }
+        target:
+          type: object
+          required: [type, ref]
+          properties:
+            type: { enum: [contract, script, demonstration, storyboard, package, release_instruction] }
+            ref: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        responsibility: { $ref: '#/components/schemas/Responsibility' }
+        destinationId: { $ref: '#/components/schemas/Uuid', description: 'Required for Gate E.' }
+        releaseInstruction:
+          type: object
+          description: 'Gate E only: publish now or at a future time (manual route at R2).'
+          properties:
+            mode: { enum: [now, scheduled] }
+            at: { type: string, format: date-time }
+        policyChecklist:
+          type: object
+          description: 'Gates B and D (R-59).'
+          properties:
+            noImpersonation: { type: boolean }
+            noFabricatedSourcesOrEvents: { type: boolean }
+            noDeceptiveEditing: { type: boolean }
+            noUnverifiedHealthOrFinanceAsFact: { type: boolean }
+        note: { type: string, maxLength: 2000 }
+    Approval:
+      type: object
+      required: [id, gate, decision, target, actor, createdAt]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        gate: { $ref: '#/components/schemas/Gate' }
+        decision: { enum: [approved, returned] }
+        target: { type: object }
+        actor: { $ref: 'common.schema.json#/$defs/Actor' }
+        destinationId: { $ref: '#/components/schemas/Uuid' }
+        current: { type: boolean }
+        invalidatedReason: { type: string }
+        createdAt: { type: string, format: date-time }
+    GateStatus:
+      type: object
+      required: [gate, status]
+      properties:
+        gate: { $ref: '#/components/schemas/Gate' }
+        status: { enum: [not_ready, ready_for_review, approved, returned, reopened] }
+        currentTarget: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        approvalId: { $ref: '#/components/schemas/Uuid' }
+        blockers: { type: array, items: { $ref: '#/components/schemas/Blocker' } }
+
+    PackageInput:
+      type: object
+      additionalProperties: false
+      required: [masterRenderId, metadata]
+      properties:
+        masterRenderId: { $ref: '#/components/schemas/Uuid' }
+        metadata:
+          type: object
+          additionalProperties: false
+          required: [title, description, madeForKids]
+          properties:
+            title: { type: string, maxLength: 100 }
+            description: { type: string, maxLength: 5000, description: 'Includes reviewed attribution.' }
+            tags: { type: array, maxItems: 30, items: { type: string, maxLength: 60 } }
+            madeForKids: { type: ['boolean', 'null'], description: 'Must be set explicitly before Gate D; null blocks approval (R-04 AC2).' }
+            aiDisclosure: { type: object }
+        coverAssetId: { $ref: '#/components/schemas/Uuid' }
+    PackageVersion:
+      type: object
+      required: [ref, masterRenderId, metadata, contents]
+      properties:
+        ref: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        masterRenderId: { $ref: '#/components/schemas/Uuid' }
+        metadata: { type: object }
+        contents:
+          type: object
+          description: 'Bundle contents (R-45).'
+          properties:
+            master: { $ref: 'common.schema.json#/$defs/BlobRef' }
+            captions: { $ref: 'common.schema.json#/$defs/BlobRef' }
+            script: { $ref: 'common.schema.json#/$defs/VersionRef' }
+            cover: { $ref: 'common.schema.json#/$defs/BlobRef' }
+            rights: { type: array, items: { type: object } }
+            versions: { type: object }
+            costs: { type: object }
+        publicationState: { type: string }
+    ExportBundle:
+      type: object
+      required: [id, status]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        status: { enum: [building, ready, failed] }
+        downloadUrl: { type: string, format: uri, description: Signed, 15 minutes }
+        bundle: { $ref: 'common.schema.json#/$defs/BlobRef' }
+
+    ManualPublicationInput:
+      type: object
+      additionalProperties: false
+      required: [packageRef, destinationId, externalId, url, publishedAt, observedVisibility]
+      properties:
+        packageRef: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        destinationId: { $ref: '#/components/schemas/Uuid' }
+        externalId: { type: string, maxLength: 64 }
+        url: { type: string, format: uri }
+        publishedAt: { type: string, format: date-time }
+        observedVisibility: { enum: [public, unlisted, private, scheduled] }
+        evidenceAssetId: { $ref: '#/components/schemas/Uuid', description: 'Screenshot or note proving the observation.' }
+    VerificationInput:
+      type: object
+      additionalProperties: false
+      required: [result]
+      properties:
+        result: { enum: [NOT_CHECKED, PASSED, PARTIAL, FAILED] }
+        checks:
+          type: object
+          properties:
+            intendedAccount: { type: boolean }
+            publicStatus: { type: boolean }
+            metadataMatchesPackage: { type: boolean }
+            playbackChecked: { type: boolean }
+        reason: { type: string, maxLength: 1000 }
+    Publication:
+      type: object
+      required: [id, route, state, verification]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        packageRef: { $ref: 'common.schema.json#/$defs/VersionRef' }
+        destinationId: { $ref: '#/components/schemas/Uuid' }
+        route: { enum: [manual, connected] }
+        state: { $ref: 'events/domain-event.schema.json#/$defs/PublicationRecorded/properties/state' }
+        externalId: { type: string }
+        url: { type: string, format: uri }
+        publishedAt: { type: string, format: date-time }
+        verification: { enum: [NOT_CHECKED, PASSED, PARTIAL, FAILED] }
+        packageMismatch: { type: boolean }
+    MetricSnapshotInput:
+      type: object
+      additionalProperties: false
+      required: [measure, platformDefinition, availability, windowStart, windowEnd]
+      properties:
+        measure: { type: string, maxLength: 80 }
+        platformDefinition: { type: string, maxLength: 300 }
+        value: { type: ['number', 'null'] }
+        availability: { enum: [available, missing, delayed, unsupported, permission_denied] }
+        windowStart: { type: string, format: date-time }
+        windowEnd: { type: string, format: date-time }
+        denominator: { type: string, maxLength: 80 }
+    SeriesSlate:
+      type: object
+      properties:
+        series:
+          type: array
+          items:
+            type: object
+            properties:
+              series: { $ref: '#/components/schemas/Series' }
+              target: { type: integer }
+              planned: { type: integer }
+              approved: { type: integer }
+              published: { type: integer }
+
+    Run:
+      type: object
+      required: [id, workflowType, state]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        workflowType: { type: string }
+        state: { enum: [pending, running, waiting_approval, paused_budget, succeeded, failed, cancelled] }
+        progress: { type: string }
+        spend: { $ref: 'common.schema.json#/$defs/Money' }
+    RunDetail:
+      allOf:
+        - { $ref: '#/components/schemas/Run' }
+        - type: object
+          properties:
+            attempts:
+              type: array
+              items:
+                type: object
+                properties:
+                  attemptId: { $ref: '#/components/schemas/Uuid' }
+                  taskKey: { type: string }
+                  taskType: { type: string }
+                  attempt: { type: integer }
+                  status: { type: string }
+                  errorClass: { $ref: 'common.schema.json#/$defs/ErrorClass' }
+                  error: { type: object }
+                  provider: { type: string }
+                  modelOrVoice: { type: string }
+                  promptSha256: { type: string }
+                  estimatedCost: { $ref: 'common.schema.json#/$defs/Money' }
+                  actualCost: { $ref: 'common.schema.json#/$defs/Money' }
+                  retriesLeft: { type: integer }
+
+    Budget:
+      type: object
+      required: [currency, reserved, spent, rowVersion]
+      properties:
+        allowance: { oneOf: [ { $ref: 'common.schema.json#/$defs/Money' }, { type: 'null' } ] }
+        currency: { type: string }
+        reserved: { $ref: 'common.schema.json#/$defs/Money' }
+        spent: { $ref: 'common.schema.json#/$defs/Money' }
+        remaining: { $ref: 'common.schema.json#/$defs/Money' }
+        rowVersion: { type: integer }
+    CostReport:
+      type: object
+      properties:
+        perAttempt: { type: array, items: { type: object } }
+        totalVariable: { $ref: 'common.schema.json#/$defs/Money' }
+        failedAndRevised: { $ref: 'common.schema.json#/$defs/Money' }
+        activeHumanMinutes: { type: integer }
+
+    AssetInput:
+      type: object
+      additionalProperties: false
+      required: [kind, name, sha256, bytes, mediaType, origin, licence]
+      properties:
+        kind: { enum: [font, sound_effect, image, voice, other] }
+        name: { type: string, maxLength: 120 }
+        sha256: { $ref: 'common.schema.json#/$defs/Sha256' }
+        bytes: { type: integer, minimum: 1, maximum: 104857600 }
+        mediaType: { type: string }
+        origin: { type: string, maxLength: 300 }
+        licence: { type: string, maxLength: 300 }
+        expiresAt: { type: string, format: date-time }
+    Asset:
+      allOf:
+        - { $ref: '#/components/schemas/AssetInput' }
+        - type: object
+          required: [id, version, lifecycle]
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            version: { type: integer }
+            lifecycle: { enum: [active, expired, withdrawn] }
+    AssetCreated:
+      type: object
+      required: [asset, uploadUrl]
+      properties:
+        asset: { $ref: '#/components/schemas/Asset' }
+        uploadUrl: { type: string, format: uri }

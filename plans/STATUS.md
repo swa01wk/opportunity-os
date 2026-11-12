@@ -1,5 +1,5 @@
-# STATUS: OpportunityOS        Updated: 2026-11-12
-Current stage: 1 Intake (no milestone yet) | Next gate: G1 Requirements baseline, awaiting product owner sign-off
+# STATUS: OpportunityOS        Updated: 2026-11-13
+Current stage: 2 Design (2a architecture, ADRs, contracts) | Next gate: G2 Design review and screens
 
 Release target: R0 -> R1 -> R2 (PRD Section 4). R3 conditional; R4/R5 out of scope.
 
@@ -10,8 +10,8 @@ All gates are signed by the product owner / tech lead (same person).
 | Stage | Gate | Status | Signed | PR |
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
-| 1 Intake | G1 Requirements baseline | In review: G1 checks pass; awaiting your sign-off | | docs/stage-1-intake, #2 |
-| 2 Design | G2 Design review and screens | Not started | | |
+| 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
+| 2 Design | G2 Design review and screens | 2a in review (architecture, ADRs, contracts); 2b and 2c not started | | docs/stage-2a-architecture, #3 |
 | 3 Plan | G3 Milestone scope and dates | Not started | | |
 
 | Milestone | Scope | Status | Exit date |
@@ -28,7 +28,7 @@ All gates are signed by the product owner / tech lead (same person).
 
 ## Requirements baseline
 
-[REQUIREMENTS.md](../docs/product/REQUIREMENTS.md): R-01–R-82, NFR-01–NFR-19, KPI-01–KPI-14, F-01–F-21. Draft for G1.
+[REQUIREMENTS.md](../docs/product/REQUIREMENTS.md): R-01–R-82, NFR-01–NFR-19, KPI-01–KPI-14, F-01–F-21. Baselined at G1 (2026-11-12, PR #2); changes only through change control.
 
 | G1 check | Result |
 |---|---|
@@ -36,16 +36,41 @@ All gates are signed by the product owner / tech lead (same person).
 | Every Must has acceptance criteria | Pass (all Must and Should items have Given/When/Then) |
 | Questions answered or assumptions accepted | Pass: Q-03 and Q-07 answered, Q-05 parked with an interim rule, all other assumptions accepted (2026-11-12) |
 
+## Design (Stage 2)
+
+| Part | Docs | Status |
+|---|---|---|
+| 2a | [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md), [ADR-001–014](../docs/adr/README.md) (all accepted), [contracts 0.1.0](../docs/contracts/README.md) | In review |
+| 2b | UI_DESIGN.md, TECH_STACK.md, SECURITY.md, OBSERVABILITY.md | Not started |
+| 2c | Screens S-xx, tokens.md | Not started |
+
+| G2 check (2a scope) | Result |
+|---|---|
+| Traceability: every R-xx maps to a component | Pass: all Must and Should R-xx mapped (R3 as planned components); Could and Won't marked not designed. R-xx → screen is 2b. |
+| Contracts versioned | Pass: 0.1.0 (`x-version`, in-document versions, OpenAPI `info.version`). Checked: 10 schemas pass the 2020-12 metaschema; valid fixtures pass; 6 schema-level invalid fixtures rejected; 4 semantic fixtures give the expected compiler codes; all OpenAPI `$ref`s resolve; DDL applies to PostgreSQL 16; all 7 diagrams render. |
+| Each layer can mock the others | Pass: mocking guide in contracts README; synthetic odd-squares fixtures |
+| No open choice blocks M0 | Pass: ADR-011–014 accepted; Remotion free individual licence; development runs on free credits (Q-05). |
+| Nothing designed that no requirement asks for | Pass: R3 planned only; R-64, R-65, R-78–R-82 not designed |
+| Threat model reviewed | Not in 2a: SECURITY.md (2b) |
+| Screens approved | Not in 2a: Stage 2c |
+
 ## Open questions and risks
 
-- [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-28 (DEC-01–12 are Q-01–Q-12).
-- Parked: Q-05 budget limits, due before the first paid provider call.
-- Specialist confirmation due before G2: Q-06 narrator licence, Q-07 Remotion licence, Q-14 and Q-20 privacy and DPDP Act, Q-25 stored excerpt length.
-- Your approval in Stage 2: TTS and LLM providers (Q-06), cloud host (Q-21), auth (Q-22), durable-execution approach without Temporal (Q-07).
-- Risk: with Temporal dropped, durable execution (NFR-01, R-51) must be met without building a custom workflow framework (PRD §14.2).
+- [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-29 (DEC-01–12 are Q-01–Q-12).
+- Parked: Q-05 budget limits. Development uses free credits with costs recorded; real limits are set from measured per-video cost before the AWS move.
+- Specialist checks: none outstanding. Q-14, Q-20, Q-25 and the narrator licence rule were decided by the tech lead at your request (engineering decisions, not legal advice).
+- Hosting: local only through R2; AWS Mumbai after the R2 gate (Q-21). Staging is a second local environment. Risk: the owner's machine is a single point of failure, so backups are copied off it (NFR-14).
+- Narration made on ElevenLabs free credits cannot be published; Gate D blocks it until takes are regenerated on a paid plan (ADR-013).
+- Open, low cost: Q-29 search API (M0 research spec).
+- Risk: DBOS Transact must pass an M0 kill-and-resume spike (ADR-003); if it fails, ADR-003 is superseded before M1 depends on it.
+- Risk: Remotion render time and memory are unmeasured until the R0 baseline (NFR-02, ADR-002).
 
 ## Recent decisions
 
+- 2026-11-13: Q-05 dev rule (no limits, free credits, costs recorded); Q-21 AWS after the R2 gate; Q-14, Q-20, Q-25 answered and narrator licence rule set by the tech lead.
+- 2026-11-12: Provider decisions: local only now, AWS Mumbai later (ADR-011, Q-21); Keycloak locally, Cognito when hosted (ADR-012, Q-22); ElevenLabs (ADR-013) and OpenAI gpt-5.4-mini-2026-03-17 (ADR-014) (Q-06); Remotion free individual licence (Q-07).
+- 2026-11-12: Stage 2a ADRs accepted: ADR-001 modular monolith (backend, agent, media, web), ADR-002 Remotion only, ADR-003 DBOS Transact durable execution via outbox, ADR-004 FastAPI, ADR-005 Next.js, ADR-006 PostgreSQL, ADR-007 S3 storage, ADR-008 Pydantic → JSON Schema → TS, ADR-009 provider adapters, ADR-010 transactional outbox.
+- 2026-11-12: G1 Requirements baseline signed by the product owner / tech lead (PR #2).
 - 2026-11-12: Q-03: no launch date; build properly through R0 → R1 → R2, without the smaller January launch.
 - 2026-11-12: Q-07: Remotion is the only renderer; no Temporal, no Manim. ADRs follow in Stage 2.
 - 2026-11-12: Q-05 budget limits parked; costs still recorded and reservation still built.
