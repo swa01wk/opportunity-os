@@ -18,13 +18,23 @@
         "provider": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["name", "voiceId", "settingsSha256"],
+          "required": ["name", "voiceId", "settingsSha256", "licence"],
           "properties": {
             "name": { "type": "string", "maxLength": 40 },
             "voiceId": { "type": "string", "maxLength": 100 },
             "modelId": { "type": "string", "maxLength": 100 },
             "settingsSha256": { "$ref": "../common.schema.json#/$defs/Sha256" },
-            "pronunciationSetSha256": { "$ref": "../common.schema.json#/$defs/Sha256" }
+            "pronunciationSetSha256": { "$ref": "../common.schema.json#/$defs/Sha256" },
+            "licence": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["plan", "commercialUse"],
+              "properties": {
+                "plan": { "type": "string", "maxLength": 40, "description": "Provider plan the take was generated on." },
+                "commercialUse": { "type": "boolean", "description": "False for free-plan takes. A package containing one cannot pass Gate D (ADR-013, R-55)." },
+                "voiceAssetId": { "$ref": "../common.schema.json#/$defs/Uuid", "description": "Voice entry in the rights ledger." }
+              }
+            }
           }
         },
         "alignmentSource": {

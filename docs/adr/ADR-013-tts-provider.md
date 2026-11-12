@@ -1,5 +1,5 @@
 # ADR-013: ElevenLabs for narration
-Status: Accepted (narrator licence still needs a specialist check)    Date: 2026-11-12 (decided by the product owner; Q-06)
+Status: Accepted    Date: 2026-11-12 (decided by the product owner; Q-06)
 
 ## Context
 - There is one licensed English narrator (NFR-16).
@@ -16,6 +16,10 @@ Options proposed in Stage 2a: ElevenLabs, Azure AI Speech, Google Cloud TTS, or 
   - `media.audio` turns that alignment into the word and phrase times in `timing.schema.json`, with `alignmentSource = provider_characters`.
 - **Pronunciation:** the workspace pronunciation list (`/pronunciations`) is synced to an ElevenLabs pronunciation dictionary. Its ID and version are pinned in each take (`pronunciationSetSha256`). ElevenLabs allows up to 3 dictionaries per request.
 - **Pinning:** `voiceId`, `modelId` and voice settings are set in configuration and pinned per take (R-03). Changing any of them invalidates every affected scene (R-32).
+- **Narrator licence rule** (tech-lead decision 2026-11-13, Q-06). The free plan carries no commercial licence ([ElevenLabs](https://elevenlabs.io/docs/help-center/legal/can-i-publish-the-content-i-generate-on-the-platform)), and content made on a paid plan stays commercially usable after cancelling.
+  - Development on free credits is fine.
+  - Any take in a published package must be generated on a paid plan, using a default or library voice licensed for commercial use, or the owner's own voice. Never a clone of another person.
+  - Each take records `licence.plan` and `licence.commercialUse` (`timing.schema.json`). The voice is registered in the rights ledger. Gate D is blocked while any take in the package has `commercialUse = false` (R-55 AC2).
 - **No fallback provider is wired now.** The adapter and its shared fixtures keep a second provider possible later (NFR-11).
 
 ## Alternatives
@@ -24,11 +28,7 @@ Options proposed in Stage 2a: ElevenLabs, Azure AI Speech, Google Cloud TTS, or 
 - **Our own forced aligner:** another model to run and evaluate.
 
 ## Consequences
-Before the first real call:
-- **Q-05 budget limits** must be set; paid dispatch is blocked while the allowance is null (R-34).
-- An **ElevenLabs plan that permits commercial use** of the chosen voice.
-
-Before the first public upload (R2):
-- **Specialist check of the narrator licence** (Q-06 follow-up).
+- Development runs on free credits; cost is still recorded per take (Q-05).
+- Before the first public upload (R2): switch to a paid plan and regenerate any free-plan takes in the package. The Gate D blocker enforces this.
 
 Separately, the API key lives in `.env` locally (git-ignored) and in Secrets Manager on AWS (NFR-06).

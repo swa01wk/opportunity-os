@@ -360,7 +360,7 @@ CREATE TABLE app.task_attempt (
 CREATE TABLE app.budget (                 -- per project allowance; limits are configuration (Q-05)
   project_id uuid PRIMARY KEY REFERENCES app.project(id),
   workspace_id uuid NOT NULL,
-  allowance_minor bigint,                 -- NULL = not set: paid dispatch blocked
+  allowance_minor bigint,                 -- NULL = not set: paid dispatch blocked (dev seeds a default, Q-05)
   currency char(3) NOT NULL DEFAULT 'INR',
   reserved_minor bigint NOT NULL DEFAULT 0,
   spent_minor bigint NOT NULL DEFAULT 0,

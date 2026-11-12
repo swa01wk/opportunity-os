@@ -276,8 +276,8 @@ None: there is no existing system or data (DISCOVERY.md not needed, Stage 1). Sc
 
 ## Deployment
 
-- **Now, local only (ADR-011):** Docker Compose on the owner's machine runs web, api, worker, render, PostgreSQL, MinIO (object lock on) and Keycloak; `make up` (PROCESS). Fake adapters by default; ElevenLabs and OpenAI only with keys in a git-ignored `.env` and a budget allowance set (Q-05). Backup is a scheduled `pg_dump` plus a bucket copy.
-- **Later, AWS Mumbai (ADR-011):** the same images on ECS Fargate, RDS PostgreSQL with PITR, S3 Object Lock, Secrets Manager, Cognito (ADR-012); separate staging and production. When is set at G3, before R1 acceptance.
+- **Now, local only (ADR-011):** Docker Compose on the owner's machine runs web, api, worker, render, PostgreSQL, MinIO (object lock on) and Keycloak; `make up` (PROCESS). Fake adapters by default; ElevenLabs and OpenAI with keys in a git-ignored `.env` (free credits in development; costs recorded, Q-05). A second Compose environment with its own credentials is staging (NFR-13). Backup is a scheduled `pg_dump` plus a bucket copy, also kept off the machine.
+- **Later, AWS Mumbai (ADR-011):** the same images on ECS Fargate, RDS PostgreSQL with PITR, S3 Object Lock, Secrets Manager, Cognito (ADR-012); separate staging and production. After the R2 gate (owner decision, Q-21).
 - render runs on a private network only, with CPU, memory and time limits per job (NFR-12).
 
 ## Quality scenarios (per NFR-xx)

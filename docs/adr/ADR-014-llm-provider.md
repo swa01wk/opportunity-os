@@ -27,8 +27,8 @@ The provider must stay swappable (ADR-009).
 - **A larger model tier:** higher cost per task; reconsider per task only if the R0 evaluation shows a quality gap.
 
 ## Consequences
+- Development runs on free credits; cost is recorded per call (Q-05).
 - Before the first real call:
-  - Q-05 budget limits must be set (R-34).
   - An OpenAI API key, in `.env` locally and Secrets Manager on AWS.
   - Data-use terms recorded in SECURITY.md (Stage 2b).
 - Changing the snapshot or reasoning effort is a versioned config change that must pass the evaluation suite (NFR-17).

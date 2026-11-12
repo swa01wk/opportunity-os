@@ -514,7 +514,7 @@ paths:
       summary: |
         Approve or return a gate (R-40, R-41). Members only (R-43). Refused when the target hash is
         not the current version, blockers exist (unsupported claims R-09, open material findings R-37,
-        rights R-55, unset audience setting R-04 AC2, failed policy checklist R-59) or the actor lacks
+        rights R-55 including narration generated without a commercial licence (ADR-013), unset audience setting R-04 AC2, failed policy checklist R-59) or the actor lacks
         the responsibility (R-05).
       parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ApprovalInput' } } } }
@@ -699,7 +699,7 @@ paths:
     put:
       tags: [cost]
       operationId: setAllowance
-      summary: Set the per-video allowance (Q-05). Null allowance blocks paid dispatch.
+      summary: Set the per-video allowance (Q-05). Null allowance blocks paid dispatch; development seeds a generous default from local configuration.
       parameters: [ { $ref: '#/components/parameters/IfMatch' } ]
       requestBody:
         required: true
@@ -836,7 +836,7 @@ components:
       type: object
       required: [kind, message]
       properties:
-        kind: { enum: [claim_unsupported, claim_needs_specialist, finding_open, rights_missing, rights_expired, audience_setting_unset, policy_check_failed, stale_approval, budget_insufficient, capability_gap, timing_not_measured, checks_failed, rubric_below_threshold] }
+        kind: { enum: [claim_unsupported, claim_needs_specialist, finding_open, rights_missing, rights_expired, voice_not_commercial, audience_setting_unset, policy_check_failed, stale_approval, budget_insufficient, capability_gap, timing_not_measured, checks_failed, rubric_below_threshold] }
         message: { type: string }
         target: { $ref: 'common.schema.json#/$defs/ErrorTarget' }
 
