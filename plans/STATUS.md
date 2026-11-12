@@ -1,5 +1,5 @@
 # STATUS: OpportunityOS        Updated: 2026-11-12
-Current stage: 1 Intake (no milestone yet) | Next gate: G1 Requirements baseline, awaiting product owner sign-off
+Current stage: 2 Design (2a architecture, ADRs, contracts) | Next gate: G2 Design review and screens
 
 Release target: R0 -> R1 -> R2 (PRD Section 4). R3 conditional; R4/R5 out of scope.
 
@@ -10,7 +10,7 @@ All gates are signed by the product owner / tech lead (same person).
 | Stage | Gate | Status | Signed | PR |
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
-| 1 Intake | G1 Requirements baseline | In review: G1 checks pass; awaiting your sign-off | | docs/stage-1-intake, #2 |
+| 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
 | 2 Design | G2 Design review and screens | Not started | | |
 | 3 Plan | G3 Milestone scope and dates | Not started | | |
 
@@ -28,7 +28,7 @@ All gates are signed by the product owner / tech lead (same person).
 
 ## Requirements baseline
 
-[REQUIREMENTS.md](../docs/product/REQUIREMENTS.md): R-01–R-82, NFR-01–NFR-19, KPI-01–KPI-14, F-01–F-21. Draft for G1.
+[REQUIREMENTS.md](../docs/product/REQUIREMENTS.md): R-01–R-82, NFR-01–NFR-19, KPI-01–KPI-14, F-01–F-21. Baselined at G1 (2026-11-12, PR #2); changes only through change control.
 
 | G1 check | Result |
 |---|---|
@@ -45,6 +45,8 @@ All gates are signed by the product owner / tech lead (same person).
 - Risk: with Temporal dropped, durable execution (NFR-01, R-51) must be met without building a custom workflow framework (PRD §14.2).
 
 ## Recent decisions
+
+- 2026-11-12: G1 Requirements baseline signed by the product owner / tech lead (PR #2).
 
 - 2026-11-12: Q-03: no launch date; build properly through R0 → R1 → R2, without the smaller January launch.
 - 2026-11-12: Q-07: Remotion is the only renderer; no Temporal, no Manim. ADRs follow in Stage 2.
