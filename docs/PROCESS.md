@@ -238,7 +238,7 @@ One pipeline promotes the same build artifact from PR to dev, staging and produc
 
 **Practices:**
 
-- branch protection on `main`: required checks, at least one approval, no direct pushes;
+- branch protection on `main` through a ruleset: pull request required, squash merge only, linear history, conversations resolved, no force pushes or deletions, and the required checks once CI exists. Require at least one approval; a solo owner sets zero approvals and adds the repository admin to the bypass list "for pull requests only", so direct pushes stay blocked. Private repos need GitHub Pro or Team for rulesets to be enforced;
 - GitHub flow with short-lived branches;
 - feature flags for work that is merged but not yet released;
 - SemVer tags and a `CHANGELOG.md` generated from Conventional Commits;
@@ -475,7 +475,7 @@ Set up once per product, then run one stage per thread. Generated docs live in t
 
 **One-time setup**
 
-1. Create an empty private GitHub repo for the product.
+1. Create an empty private GitHub repo for the product, set "Automatically delete head branches" and squash-only merging, and add the `main` ruleset (see CI/CD practices). Add required checks after M0 delivers CI.
 2. In Claude, connect GitHub and install the Claude GitHub App on that repo, so threads can push branches and open PRs.
 3. Export this doc as Markdown and name it `PROCESS.md`.
 4. Create a Claude project. Attach the repo with push access, and upload `PROCESS.md` and the PRD as project files.
@@ -653,7 +653,7 @@ Change no doc until I confirm.
 
 Follow these eight steps to take a new PRD through the process for the first time.
 
-1. Create an empty private GitHub repo for the product.
+1. Create an empty private GitHub repo for the product, set "Automatically delete head branches" and squash-only merging, and add the `main` ruleset (see CI/CD practices). Add required checks after M0 delivers CI.
 2. In Claude, connect GitHub and install the Claude GitHub App on that repo, so threads can push branches and open PRs.
 3. Export this doc as Markdown and save it as `PROCESS.md`.
 4. Create a new Claude project. Attach the repo with push access, and upload `PROCESS.md` and the PRD as project files.
