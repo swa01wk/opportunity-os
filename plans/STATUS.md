@@ -11,7 +11,7 @@ All gates are signed by the product owner / tech lead (same person).
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
-| 2 Design | G2 Design review and screens | 2a in review (architecture, ADRs, contracts); 2b and 2c not started | | docs/stage-2a-architecture, PR pending |
+| 2 Design | G2 Design review and screens | 2a in review (architecture, ADRs, contracts); 2b and 2c not started | | docs/stage-2a-architecture, #3 |
 | 3 Plan | G3 Milestone scope and dates | Not started | | |
 
 | Milestone | Scope | Status | Exit date |
