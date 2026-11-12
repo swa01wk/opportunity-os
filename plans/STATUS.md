@@ -10,7 +10,7 @@ All gates are signed by the product owner / tech lead (same person).
 | Stage | Gate | Status | Signed | PR |
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
-| 1 Intake | G1 Requirements baseline | In review: 2 of 3 G1 checks pass; open questions need answers or accepted assumptions | | docs/stage-1-intake |
+| 1 Intake | G1 Requirements baseline | In review: 2 of 3 G1 checks pass; open questions need answers or accepted assumptions | | docs/stage-1-intake, #2 |
 | 2 Design | G2 Design review and screens | Not started | | |
 | 3 Plan | G3 Milestone scope and dates | Not started | | |
 
