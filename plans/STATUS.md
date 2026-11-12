@@ -1,5 +1,5 @@
 # STATUS: OpportunityOS        Updated: 2026-11-13
-Current stage: 2 Design (2b UI, tech stack, security, observability) | Next gate: G2 Design review and screens
+Current stage: 2 Design (2c screens) | Next gate: G2 Design review and screens
 
 Release target: R0 -> R1 -> R2 (PRD Section 4). R3 conditional; R4/R5 out of scope.
 
@@ -11,7 +11,7 @@ All gates are signed by the product owner / tech lead (same person).
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
-| 2 Design | G2 Design review and screens | 2a Done (merged 2026-11-12); 2b in review; 2c not started | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 |
+| 2 Design | G2 Design review and screens | 2a Done (merged 2026-11-12); 2b Done (merged 2026-11-12); 2c step 1 in client review (tokens + S-07) | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1 |
 | 3 Plan | G3 Milestone scope and dates | Not started | | |
 
 | Milestone | Scope | Status | Exit date |
@@ -31,7 +31,7 @@ All gates are signed by the product owner / tech lead (same person).
 | S-04 Project settings and data | R-02–R-04, R-34, R-56, R-60 | — | Draft (prototype in 2c) |
 | S-05 Evidence | R-08–R-10 | — | Draft (prototype in 2c) |
 | S-06 Script and demonstration | R-11–R-15, R-59, Gate B | — | Draft (prototype in 2c) |
-| S-07 Storyboard and preview | R-16, R-18–R-23, R-27, R-28, Gate C | — | Draft (prototype in 2c) |
+| S-07 Storyboard and preview | R-16, R-18–R-23, R-27, R-28, Gate C | — | Client review: reference prototype for look and feel ([S-07-storyboard.html](../docs/design/screens/S-07-storyboard.html)) |
 | S-08 Narration | R-25, R-26 | — | Draft (prototype in 2c) |
 | S-09 Revision impact | R-31, R-32, R-42 | — | Draft (prototype in 2c) |
 | S-10 Compare versions | R-33 | — | Draft (prototype in 2c) |
@@ -63,8 +63,8 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 | Part | Docs | Status |
 |---|---|---|
 | 2a | [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md), [ADR-001–014](../docs/adr/README.md) (all accepted), [contracts 0.1.0](../docs/contracts/README.md) | Done (PR #3, merged 2026-11-12) |
-| 2b | [UI_DESIGN.md](../docs/product/UI_DESIGN.md), [TECH_STACK.md](../docs/architecture/TECH_STACK.md), [SECURITY.md](../docs/architecture/SECURITY.md), [OBSERVABILITY.md](../docs/architecture/OBSERVABILITY.md), ADR-015–019, [contracts 0.2.0](../docs/contracts/README.md#change-log) | In review (PR #4); decisions taken 2026-11-13 |
-| 2c | Screens S-01–S-16 (R1/R2), tokens.md: Studio UI tokens and, per A-31, the video house style | Not started |
+| 2b | [UI_DESIGN.md](../docs/product/UI_DESIGN.md), [TECH_STACK.md](../docs/architecture/TECH_STACK.md), [SECURITY.md](../docs/architecture/SECURITY.md), [OBSERVABILITY.md](../docs/architecture/OBSERVABILITY.md), ADR-015–019, [contracts 0.2.0](../docs/contracts/README.md#change-log) | Done (PR #4, merged 2026-11-12); decisions taken 2026-11-13 |
+| 2c | Step 1: [tokens.md](../docs/design/tokens.md) (Studio UI tokens, video house style brand kit v1 per A-31) and the S-07 reference prototype. Step 2 after your look-and-feel approval: S-01–S-16 | Step 1 in client review (branch design/screens-v1) |
 
 | G2 check (2a + 2b scope) | Result |
 |---|---|
@@ -74,7 +74,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 | No open choice blocks M0 | Pass: ADR-011–014 accepted; Remotion free individual licence; development runs on free credits (Q-05). |
 | Nothing designed that no requirement asks for | Pass: R3 planned only; R-64, R-65, R-78–R-82 not designed |
 | Threat model reviewed | Pass: STRIDE TH-01–TH-30, agent risks and accepted risks reviewed and accepted 2026-11-13 (owner delegated to the tech lead) |
-| Screens approved | Not yet: Stage 2c |
+| Screens approved | Not yet: tokens and S-07 in client review; S-01–S-16 follow (Stage 2c step 2) |
 | Every key journey has an SLO | Pass: SLO-01–SLO-10, provisional, calibrate after R0 (A-15) |
 | Every layer has a chosen tool | Pass: TECH_STACK.md; exact pins in M0 lockfiles. Q-29 search API still open (does not block M0). |
 
@@ -93,6 +93,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Recent decisions
 
+- 2026-11-13: Stage 2c step 1 (tech lead decisions, in your review): Studio typeface and video typeface Atkinson Hyperlegible Next and Mono (SIL OFL 1.1), equations in KaTeX fonts (OFL); five layer colours chosen for colour-blind separation; safe zones as the union of Shorts and Reels overlays, provisional; brand cue is the "Signal Motion" wordmark with a 2 × 2 mark, closure only. Font files go into the rights ledger before first use (R-55).
 - 2026-11-13: G2 review items decided (owner delegated to the tech lead): threat model and accepted risks accepted; Q-30 (access audit kept 1 year) and Q-31 (video house style in 2c) accepted; contract gaps closed in contracts 0.2.0 (project delete/archive, KPI baselines, analytics schema, `fetch_source` limited to search results, operator URLs and one-hop links); sessions 12 h idle / 7 days absolute with step-up MFA for Gate E, budget raise, deletion and export; backups 30 dailies plus a pre-migration snapshot; estimates at ₹95/USD, actuals at the recorded rate; breach notices follow DPDP Rule 7.
 - 2026-11-13: Stage 2b ADRs accepted by the tech lead: ADR-015 local object store (MinIO CE interim, replaced in M0), ADR-016 OpenTelemetry + Grafana LGTM, ADR-017 KPI events in PostgreSQL, ADR-018 Studio UI kit, ADR-019 toolchain. Q-30, Q-31 raised.
 
