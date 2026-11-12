@@ -11,7 +11,7 @@ All gates are signed by the product owner / tech lead (same person).
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
-| 2 Design | G2 Design review and screens | 2a Done (merged 2026-11-12); 2b Done (merged 2026-11-12); 2c step 1 in client review (tokens + S-07) | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1 |
+| 2 Design | G2 Design review and screens | 2a Done (merged 2026-11-12); 2b Done (merged 2026-11-12); 2c step 1 in client review (tokens + S-07) | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5 |
 | 3 Plan | G3 Milestone scope and dates | Not started | | |
 
 | Milestone | Scope | Status | Exit date |
@@ -64,7 +64,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 |---|---|---|
 | 2a | [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md), [ADR-001–014](../docs/adr/README.md) (all accepted), [contracts 0.1.0](../docs/contracts/README.md) | Done (PR #3, merged 2026-11-12) |
 | 2b | [UI_DESIGN.md](../docs/product/UI_DESIGN.md), [TECH_STACK.md](../docs/architecture/TECH_STACK.md), [SECURITY.md](../docs/architecture/SECURITY.md), [OBSERVABILITY.md](../docs/architecture/OBSERVABILITY.md), ADR-015–019, [contracts 0.2.0](../docs/contracts/README.md#change-log) | Done (PR #4, merged 2026-11-12); decisions taken 2026-11-13 |
-| 2c | Step 1: [tokens.md](../docs/design/tokens.md) (Studio UI tokens, video house style brand kit v1 per A-31) and the S-07 reference prototype. Step 2 after your look-and-feel approval: S-01–S-16 | Step 1 in client review (branch design/screens-v1) |
+| 2c | Step 1: [tokens.md](../docs/design/tokens.md) (Studio UI tokens, video house style brand kit v1 per A-31) and the S-07 reference prototype. Step 2 after your look-and-feel approval: S-01–S-16 | Step 1 in client review (PR #5) |
 
 | G2 check (2a + 2b scope) | Result |
 |---|---|
