@@ -1,0 +1,54 @@
+{
+  "$comment": "Task contracts for the three bounded model tasks (R-63, PRD §14.1). Budgets are ceilings per task run; actual money limits come from the project allowance (R-34, Q-05). Numbers are starting values, tuned from the R0 evaluation and changed only through a spec.",
+  "contractVersion": "0.1.0",
+  "tasks": [
+    {
+      "taskType": "research",
+      "input": "task-io.schema.json#/$defs/ResearchInput",
+      "output": "task-io.schema.json#/$defs/ResearchOutput",
+      "permittedTools": ["search_sources", "fetch_source", "compute_demonstration"],
+      "budget": { "maxModelCalls": 12, "maxToolCalls": 30, "maxInputTokens": 200000, "maxOutputTokens": 16000 },
+      "retryCeiling": 2,
+      "timeoutSec": 600,
+      "failureStates": ["schema_invalid", "citation_invalid", "budget_exhausted", "timed_out", "provider_error", "injection_detected"],
+      "postconditions": [
+        "every evidence.sourceId was returned by fetch_source in this run",
+        "every excerpt is found in the fetched text and is under 25 words",
+        "claims with no supporting evidence are listed as gaps, not claims"
+      ],
+      "evaluationFixtures": "agent/evals/research/"
+    },
+    {
+      "taskType": "script",
+      "input": "task-io.schema.json#/$defs/ScriptInput",
+      "output": "task-io.schema.json#/$defs/ScriptOutput",
+      "permittedTools": [],
+      "budget": { "maxModelCalls": 3, "maxToolCalls": 0, "maxInputTokens": 60000, "maxOutputTokens": 8000 },
+      "retryCeiling": 2,
+      "timeoutSec": 300,
+      "failureStates": ["schema_invalid", "unknown_claim_reference", "budget_exhausted", "timed_out", "provider_error"],
+      "postconditions": [
+        "every claimId is one of the input claims",
+        "beat kinds follow the series narrative structure (R-57)",
+        "estimated narration fits the target duration at the pinned pace"
+      ],
+      "evaluationFixtures": "agent/evals/script/"
+    },
+    {
+      "taskType": "storyboard",
+      "input": "task-io.schema.json#/$defs/StoryboardInput",
+      "output": "task-io.schema.json#/$defs/StoryboardOutput",
+      "permittedTools": ["list_capabilities", "compute_demonstration", "validate_scene_spec"],
+      "budget": { "maxModelCalls": 8, "maxToolCalls": 20, "maxInputTokens": 150000, "maxOutputTokens": 32000 },
+      "retryCeiling": 2,
+      "timeoutSec": 600,
+      "failureStates": ["schema_invalid", "spec_invalid", "capability_gap", "budget_exhausted", "timed_out", "provider_error"],
+      "postconditions": [
+        "videoSpec passes validate_scene_spec, or every remaining error is listed under unsupportedNeeds",
+        "every scene references script segments that exist",
+        "displayed values reference demonstration results (valueRef), never typed-in numbers"
+      ],
+      "evaluationFixtures": "agent/evals/storyboard/"
+    }
+  ]
+}

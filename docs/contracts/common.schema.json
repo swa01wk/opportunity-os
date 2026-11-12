@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opportunityos.invalid/contracts/common.schema.json",
+  "x-version": "0.1.0",
+  "title": "Common definitions",
+  "description": "Shared primitives used by every OpportunityOS contract. Canonical source from M0: Pydantic (ADR-008).",
+  "$defs": {
+    "Uuid": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Lowercase hex SHA-256 of canonical JSON (RFC 8785) or of file bytes."
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Absolute UTC timestamp (RFC 3339). Display timezone is a destination setting (R-04)."
+    },
+    "SemVer": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$"
+    },
+    "LocalId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{0,63}$",
+      "description": "Stable, human-readable ID unique within its document (objects, elements, scenes, beats, phrases)."
+    },
+    "Token": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(\\.[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Design-token name from docs/design/tokens.md, e.g. color.layer.3 or ease.standard. Never a raw value."
+    },
+    "Money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amountMinor", "currency"],
+      "properties": {
+        "amountMinor": { "type": "integer", "description": "Amount in minor units (paise, cents)." },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "fxRateToReporting": {
+          "type": "string",
+          "pattern": "^[0-9]+(\\.[0-9]+)?$",
+          "description": "Recorded conversion rate into the reporting currency (INR, Q-05), as a decimal string."
+        }
+      }
+    },
+    "VersionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "sha256"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
+        "version": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/Sha256" }
+      },
+      "description": "Pointer to one immutable version of a record. Approvals and manifests bind to these."
+    },
+    "BlobRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "sha256", "bytes", "mediaType"],
+      "properties": {
+        "key": { "type": "string", "pattern": "^ws/[0-9a-f-]{36}/sha256/[0-9a-f]{64}\\.[a-z0-9]{1,8}$" },
+        "sha256": { "$ref": "#/$defs/Sha256" },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "mediaType": { "type": "string", "maxLength": 100 }
+      },
+      "description": "Content-addressed object in private storage (ADR-007)."
+    },
+    "Actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "enum": ["member", "service", "agent_task"] },
+        "id": { "type": "string", "maxLength": 100 },
+        "responsibility": {
+          "enum": ["owner", "editor", "reviewer", "publisher", "analyst"],
+          "description": "PRD §2.3 responsibility the action was taken under (R-05). Only members have one."
+        }
+      }
+    },
+    "ErrorClass": {
+      "enum": ["retryable_provider", "invalid_content", "render_defect", "uncertain_external", "resource_limit", "authorization", "conflict", "internal"],
+      "description": "R-53 classification. Each class has its own repair options."
+    },
+    "ErrorTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sceneId": { "$ref": "#/$defs/LocalId" },
+        "objectId": { "$ref": "#/$defs/LocalId" },
+        "claimId": { "$ref": "#/$defs/Uuid" },
+        "assetId": { "$ref": "#/$defs/Uuid" },
+        "accountLabel": { "type": "string", "maxLength": 100 },
+        "field": { "type": "string", "maxLength": 200, "description": "JSON pointer into the failing document." }
+      }
+    }
+  }
+}

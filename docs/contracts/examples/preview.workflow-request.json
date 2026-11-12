@@ -1,0 +1,21 @@
+{
+  "requestId": "00000000-0000-4000-8000-000000000052",
+  "workflowType": "preview",
+  "projectId": "00000000-0000-4000-8000-000000000010",
+  "requestedBy": {
+    "type": "member",
+    "id": "00000000-0000-4000-8000-000000000002",
+    "responsibility": "editor"
+  },
+  "input": {
+    "storyboardRef": {
+      "id": "00000000-0000-4000-8000-000000000021",
+      "version": 1,
+      "sha256": "e7d5d8290e5e5b5b6c9568292fe50101b7c88baf2bac2241245fe49838b4f6d9"
+    },
+    "estimatedCost": {
+      "amountMinor": 2500,
+      "currency": "INR"
+    }
+  }
+}

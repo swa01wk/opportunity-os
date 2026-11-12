@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opportunityos.invalid/contracts/media/render-job.schema.json",
+  "x-version": "0.1.0",
+  "title": "Render job",
+  "description": "Internal contract between the worker (a durable workflow step) and the render service. Not exposed outside the private network. A job ID equals the effective input hash, so a repeated request is the same job (idempotent, ADR-003).",
+  "$defs": {
+    "RenderJobRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["jobId", "workspaceId", "projectId", "kind", "quality", "videoSpec", "limits", "traceparent"],
+      "properties": {
+        "jobId": { "$ref": "../common.schema.json#/$defs/Sha256" },
+        "workspaceId": { "$ref": "../common.schema.json#/$defs/Uuid" },
+        "projectId": { "$ref": "../common.schema.json#/$defs/Uuid" },
+        "kind": { "enum": ["validate", "scene_clip", "preview", "master"] },
+        "quality": { "enum": ["draft", "final"] },
+        "videoSpec": { "$ref": "../common.schema.json#/$defs/BlobRef" },
+        "narrationTiming": { "$ref": "../common.schema.json#/$defs/BlobRef" },
+        "captionTrack": { "$ref": "../common.schema.json#/$defs/BlobRef" },
+        "narrationAudio": { "$ref": "../common.schema.json#/$defs/BlobRef" },
+        "sceneIds": {
+          "type": "array",
+          "maxItems": 24,
+          "items": { "$ref": "../common.schema.json#/$defs/LocalId" },
+          "description": "For scene_clip: which scenes. For preview/master: omitted = all; reused clips are taken from cache by hash."
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["timeoutSec", "maxMemoryMb", "concurrency"],
+          "properties": {
+            "timeoutSec": { "type": "integer", "minimum": 10, "maximum": 3600 },
+            "maxMemoryMb": { "type": "integer", "minimum": 512, "maximum": 16384 },
+            "concurrency": { "type": "integer", "minimum": 1, "maximum": 8 }
+          },
+          "description": "NFR-12 resource bounds."
+        },
+        "traceparent": { "type": "string", "pattern": "^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$", "description": "W3C trace context (NFR-09)." }
+      }
+    },
+    "RenderJobStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["jobId", "state", "updatedAt"],
+      "properties": {
+        "jobId": { "$ref": "../common.schema.json#/$defs/Sha256" },
+        "state": { "enum": ["queued", "running", "succeeded", "failed", "cancelled"] },
+        "progressPct": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "manifest": { "$ref": "../common.schema.json#/$defs/BlobRef" },
+        "validationErrors": {
+          "type": "array",
+          "maxItems": 200,
+          "items": { "$ref": "#/$defs/ValidationError" }
+        },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["class", "message"],
+          "properties": {
+            "class": { "$ref": "../common.schema.json#/$defs/ErrorClass" },
+            "code": { "type": "string", "maxLength": 60 },
+            "message": { "type": "string", "maxLength": 500 },
+            "target": { "$ref": "../common.schema.json#/$defs/ErrorTarget" }
+          }
+        },
+        "updatedAt": { "$ref": "../common.schema.json#/$defs/Timestamp" }
+      }
+    },
+    "ValidationError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "target"],
+      "properties": {
+        "code": {
+          "enum": [
+            "SCHEMA", "UNKNOWN_REFERENCE", "DUPLICATE_ID", "FRAME_OUT_OF_RANGE", "CAPABILITY_UNSUPPORTED",
+            "PARAM_OUT_OF_BOUNDS", "TOO_MANY_OBJECTS", "DEMONSTRATION_MISMATCH", "DOMAIN_ERROR",
+            "CONTINUITY_BREAK", "COLOR_MEANING_CHANGED", "COLOR_ONLY_MEANING", "SAFE_ZONE", "CAPTION_OVERLAP",
+            "LABEL_OVERFLOW", "ASSET_UNLICENSED", "ASSET_EXPIRED", "TIMING_NOT_MEASURED", "ANCHOR_UNRESOLVED", "DURATION_OUT_OF_RANGE"
+          ]
+        },
+        "message": { "type": "string", "maxLength": 500 },
+        "target": { "$ref": "../common.schema.json#/$defs/ErrorTarget" },
+        "expected": { "type": "string", "maxLength": 200 },
+        "actual": { "type": "string", "maxLength": 200 }
+      },
+      "description": "Actionable compiler error naming the scene, object and field (R-12, R-18 AC2)."
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/RenderJobRequest" },
+    { "$ref": "#/$defs/RenderJobStatus" }
+  ]
+}

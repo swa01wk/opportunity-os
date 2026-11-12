@@ -1,0 +1,161 @@
+{
+  "id": "00000000-0000-4000-8000-000000000030",
+  "version": 1,
+  "function": "odd_square_layers",
+  "functionVersion": "0.1.0",
+  "kind": "generalConstruction",
+  "domain": {
+    "description": "n is a positive integer, 1 <= n <= 12",
+    "units": "unit cells"
+  },
+  "params": {
+    "n": 5
+  },
+  "arithmetic": {
+    "mode": "exact",
+    "rounding": "none"
+  },
+  "results": {
+    "layers": [
+      {
+        "k": 1,
+        "cellCount": 1,
+        "cumulative": 1,
+        "cells": [
+          {
+            "col": 0,
+            "row": 0
+          }
+        ]
+      },
+      {
+        "k": 2,
+        "cellCount": 3,
+        "cumulative": 4,
+        "cells": [
+          {
+            "col": 1,
+            "row": 0
+          },
+          {
+            "col": 0,
+            "row": 1
+          },
+          {
+            "col": 1,
+            "row": 1
+          }
+        ]
+      },
+      {
+        "k": 3,
+        "cellCount": 5,
+        "cumulative": 9,
+        "cells": [
+          {
+            "col": 2,
+            "row": 0
+          },
+          {
+            "col": 2,
+            "row": 1
+          },
+          {
+            "col": 0,
+            "row": 2
+          },
+          {
+            "col": 1,
+            "row": 2
+          },
+          {
+            "col": 2,
+            "row": 2
+          }
+        ]
+      },
+      {
+        "k": 4,
+        "cellCount": 7,
+        "cumulative": 16,
+        "cells": [
+          {
+            "col": 3,
+            "row": 0
+          },
+          {
+            "col": 3,
+            "row": 1
+          },
+          {
+            "col": 3,
+            "row": 2
+          },
+          {
+            "col": 0,
+            "row": 3
+          },
+          {
+            "col": 1,
+            "row": 3
+          },
+          {
+            "col": 2,
+            "row": 3
+          },
+          {
+            "col": 3,
+            "row": 3
+          }
+        ]
+      },
+      {
+        "k": 5,
+        "cellCount": 9,
+        "cumulative": 25,
+        "cells": [
+          {
+            "col": 4,
+            "row": 0
+          },
+          {
+            "col": 4,
+            "row": 1
+          },
+          {
+            "col": 4,
+            "row": 2
+          },
+          {
+            "col": 4,
+            "row": 3
+          },
+          {
+            "col": 0,
+            "row": 4
+          },
+          {
+            "col": 1,
+            "row": 4
+          },
+          {
+            "col": 2,
+            "row": 4
+          },
+          {
+            "col": 3,
+            "row": 4
+          },
+          {
+            "col": 4,
+            "row": 4
+          }
+        ]
+      }
+    ],
+    "total": 25
+  },
+  "resultsSha256": "0199dfc789c6792bc2a0332e30a5c6db3d2caab2cf2ff9f409e41ab8f78d5dab",
+  "derivationRef": "00000000-0000-4000-8000-000000000040",
+  "reviewStatus": "approved"
+}

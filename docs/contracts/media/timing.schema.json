@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opportunityos.invalid/contracts/media/timing.schema.json",
+  "x-version": "0.1.0",
+  "title": "Narration timing and captions",
+  "description": "Measured narration timing (R-26) and the phrase-segmented caption track built from it (R-27). Produced by media/audio in the worker; consumed by the compiler and render service.",
+  "$defs": {
+    "NarrationTiming": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["takeId", "takeVersion", "audio", "durationMs", "sampleRateHz", "provider", "words", "phrases"],
+      "properties": {
+        "takeId": { "$ref": "../common.schema.json#/$defs/Uuid" },
+        "takeVersion": { "type": "integer", "minimum": 1 },
+        "audio": { "$ref": "../common.schema.json#/$defs/BlobRef" },
+        "durationMs": { "type": "integer", "minimum": 1, "maximum": 120000 },
+        "sampleRateHz": { "enum": [22050, 24000, 44100, 48000] },
+        "provider": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "voiceId", "settingsSha256"],
+          "properties": {
+            "name": { "type": "string", "maxLength": 40 },
+            "voiceId": { "type": "string", "maxLength": 100 },
+            "modelId": { "type": "string", "maxLength": 100 },
+            "settingsSha256": { "$ref": "../common.schema.json#/$defs/Sha256" },
+            "pronunciationSetSha256": { "$ref": "../common.schema.json#/$defs/Sha256" }
+          }
+        },
+        "alignmentSource": {
+          "enum": ["provider_characters", "provider_words", "forced_alignment"],
+          "description": "How word times were obtained. Never a model estimate (R-26)."
+        },
+        "words": {
+          "type": "array",
+          "maxItems": 600,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text", "startMs", "endMs"],
+            "properties": {
+              "text": { "type": "string", "maxLength": 60 },
+              "startMs": { "type": "integer", "minimum": 0 },
+              "endMs": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "phrases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 120,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "segmentId", "text", "startMs", "endMs"],
+            "properties": {
+              "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+              "segmentId": { "$ref": "../common.schema.json#/$defs/LocalId", "description": "Script narration segment this phrase belongs to." },
+              "text": { "type": "string", "maxLength": 200 },
+              "startMs": { "type": "integer", "minimum": 0 },
+              "endMs": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "description": "Anchor targets for VideoSpec actions (Anchor.kind = phrase)."
+        }
+      }
+    },
+    "CaptionTrack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timingRef", "fps", "segments"],
+      "properties": {
+        "timingRef": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+        "fps": { "const": 30 },
+        "maxCharsPerLine": { "type": "integer", "minimum": 16, "maximum": 42 },
+        "segments": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "startFrame", "endFrame", "lines", "region"],
+            "properties": {
+              "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+              "startFrame": { "type": "integer", "minimum": 0 },
+              "endFrame": { "type": "integer", "minimum": 1 },
+              "lines": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2,
+                "items": { "type": "string", "minLength": 1, "maxLength": 42 }
+              },
+              "region": {
+                "enum": ["lower", "upper"],
+                "description": "Safe-zone region from the brand kit. The compiler moves captions to the other region, or fails, if they would cover an active object, label or equation (R-27)."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/NarrationTiming" },
+    { "$ref": "#/$defs/CaptionTrack" }
+  ]
+}

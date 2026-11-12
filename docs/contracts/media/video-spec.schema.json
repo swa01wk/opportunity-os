@@ -1,0 +1,438 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opportunityos.invalid/contracts/media/video-spec.schema.json",
+  "x-version": "0.1.0",
+  "title": "VideoSpec",
+  "description": "Typed scene specification compiled by the render service into reviewed Remotion components (R-18, NFR-05). Bounded data only: no code, no URLs, no raw style values. Structural rules live here; semantic rules (references resolve, values match the demonstration model, capability bounds, safe zones) are enforced by the compiler and listed in docs/contracts/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "specId", "projectId", "storyboardVersion", "format", "brandKit", "timing", "targetDurationFrames", "objects", "scenes"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "specId": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "projectId": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "storyboardVersion": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+    "scriptVersion": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+    "format": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height", "fps"],
+      "properties": {
+        "width": { "const": 1080 },
+        "height": { "const": 1920 },
+        "fps": { "const": 30 }
+      },
+      "description": "Pinned by NFR-16. A different format is a schema major version."
+    },
+    "brandKit": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "enum": ["provisional", "measured"],
+          "description": "provisional = storyboard estimate; measured = recompiled from a narration take (R-26). Masters require measured."
+        },
+        "narrationTimingRef": { "$ref": "../common.schema.json#/$defs/VersionRef" }
+      }
+    },
+    "targetDurationFrames": {
+      "type": "integer",
+      "minimum": 900,
+      "maximum": 2700,
+      "description": "30–90 s at 30 fps (NFR-16)."
+    },
+    "demonstrations": {
+      "type": "array",
+      "maxItems": 8,
+      "items": { "$ref": "../common.schema.json#/$defs/VersionRef" },
+      "description": "Reviewed DemonstrationModel versions whose results this spec displays (R-11, R-12)."
+    },
+    "objects": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 300,
+      "items": { "$ref": "#/$defs/ObjectDef" },
+      "description": "Global registry of persistent objects. IDs are stable across scenes (R-20)."
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/Scene" }
+    }
+  },
+  "$defs": {
+    "Point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "integer", "minimum": 0, "maximum": 1080 },
+        "y": { "type": "integer", "minimum": 0, "maximum": 1920 }
+      }
+    },
+    "ClaimRefs": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "$ref": "../common.schema.json#/$defs/Uuid" }
+    },
+    "ObjectDef": {
+      "oneOf": [
+        { "$ref": "#/$defs/MathExpression" },
+        { "$ref": "#/$defs/NumberSequence" },
+        { "$ref": "#/$defs/GeometricArrangement" },
+        { "$ref": "#/$defs/TextBlock" }
+      ],
+      "discriminator": { "propertyName": "type" }
+    },
+    "ObjectBase": {
+      "type": "object",
+      "required": ["id", "type", "semanticRole"],
+      "properties": {
+        "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+        "semanticRole": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "What this object means in the explanation, e.g. 'odd-number layer 3'. Shown in the Studio and checked for continuity."
+        },
+        "colorToken": { "$ref": "../common.schema.json#/$defs/Token" },
+        "label": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "Non-colour cue that carries the same meaning as the colour (R-20 AC2)."
+        },
+        "claimRefs": { "$ref": "#/$defs/ClaimRefs" },
+        "demonstrationRef": { "$ref": "../common.schema.json#/$defs/Uuid" }
+      }
+    },
+    "MathExpression": {
+      "allOf": [{ "$ref": "#/$defs/ObjectBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["type", "terms", "anchor"],
+      "properties": {
+        "type": { "const": "MathExpression" },
+        "anchor": { "$ref": "#/$defs/Point" },
+        "sizeToken": { "$ref": "../common.schema.json#/$defs/Token" },
+        "terms": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "tex"],
+            "properties": {
+              "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+              "tex": {
+                "type": "string",
+                "maxLength": 120,
+                "description": "TeX for one addressable term, typeset by KaTeX with trust disabled (ADR-002). Data, never code."
+              },
+              "colorToken": { "$ref": "../common.schema.json#/$defs/Token" },
+              "linkedObjectIds": {
+                "type": "array",
+                "maxItems": 8,
+                "items": { "$ref": "../common.schema.json#/$defs/LocalId" },
+                "description": "Objects or groups this term stands for (R-20). Colour must match."
+              },
+              "valueRef": {
+                "type": "string",
+                "maxLength": 80,
+                "description": "Path into the demonstration results that this term displays, e.g. results.layers[2].cellCount. The compiler checks equality (R-12)."
+              }
+            }
+          }
+        }
+      }
+    },
+    "NumberSequence": {
+      "allOf": [{ "$ref": "#/$defs/ObjectBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["type", "terms", "anchor"],
+      "properties": {
+        "type": { "const": "NumberSequence" },
+        "anchor": { "$ref": "#/$defs/Point" },
+        "operator": { "enum": ["plus", "comma", "none"], "default": "plus" },
+        "terms": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 40,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "value"],
+            "properties": {
+              "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+              "value": {
+                "type": "string",
+                "pattern": "^-?[0-9]{1,15}(\\.[0-9]{1,6})?$",
+                "description": "Exact decimal as a string; never a float (R-11)."
+              },
+              "colorToken": { "$ref": "../common.schema.json#/$defs/Token" },
+              "linkedObjectIds": {
+                "type": "array",
+                "maxItems": 8,
+                "items": { "$ref": "../common.schema.json#/$defs/LocalId" }
+              },
+              "valueRef": { "type": "string", "maxLength": 80 }
+            }
+          }
+        }
+      }
+    },
+    "GeometricArrangement": {
+      "allOf": [{ "$ref": "#/$defs/ObjectBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["type", "layout", "origin", "unitPx", "cells"],
+      "properties": {
+        "type": { "const": "GeometricArrangement" },
+        "layout": { "enum": ["grid", "ring", "line", "group"] },
+        "origin": { "$ref": "#/$defs/Point" },
+        "unitPx": { "type": "integer", "minimum": 8, "maximum": 240 },
+        "groups": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id"],
+            "properties": {
+              "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+              "colorToken": { "$ref": "../common.schema.json#/$defs/Token" },
+              "label": { "type": "string", "maxLength": 40 },
+              "valueRef": { "type": "string", "maxLength": 80 }
+            }
+          }
+        },
+        "cells": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 400,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "col", "row"],
+            "properties": {
+              "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+              "col": { "type": "integer", "minimum": 0, "maximum": 39 },
+              "row": { "type": "integer", "minimum": 0, "maximum": 39 },
+              "groupId": { "$ref": "../common.schema.json#/$defs/LocalId" }
+            }
+          },
+          "description": "For grid: column/row. For ring and line: col is the index and row is 0. Coordinates come from the demonstration model and are checked against it."
+        }
+      }
+    },
+    "TextBlock": {
+      "allOf": [{ "$ref": "#/$defs/ObjectBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["type", "role", "text", "anchor"],
+      "properties": {
+        "type": { "const": "TextBlock" },
+        "role": { "enum": ["question", "takeaway", "label", "title", "brandCue"] },
+        "text": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "anchor": { "$ref": "#/$defs/Point" },
+        "styleToken": { "$ref": "../common.schema.json#/$defs/Token" }
+      },
+      "description": "CaptionAndTakeaway family: on-screen question, labels and takeaway. Narration captions are a separate CaptionTrack (timing.schema.json)."
+    },
+    "Scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "beat", "durationFrames", "narration", "demonstrationKind", "entryState", "actions"],
+      "properties": {
+        "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+        "beat": { "enum": ["hook", "setup", "demonstration", "explanation", "payoff", "closure"] },
+        "durationFrames": { "type": "integer", "minimum": 15, "maximum": 900 },
+        "narration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["beatId", "segmentIds"],
+          "properties": {
+            "beatId": { "$ref": "../common.schema.json#/$defs/LocalId" },
+            "segmentIds": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 20,
+              "items": { "$ref": "../common.schema.json#/$defs/LocalId" }
+            }
+          },
+          "description": "Script beat and narration segments this scene serves (R-16)."
+        },
+        "demonstrationKind": {
+          "enum": ["generalConstruction", "example", "approximation", "illustrative", "none"],
+          "description": "R-13: examples, approximations and illustrations are labelled and reviewed at Gate B."
+        },
+        "claimRefs": { "$ref": "#/$defs/ClaimRefs" },
+        "assetRefs": {
+          "type": "array",
+          "maxItems": 10,
+          "items": { "$ref": "../common.schema.json#/$defs/Uuid" },
+          "description": "Registered assets (rights ledger, R-55). Unlicensed or expired assets fail validation."
+        },
+        "entryState": {
+          "type": "array",
+          "maxItems": 300,
+          "items": { "$ref": "#/$defs/ObjectState" },
+          "description": "Full state needed to render this scene on its own (PRD §9.2). Must equal the previous scene's computed exit state; checked at every cut (R-22)."
+        },
+        "actions": {
+          "type": "array",
+          "maxItems": 120,
+          "items": { "$ref": "#/$defs/Action" }
+        }
+      }
+    },
+    "ObjectState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["targetId", "visible"],
+      "properties": {
+        "targetId": { "$ref": "../common.schema.json#/$defs/LocalId", "description": "Object, group, cell or term ID." },
+        "visible": { "type": "boolean" },
+        "position": { "$ref": "#/$defs/Point" },
+        "scalePct": { "type": "integer", "minimum": 10, "maximum": 400 },
+        "rotationDeg": { "type": "integer", "minimum": -360, "maximum": 360 },
+        "emphasis": { "enum": ["normal", "dimmed", "highlighted", "outlined", "emphasized"] },
+        "groupId": { "$ref": "../common.schema.json#/$defs/LocalId" }
+      }
+    },
+    "Anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref", "edge"],
+      "properties": {
+        "kind": { "enum": ["phrase", "action"] },
+        "ref": { "$ref": "../common.schema.json#/$defs/LocalId", "description": "Phrase ID from the narration timing, or another action ID in this scene." },
+        "edge": { "enum": ["start", "end"] },
+        "offsetFrames": { "type": "integer", "minimum": -60, "maximum": 60, "default": 0 }
+      },
+      "description": "When timing is measured, startFrame is recomputed from the anchor (R-21, R-26)."
+    },
+    "ActionBase": {
+      "type": "object",
+      "required": ["id", "op", "targets", "startFrame", "endFrame", "easing"],
+      "properties": {
+        "id": { "$ref": "../common.schema.json#/$defs/LocalId" },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": { "$ref": "../common.schema.json#/$defs/LocalId" }
+        },
+        "startFrame": { "type": "integer", "minimum": 0, "maximum": 900, "description": "Scene-relative." },
+        "endFrame": { "type": "integer", "minimum": 0, "maximum": 900, "description": "Scene-relative, exclusive; endFrame > startFrame and ≤ scene durationFrames (compiler check)." },
+        "easing": { "$ref": "../common.schema.json#/$defs/Token" },
+        "anchor": { "$ref": "#/$defs/Anchor" }
+      }
+    },
+    "Action": {
+      "oneOf": [
+        { "$ref": "#/$defs/FocusAction" },
+        { "$ref": "#/$defs/MoveAction" },
+        { "$ref": "#/$defs/RotateAction" },
+        { "$ref": "#/$defs/ScaleAction" },
+        { "$ref": "#/$defs/RegroupAction" },
+        { "$ref": "#/$defs/MapTermsAction" },
+        { "$ref": "#/$defs/TextAction" }
+      ],
+      "discriminator": { "propertyName": "op" }
+    },
+    "FocusAction": {
+      "allOf": [{ "$ref": "#/$defs/ActionBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "family": { "const": "FocusHighlight" },
+        "op": { "enum": ["reveal", "hide", "highlight", "outline", "emphasize", "dim", "undim"] },
+        "stagger": { "type": "integer", "minimum": 0, "maximum": 30, "description": "Frames between successive targets, e.g. cells appearing one by one." }
+      },
+      "required": ["family", "op"]
+    },
+    "MoveAction": {
+      "allOf": [{ "$ref": "#/$defs/ActionBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "family": { "const": "ObjectTransform" },
+        "op": { "const": "move" },
+        "to": { "$ref": "#/$defs/Point" }
+      },
+      "required": ["family", "op", "to"]
+    },
+    "RotateAction": {
+      "allOf": [{ "$ref": "#/$defs/ActionBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "family": { "const": "ObjectTransform" },
+        "op": { "const": "rotate" },
+        "byDeg": { "type": "integer", "minimum": -360, "maximum": 360 }
+      },
+      "required": ["family", "op", "byDeg"]
+    },
+    "ScaleAction": {
+      "allOf": [{ "$ref": "#/$defs/ActionBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "family": { "const": "ObjectTransform" },
+        "op": { "const": "scale" },
+        "toPct": { "type": "integer", "minimum": 10, "maximum": 400 }
+      },
+      "required": ["family", "op", "toPct"]
+    },
+    "RegroupAction": {
+      "allOf": [{ "$ref": "#/$defs/ActionBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "family": { "const": "ObjectTransform" },
+        "op": { "const": "regroup" },
+        "toGroupId": { "$ref": "../common.schema.json#/$defs/LocalId" }
+      },
+      "required": ["family", "op", "toGroupId"]
+    },
+    "MapTermsAction": {
+      "allOf": [{ "$ref": "#/$defs/ActionBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "family": { "const": "ObjectTransform" },
+        "op": { "const": "mapTerms" },
+        "mapping": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 40,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to"],
+            "properties": {
+              "from": { "$ref": "../common.schema.json#/$defs/LocalId" },
+              "to": { "$ref": "../common.schema.json#/$defs/LocalId" }
+            }
+          },
+          "description": "Explicit old-term → new-term mapping for value transformations (PRD §9.2)."
+        }
+      },
+      "required": ["family", "op", "mapping"]
+    },
+    "TextAction": {
+      "allOf": [{ "$ref": "#/$defs/ActionBase" }],
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "family": { "const": "CaptionAndTakeaway" },
+        "op": { "enum": ["showText", "hideText"] }
+      },
+      "required": ["family", "op"]
+    }
+  }
+}

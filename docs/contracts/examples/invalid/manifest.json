@@ -1,0 +1,75 @@
+{
+  "$comment": "Expected outcome per fixture. level=schema: rejected by JSON Schema/Pydantic. level=semantic: schema-valid, rejected by the compiler with the given ValidationError code.",
+  "fixtures": [
+    {
+      "file": "unknown-op.video-spec.json",
+      "contract": "media/video-spec.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "Action op not in the catalogue (R-18 AC2)."
+    },
+    {
+      "file": "wrong-format.video-spec.json",
+      "contract": "media/video-spec.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "Format pinned to 1080x1920 at 30 fps (NFR-16)."
+    },
+    {
+      "file": "float-value.video-spec.json",
+      "contract": "media/video-spec.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "Numbers are exact decimal strings, never floats (R-11)."
+    },
+    {
+      "file": "negative-frame.video-spec.json",
+      "contract": "media/video-spec.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "Frame out of range (R-21)."
+    },
+    {
+      "file": "layer5-ten-cells.video-spec.json",
+      "contract": "media/video-spec.schema.json",
+      "level": "semantic",
+      "expected": "DEMONSTRATION_MISMATCH",
+      "note": "Layer 5 has 10 cells; the demonstration says 2k-1 = 9 (PRD §10.2, R-12)."
+    },
+    {
+      "file": "missing-target.video-spec.json",
+      "contract": "media/video-spec.schema.json",
+      "level": "semantic",
+      "expected": "UNKNOWN_REFERENCE",
+      "note": "Action targets an object that does not exist (R-18 AC2)."
+    },
+    {
+      "file": "continuity-break.video-spec.json",
+      "contract": "media/video-spec.schema.json",
+      "level": "semantic",
+      "expected": "CONTINUITY_BREAK",
+      "note": "Explanation entry state does not equal demonstration exit state (R-22)."
+    },
+    {
+      "file": "color-meaning-changed.video-spec.json",
+      "contract": "media/video-spec.schema.json",
+      "level": "semantic",
+      "expected": "COLOR_MEANING_CHANGED",
+      "note": "Term 5 coloured as layer 4 while linked to layer 3 (R-20)."
+    },
+    {
+      "file": "odd-squares.video-spec.json",
+      "contract": "media/video-spec.schema.json",
+      "level": "semantic-master",
+      "expected": "TIMING_NOT_MEASURED",
+      "note": "The valid example is a provisional storyboard; requesting a master from it must fail until timing is measured (R-26)."
+    },
+    {
+      "file": "bad-gate.event.json",
+      "contract": "events/domain-event.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "Unknown gate. (An agent actor on an approval is refused by the API, R-43; schema cannot express that.)"
+    }
+  ]
+}
