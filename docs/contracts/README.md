@@ -1,6 +1,6 @@
 # Contracts
 
-Agreed in Stage 2a, before backend, web, agent and media work splits. Contract version **0.1.0** (draft until the M0 contracts spec regenerates these files from Pydantic, ADR-008; then 1.0.0). Never changed outside a spec. Architecture context: [ARCHITECTURE.md](../architecture/ARCHITECTURE.md).
+Agreed in Stage 2a, before backend, web, agent and media work splits. Contract version **0.2.0** (draft until the M0 contracts spec regenerates these files from Pydantic, ADR-008; then 1.0.0). Never changed outside a spec. Architecture context: [ARCHITECTURE.md](../architecture/ARCHITECTURE.md).
 
 | Contract | Files | Producer → consumer | Requirements |
 |---|---|---|---|
@@ -16,6 +16,7 @@ Agreed in Stage 2a, before backend, web, agent and media work splits. Contract v
 | Narration timing, captions | [media/timing.schema.json](media/timing.schema.json) | worker (media/audio) → render | R-25–R-27 |
 | Render job | [media/render-job.schema.json](media/render-job.schema.json) | worker ↔ render (private network) | R-28, R-29, NFR-12 |
 | Render manifest | [media/render-manifest.schema.json](media/render-manifest.schema.json) | render → api, web, export | R-30, R-32, NFR-03 |
+| KPI analytics events | [analytics/events.schema.json](analytics/events.schema.json) | outbox relay → `analytics.event` → Grafana views | KPI-01–KPI-14, ADR-017 |
 | Database draft | [db/schema.sql](db/schema.sql) | backend migrations (Alembic) | R-41, R-34, PRD §15 |
 | Fixtures | [examples/](examples/), [examples/invalid/](examples/invalid/) | CI in both runtimes | NFR-19, QA-01, QA-02 |
 
@@ -51,3 +52,10 @@ Agreed in Stage 2a, before backend, web, agent and media work splits. Contract v
 - Additive optional fields: minor bump. Removing or tightening anything: major bump, a migration for stored documents and a spec that names the change (PROCESS contract rule).
 - `openapi.yaml` `info.version` follows the same rule; the API path prefix `/v1` changes only on a breaking change to the whole API.
 - R3 additions (connections, connected publishing, experiments, opportunity lab) are a minor version added by the spec that starts R3 (A-18).
+
+## Change log
+
+| Version | Stage | Changes |
+|---|---|---|
+| 0.1.0 | 2a | First agreed contracts. |
+| 0.2.0 | 2b | Additive. `DELETE /projects/{id}` (never-published projects only; published → 409 with `archive` option) and `archived` on projects (NFR-10 AC2). `GET/POST /kpi-baselines` and `app.kpi_baseline` (KPI-04, Q-13). `analytics` schema, `analytics.event` and `analytics/events.schema.json` (ADR-017). Domain events `project.archived`, `project.deletion_requested`, `project.deleted`, `kpi.baseline_recorded`; workflow type `project_deletion`. `fetch_source` limited to search results, operator URLs and one-hop links from fetched pages, with a new `links` output and `maxLinkHops` budget (SECURITY TH-14). Step-up sign-in rule documented in `openapi.yaml`. |

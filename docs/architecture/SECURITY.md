@@ -1,8 +1,8 @@
 # Security
 
-Status: **Draft for G2** (Stage 2b). This file owns the threat model, the responsibility → action matrix, data classification, secrets handling, personal-data handling and retention, and agent risks. Requirements are in [REQUIREMENTS.md](../product/REQUIREMENTS.md) (NFR-04, NFR-05, NFR-06, NFR-10, R-05, R-41, R-43); components and the write path in [ARCHITECTURE.md](ARCHITECTURE.md); decisions in the [ADRs](../adr/README.md). Tests that prove each mitigation become T-xx in TEST_STRATEGY.md (Stage 3), traced through the QA-xx column.
+Status: **Draft for G2** (Stage 2b). Threat model and accepted risks **reviewed and accepted 2026-11-13** (product owner, delegated to the tech lead). This file owns the threat model, the responsibility → action matrix, data classification, secrets handling, personal-data handling and retention, and agent risks. Requirements are in [REQUIREMENTS.md](../product/REQUIREMENTS.md) (NFR-04, NFR-05, NFR-06, NFR-10, R-05, R-41, R-43); components and the write path in [ARCHITECTURE.md](ARCHITECTURE.md); decisions in the [ADRs](../adr/README.md). Tests that prove each mitigation become T-xx in TEST_STRATEGY.md (Stage 3), traced through the QA-xx column.
 
-> The personal-data and provider-terms sections are engineering readings by the tech lead (Q-14, Q-20, Q-25), not legal advice. Items marked **⚑ specialist** would benefit from a privacy or legal reviewer before the first public upload.
+> The personal-data, provider-terms and breach sections are engineering readings by the tech lead (Q-14, Q-20, Q-25, Q-30), checked against the published rule text and provider pages on 2026-11-13. They are not legal advice. A legal review is optional, not blocking: the only personal data held is the owner's own account.
 
 ## Scope and trust boundaries
 
@@ -68,7 +68,7 @@ S spoofing · T tampering · R repudiation · I information disclosure · D deni
 | TH-11 | audit | R | "I never approved that" or an untraceable change | Every command writes `audit_log` with actor, responsibility, request ID and trace ID in the same transaction (ADR-010); approvals are insert-only | QA-05 |
 | TH-12 | worker → fetcher | I / E | SSRF: a source URL points at the metadata service, localhost or the Compose network | `SourceFetcher` resolves DNS and refuses private, loopback, link-local and metadata ranges after every redirect; HTTPS only; ≤ 3 redirects; 5 MB cap; HTML/PDF/text only (NFR-05, ADR-009) | QA-08 |
 | TH-13 | agent tasks | T / E | Prompt injection in a fetched page tries to approve, change state or call tools | See [Agent risks](#agent-risks-prompt-injection-excessive-agency-generated-code) | QA-08 |
-| TH-14 | agent tasks | I | Exfiltration: the model encodes data into a `fetch_source` URL | Prompts hold no secrets or personal data (synthetic or approved content only); fetch limited per run; **gap:** restrict `fetch_source` to URLs returned by `search_sources` in the same run or supplied by the operator (contract change, M0 research spec) | QA-08 |
+| TH-14 | agent tasks | I | Exfiltration: the model encodes data into a URL it asks `fetch_source` to open | Prompts hold no secrets or personal data; `fetch_source` accepts only URLs from `search_sources` in this run, operator URLs, or links found on a page fetched in this run (one hop, ≤ 10 per run); anything else is refused as `url_not_permitted` (contracts 0.2.0). Research can still follow a page to its primary source | QA-08 |
 | TH-15 | render | E | Code execution through a crafted VideoSpec, TeX or asset | No generated code is executed; VideoSpec is schema- and semantics-validated; KaTeX `trust: false` with length limit; assets must be registered with hash and licence; render has no internet egress and no DB access outside `media` (ADR-002, NFR-05) | QA-01, QA-08 |
 | TH-16 | render | D | Huge spec or asset exhausts CPU or memory | Compiler limits on objects, actions and text; container CPU, memory and time caps; bounded render pool (NFR-12) | QA-06 |
 | TH-17 | worker → providers | D (financial) | Retry loops or parallel dispatch overspend | Per-attempt reservation under row lock before dispatch; retry ceilings per task; task token budgets (R-34, NFR-07, tasks.json) | QA-06 |
@@ -88,7 +88,13 @@ S spoofing · T tampering · R repudiation · I information disclosure · D deni
 
 ## Authentication and roles
 
-**Authentication** (ADR-012): OIDC authorization-code flow with PKCE; Keycloak locally with TOTP MFA required, Cognito when hosted. No local password store. Sessions: access token 10 minutes, refresh token rotated, idle session timeout 8 hours (my call; tune after R1).
+**Authentication** (ADR-012): OIDC authorization-code flow with PKCE; Keycloak locally with TOTP MFA required, Cognito when hosted. No local password store.
+
+**Sessions** (decided 2026-11-13; the aim is that a long review or render never loses work):
+- Access token 10 minutes, refreshed silently with a rotating refresh token; the SSE stream reconnects with the new token.
+- Idle timeout 12 hours (a full working day of review); absolute session lifetime 7 days, then sign in again with MFA.
+- **Step-up** for the actions that cannot be undone or that spend: Gate E release, raising a budget allowance, deleting a project, exporting project data. They need a sign-in with MFA in the last 15 minutes (`auth_time`), otherwise the API returns `step_up_required` and the Studio re-prompts in place, keeping the dialog's content (openapi.yaml 0.2.0).
+- Expiry never discards saved work: every edit is a saved version before the token matters.
 
 **Identities**
 - **Member**: a person (`app.member`) with responsibilities and optional specialist scopes. At R1 there is one member, the owner, holding all five responsibilities (PRD §2.3).
@@ -112,10 +118,10 @@ S spoofing · T tampering · R repudiation · I information disclosure · D deni
 | Build export bundle (after Gate D) | ✓ | ✓ | | ✓ | | | |
 | **Gate E** public release; record manual publication and verification | ✓ | | | ✓ | | | |
 | Propose a post-publication correction | ✓ | ✓ | ✓ | | | | |
-| Enter manual metrics; view analytics | ✓ | | | | ✓ | | |
+| Enter manual metrics and KPI baselines; view analytics | ✓ | | | | ✓ | | |
 | Cancel, resume, retry, take over a run | ✓ | ✓ | | | | | |
 | Register assets and licences | ✓ | ✓ | | | | | |
-| Export or delete project data (R-56, NFR-10) | ✓ | | | | | | |
+| Export project data (R-56); delete or archive a project (NFR-10) | ✓ | | | | | | |
 | Write run projections, costs, render results | | | | | | ✓ | |
 | Produce task output (draft data only) | | | | | | | ✓ |
 | Record any approval or public action | members only | | | | | ✗ | ✗ |
@@ -146,7 +152,7 @@ There is **no viewer personal data**: analytics are aggregates, comments are rea
 
 ## Personal data and retention
 
-**Law (Q-20).** The DPDP Act 2023 and the DPDP Rules 2025 are treated as applying; GDPR is not (no EU data subjects targeted). The owner is the Data Fiduciary and, today, also the only Data Principal whose personal data the system holds. **⚑ specialist** for confirmation before R4 or if viewer data is ever stored.
+**Law (Q-20).** The DPDP Act 2023 and the DPDP Rules 2025 are treated as applying; GDPR is not (no EU data subjects targeted). The owner is the Data Fiduciary and, today, also the only Data Principal whose personal data the system holds. Re-check before R4 or if viewer data is ever stored.
 
 **What we process:** owner identity (name, email, IdP subject) for sign-in and audit. From R3, channel OAuth tokens (Secret class). Public author names may appear in citation metadata for sources (publicly available information). Nothing else.
 
@@ -161,7 +167,17 @@ There is **no viewer personal data**: analytics are aggregates, comments are rea
 | **Retain such logs for one year** | **Access-audit records (`audit_log`, Keycloak login and admin events) are kept for 1 year (A-30, open as Q-30).** Operational logs and traces keep the 30-day rule (Q-14). |
 | Contracts with processors | OpenAI, ElevenLabs, search provider, AWS later: terms recorded below |
 
-**Breach response:** detection through alerts and the access audit; containment and key rotation; notify affected Data Principals and the Data Protection Board as the Rules require once they apply (Q-14 notes the 13 May 2027 date). Steps live in RUNBOOK.md (Stage 6, hardening). **⚑ specialist** for the notification wording.
+**Breach response:** detect (alerts, access audit) → contain (revoke sessions, rotate keys, isolate the host) → assess what personal data was involved → notify as below → fix and record a postmortem in `docs/ops/incidents/` (PROCESS). The operational steps go into RUNBOOK.md in hardening; the notice contents are fixed here. The Rules' breach duties apply from 13 May 2027 (Q-14); we follow them from now.
+
+Notice contents follow DPDP Rule 7 ([rule text](https://www.dpdpa.com/dpdparules/rule7.html)):
+
+| Notice | When | Must contain |
+|---|---|---|
+| To each affected Data Principal (today: the owner; later any member) | Without delay, through their account or registered email | Nature, extent, timing and location of the breach; likely consequences for them; what we have done or are doing to reduce the risk; what they can do to protect themselves; a business contact for questions |
+| Initial intimation to the Data Protection Board | Without delay on becoming aware | Description of the breach: nature, extent, timing, location and likely impact |
+| Detailed report to the Board | Within 72 hours of becoming aware (longer only if the Board allows it on written request) | Updated detail; broad facts on events, circumstances and reasons; mitigation taken or proposed; findings on who caused it; remedial steps to prevent recurrence; report on the notices given to Data Principals |
+
+Templates with these headings are added to RUNBOOK.md in hardening, so a notice can be sent the same day.
 
 **Retention schedule** (Q-14, Q-20, Q-25; implemented by `wf.retention`, ADR-007):
 
@@ -175,19 +191,19 @@ There is **no viewer personal data**: analytics are aggregates, comments are rea
 | Access audit (`audit_log`, Keycloak login/admin events) | 1 year (DPDP Rule 6; A-30) |
 | Metrics (telemetry) | 90 days locally (OBSERVABILITY.md) |
 | KPI analytics events | With the work they describe (ADR-017) |
-| Backups | 30 daily copies; expired backups deleted, so a deletion request is fully effective within 30 days |
+| Backups | 30 daily copies (RPO 24 h, A-16), plus a snapshot taken before every migration and kept until the next good daily backup. Objects are copied incrementally (content-addressed, so cheap). Older copies are deleted, so a deletion request is fully effective within 30 days |
 | Owner account | While active; deleted on request with the workspace |
 
-**Deletion request (NFR-10 AC2):** the owner deletes a draft project → its records and unreferenced objects are removed from PostgreSQL, the object store and caches; backups age out within 30 days; the audit entry of the deletion is kept for its 1 year; external public posts are never claimed as removed. **Gap:** `openapi.yaml` 0.1.0 has no deletion endpoint (STATUS.md, G2 gaps).
+**Deletion request (NFR-10 AC2)** (`DELETE /projects/{id}`, contracts 0.2.0): the owner, with step-up, deletes a project that was never published → active runs are cancelled, its records and unreferenced objects are removed from PostgreSQL, the object store and caches; backups age out within 30 days; the audit entry of the deletion is kept for 1 year (A-30). A project with a publication record is not deleted, because the evidence that explains a public post is kept (PRD §15, Q-14); it can be archived (hidden, nothing removed). External public posts are never claimed as removed.
 
 ## Provider data-use terms
 
-Recorded per ADR-014 and ADR-013. Re-check each at its first real (paid) call and when terms change. **⚑ specialist** optional.
+Recorded per ADR-014 and ADR-013, checked on the providers' own pages on 2026-11-13. Re-check when terms change; the M0 adapter specs apply the settings below.
 
 | Provider | What we send | Terms as understood on 2026-11-13 | Our settings |
 |---|---|---|---|
-| OpenAI | Task prompts: approved claims, briefs, script text, untrusted page text, capability catalogue | API inputs and outputs are not used for training by default; abuse-monitoring retention applies; zero data retention is available on request for eligible accounts | `store: false`; no personal data or secrets in prompts; synthetic data in fixtures (A-23) |
-| ElevenLabs | Narration text, pronunciation dictionary | Free plan: no commercial licence for output; paid plan: commercial use (ADR-013). Data-use terms to be confirmed at subscription | Only approved narration text; no personal data |
+| OpenAI | Task prompts: approved claims, briefs, script text, untrusted page text, capability catalogue | API data is not used for training unless we opt in; abuse-monitoring logs kept up to 30 days; Responses API keeps application state 30 days unless `store` is false; zero data retention needs OpenAI approval ([your data](https://developers.openai.com/api/docs/guides/your-data)) | `store: false` on every call; never opt in to sharing; no personal data or secrets in prompts; synthetic fixtures (A-23). Zero data retention is not needed: nothing sensitive is sent |
+| ElevenLabs | Narration text, pronunciation dictionary | Free plan: no commercial licence for output; paid plan: commercial use (ADR-013). Submitted data may be used to improve models unless the account opts out; Enterprise is excluded by default ([data use](https://elevenlabs.io/docs/help-center/legal/is-my-data-used-to-improve-eleven-labs-ai-models)) | **Opt out** (Profile → Terms and privacy → Data use → turn off "Improve the models for everyone") before the first real call, on every account and environment; recorded in RUNBOOK. Only approved narration text; no personal data |
 | Search API (Q-29) | Search queries derived from the brief | Decided with the provider in the M0 research spec | No personal data in queries |
 | AWS (after R2) | Everything, as host | Standard AWS customer agreement; ap-south-1 keeps data in India | KMS encryption; least-privilege IAM |
 
@@ -211,13 +227,12 @@ LLM04 (data and model poisoning) and LLM08 (vector and embedding weaknesses) do 
 
 ## Accepted risks
 
-Recorded for your sign-off at G2. Each has an owner (the tech lead) and a revisit point.
+Accepted 2026-11-13 (product owner, delegated). Each has an owner (the tech lead) and a revisit point.
 
 | Risk | Why accepted | Revisit |
 |---|---|---|
 | One person holds every responsibility at R1–R2; no separation of duties | Internal tool with one operator (PRD §2.3); version binding, audit and explicit gate dialogs still apply | R4 |
 | Owner's machine is the only host | Local-only decision (ADR-011); off-machine backups, disk encryption, restore rehearsal | AWS move after R2 |
 | MinIO CE interim image is unmaintained | Local network only, no internet exposure; correctness does not depend on it | M0 storage spec (ADR-015) |
-| `fetch_source` accepts any HTTPS URL the model chooses | Prompts contain no secrets or personal data, so exfiltration value is low | M0 research spec restricts it (TH-14) |
 | Parsers process untrusted PDFs and HTML in the worker process | Size and time limits, non-root, scanned dependencies | Revisit if a parser CVE is reported; sandbox in a separate container then |
-| Provider data-use terms not yet confirmed on paid plans | Free credits and synthetic data only until then | First paid call (ADR-013, ADR-014) |
+| Providers keep request logs for a short period (OpenAI abuse monitoring up to 30 days) | We send only approved or synthetic content and no personal data; training use is off (OpenAI default, ElevenLabs opt-out) | When terms change, or if personal data is ever sent |

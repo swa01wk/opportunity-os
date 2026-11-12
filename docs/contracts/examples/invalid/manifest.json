@@ -70,6 +70,13 @@
       "level": "schema",
       "expected": "SCHEMA",
       "note": "Unknown gate. (An agent actor on an approval is refused by the API, R-43; schema cannot express that.)"
+    },
+    {
+      "file": "bad-series.analytics-event.json",
+      "contract": "analytics/events.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "Event properties are typed per event name (ADR-017)."
     }
   ]
 }

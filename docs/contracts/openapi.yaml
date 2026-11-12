@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: OpportunityOS API
-  version: 0.1.0
+  version: 0.2.0
   description: |
     Studio-facing API for R1–R2 (PRD §13). Owned by `backend/` (ADR-004).
     R3 endpoints (connections, connected publishing, experiments, opportunity lab) are added by the
@@ -17,6 +17,11 @@ info:
     - Long work returns 202 with a run (`Run`); progress arrives on the SSE stream.
     - Errors are RFC 9457 problem documents (`Problem`) with the R-53 error class and repair options.
     - Money is minor units plus ISO currency. Times are UTC; display timezone is per destination.
+    - Step-up: Gate E approval, raising a budget allowance, project deletion and data export need a
+      recent sign-in (token `auth_time` within 15 minutes, MFA); otherwise 403 with problem type
+      `step_up_required` (SECURITY.md).
+
+    0.2.0 (Stage 2b): project archive and deletion (NFR-10 AC2), KPI baselines (KPI-04, ADR-017).
 servers:
   - url: http://localhost:8000/v1
     description: Local (docker compose)
@@ -104,6 +109,21 @@ paths:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Project' } } } }
         '412': { $ref: '#/components/responses/Problem' }
         default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [projects]
+      operationId: deleteProject
+      summary: |
+        Delete a project that has never been published (NFR-10 AC2). Owner only, step-up required.
+        Cancels active runs, then a deletion run removes its records and unreferenced objects;
+        backups age out within 30 days; the audit entry is kept (A-30). A project with any
+        publication record is refused with 409 `project_has_publications` and the repair option
+        `archive` (PATCH archived=true), because publication evidence is kept (PRD §15, Q-14).
+      parameters: [ { $ref: '#/components/parameters/IfMatch' } ]
+      responses:
+        '202': { $ref: '#/components/responses/RunAccepted' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '412': { $ref: '#/components/responses/Problem' }
   /projects/{projectId}/destination:
     parameters: [ { $ref: '#/components/parameters/projectId' } ]
     put:
@@ -741,6 +761,22 @@ paths:
       responses:
         '201': { description: Created }
 
+  /kpi-baselines:
+    get:
+      tags: [cost]
+      operationId: listKpiBaselines
+      summary: Recorded manual baselines (Q-13)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/KpiBaseline' } } } } }
+    post:
+      tags: [cost]
+      operationId: recordKpiBaseline
+      summary: Record the documented manual baseline for a KPI (KPI-04, Q-13). Owner or analyst. Insert-only; a new entry supersedes the previous one for the same KPI.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/KpiBaselineInput' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/KpiBaseline' } } } }
+
   /assets:
     get:
       tags: [assets]
@@ -884,6 +920,7 @@ components:
       additionalProperties: false
       properties:
         title: { type: string, maxLength: 120 }
+        archived: { type: boolean, description: 'Hide from the project list; nothing is deleted (0.2.0).' }
         brandKitVersion: { type: integer, minimum: 1 }
         narrator: { $ref: '#/components/schemas/NarratorSettings' }
     NarratorSettings:
@@ -902,6 +939,8 @@ components:
         series: { $ref: '#/components/schemas/Series' }
         state: { $ref: '#/components/schemas/ProductionState' }
         stateReason: { type: string }
+        archivedAt: { type: ['string', 'null'], format: date-time }
+        deletionRequestedAt: { type: ['string', 'null'], format: date-time }
         brandKit: { $ref: 'common.schema.json#/$defs/VersionRef' }
         narrator: { $ref: '#/components/schemas/NarratorSettings' }
         destination: { $ref: '#/components/schemas/Destination' }
@@ -1394,3 +1433,23 @@ components:
       properties:
         asset: { $ref: '#/components/schemas/Asset' }
         uploadUrl: { type: string, format: uri }
+    KpiBaselineInput:
+      type: object
+      additionalProperties: false
+      required: [kpi, measuredOn, method, activeMinutes]
+      properties:
+        kpi: { enum: [KPI-04] }
+        measuredOn: { type: string, format: date }
+        method: { type: string, maxLength: 300, description: 'How the comparable Short was made (Q-13).' }
+        activeMinutes: { type: integer, minimum: 1, maximum: 100000 }
+        revisions: { type: integer, minimum: 0, maximum: 1000 }
+        cost: { $ref: 'common.schema.json#/$defs/Money' }
+    KpiBaseline:
+      allOf:
+        - { $ref: '#/components/schemas/KpiBaselineInput' }
+        - type: object
+          required: [id, recordedAt, recordedBy]
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            recordedAt: { type: string, format: date-time }
+            recordedBy: { $ref: '#/components/schemas/Uuid' }

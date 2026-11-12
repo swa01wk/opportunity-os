@@ -9,7 +9,7 @@ KPI-01–KPI-14 (REQUIREMENTS.md) each need an analytics event (PROCESS Stage 2,
 - Each row: `event_name`, `event_version`, `occurred_at`, `workspace_id`, `project_id`, `source_event_id` (unique, so relays are idempotent), and a small typed `properties` object defined per event in OBSERVABILITY.md. No free text, no personal data beyond the member UUID.
 - KPIs are SQL views over `analytics.event` joined to current state; Grafana reads them through a read-only database user.
 - Retention: kept as long as the work it describes (Q-14 rule for approved and published work).
-- **Contract change:** the table and its event names are added to `docs/contracts/db/schema.sql` by the M0 contracts spec (minor bump to 0.2.0).
+- **Contract:** `analytics.event` in `docs/contracts/db/schema.sql` and event names and properties in `docs/contracts/analytics/events.schema.json` (contracts 0.2.0, Stage 2b).
 
 ## Alternatives
 - **Product analytics SaaS (PostHog, Mixpanel):** third-party data processor for a one-user internal tool.

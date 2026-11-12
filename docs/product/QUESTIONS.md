@@ -50,15 +50,14 @@ Running log of every open question and decision found in [PRD v2.0](../sources/P
 | Q-27 | Should package approval be blocked until the audience (made-for-kids) setting is set explicitly? | §7.1 | PO | Accepted | A-27: Yes. It is set per package with no default (R-04 AC2). | — |
 | Q-28 | Are chat-driven drafting (R-64) and model critique in QA (R-65) wanted at R1? | §13, §14.1 | PO | Accepted | A-28: Neither is in R1; reconsider after R1. | Revisit after R1. |
 | Q-29 | Which web search API backs the research task's `search_sources` tool? | §14.1, R-08; found in Stage 2a | TL | Open | A-29: A search API behind a `SearchProvider` adapter (ADR-009), chosen by the M0 research spec on result quality, terms and cost. Model-provider built-in search is not used (ADR-014). Until then the operator supplies source URLs (`operatorSourceUrls`). | Decide in the M0 research spec. |
-| Q-30 | Does the 30-day log retention (Q-14) also cover access-audit records, given DPDP Rule 6 asks for logs of access to personal data to be kept for one year? | §20; found in Stage 2b | PO, SP (privacy) | Open | A-30: No. Operational logs, traces and delivered outbox events keep 30 days; access-audit records (`audit_log`, Keycloak login and admin events) are kept 1 year. | Confirm at G2. SECURITY.md applies A-30. |
-| Q-31 | Where is the video house style (R-23: palette, type scale, equation typography, caption placement, safe zones, transitions, brand cue) designed? | §5.2, §10; found in Stage 2b | PO | Open | A-31: In Stage 2c, as a separate "video house style" section of `docs/design/tokens.md` (brand kit v1), next to the Studio UI tokens, so S-07 and S-11 prototypes show original video frames. Motion and voice references (PRD OOS-003) follow in M0. | Confirm before 2c. |
+| Q-30 | Does the 30-day log retention (Q-14) also cover access-audit records, given DPDP Rule 6 asks for logs of access to personal data to be kept for one year? | §20; found in Stage 2b | PO, SP (privacy) | Accepted | A-30: No. Operational logs, traces and delivered outbox events keep 30 days; access-audit records (`audit_log`, Keycloak login and admin events) are kept 1 year. | Accepted 2026-11-13 (owner delegated to the tech lead). Applied in SECURITY.md and OBSERVABILITY.md. |
+| Q-31 | Where is the video house style (R-23: palette, type scale, equation typography, caption placement, safe zones, transitions, brand cue) designed? | §5.2, §10; found in Stage 2b | PO | Accepted | A-31: In Stage 2c, as a separate "video house style" section of `docs/design/tokens.md` (brand kit v1), next to the Studio UI tokens, so S-07 and S-11 prototypes show original video frames. Motion and voice references (PRD OOS-003) follow in M0. | Accepted 2026-11-13 (owner delegated to the tech lead). Scope of Stage 2c. |
 
 ## Still to do
 
 - **Parked:** Q-05 budget limits; development runs on free credits with costs recorded. Real limits are set before the AWS move.
 - **Specialist checks:** none outstanding. Q-14, Q-20, Q-25 and the narrator licence rule (Q-06) were decided by the tech lead on 2026-11-13 at the owner's request; these are engineering decisions, not legal advice.
 - **Open, low cost:** Q-29 search API, decided in the M0 research spec.
-- **Open, for G2 / 2c:** Q-30 access-audit retention; Q-31 where the video house style is designed.
 
 ## Change log
 
@@ -70,3 +69,4 @@ Running log of every open question and decision found in [PRD v2.0](../sources/P
 | 2026-11-12 | Q-06 answered (ElevenLabs; gpt-5.4-mini). Q-07 licensee: individual, free licence. Q-21 answered (local now, AWS Mumbai later). Q-22 answered (Keycloak locally, Cognito when hosted). | Product owner |
 | 2026-11-13 | Q-05 interim rule: no limits in development, free credits, cost recorded. Q-21: AWS after the R2 gate. Q-14, Q-20, Q-25 answered and Q-06 narrator licence rule set by the tech lead at the owner's request. | Product owner, Claude |
 | 2026-11-13 | Stage 2b: Q-30 (access-audit retention vs DPDP Rule 6) and Q-31 (video house style in 2c) raised. Q-14 and Q-20 recorded in SECURITY.md. Requirements unchanged. | Claude |
+| 2026-11-13 | Q-30 and Q-31 accepted (owner delegated the calls to the tech lead). Contract gaps closed in contracts 0.2.0. | Product owner, Claude |

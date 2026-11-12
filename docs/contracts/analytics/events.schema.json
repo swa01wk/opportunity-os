@@ -1,0 +1,660 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opportunityos.invalid/contracts/analytics/events.schema.json",
+  "x-version": "0.2.0",
+  "title": "AnalyticsEvent",
+  "description": "KPI analytics event (ADR-017). Written only by the outbox relay into analytics.event from a delivered DomainEvent; never written directly. Properties carry no free text and no personal data beyond the member UUID. Event names and KPIs: OBSERVABILITY.md. R3 adds recommendation.decided.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sourceEventId",
+    "eventName",
+    "eventVersion",
+    "occurredAt",
+    "workspaceId",
+    "properties"
+  ],
+  "properties": {
+    "sourceEventId": {
+      "$ref": "../common.schema.json#/$defs/Uuid"
+    },
+    "eventName": {
+      "enum": [
+        "video.approved",
+        "video.published",
+        "gate.approved",
+        "run.finished",
+        "effort.logged",
+        "kpi.baseline_recorded",
+        "cost.settled",
+        "rubric.scored",
+        "finding.resolved",
+        "metric.recorded"
+      ]
+    },
+    "eventVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "occurredAt": {
+      "$ref": "../common.schema.json#/$defs/Timestamp"
+    },
+    "workspaceId": {
+      "$ref": "../common.schema.json#/$defs/Uuid"
+    },
+    "projectId": {
+      "$ref": "../common.schema.json#/$defs/Uuid"
+    },
+    "memberId": {
+      "$ref": "../common.schema.json#/$defs/Uuid"
+    },
+    "properties": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "eventName": {
+            "const": "video.approved"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "$ref": "#/$defs/video_approved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventName": {
+            "const": "video.published"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "$ref": "#/$defs/video_published"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventName": {
+            "const": "gate.approved"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "$ref": "#/$defs/gate_approved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventName": {
+            "const": "run.finished"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "$ref": "#/$defs/run_finished"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventName": {
+            "const": "effort.logged"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "$ref": "#/$defs/effort_logged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventName": {
+            "const": "kpi.baseline_recorded"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "$ref": "#/$defs/kpi_baseline_recorded"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventName": {
+            "const": "cost.settled"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "$ref": "#/$defs/cost_settled"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventName": {
+            "const": "rubric.scored"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "$ref": "#/$defs/rubric_scored"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventName": {
+            "const": "finding.resolved"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "$ref": "#/$defs/finding_resolved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eventName": {
+            "const": "metric.recorded"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "$ref": "#/$defs/metric_recorded"
+          }
+        }
+      }
+    }
+  ],
+  "$comment": "if/then is for the JSON Schema draft; the Pydantic source models a discriminated union on eventName (ADR-008).",
+  "$defs": {
+    "video_approved": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectId",
+        "series",
+        "packageVersionId",
+        "packageSha256"
+      ],
+      "properties": {
+        "projectId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "series": {
+          "enum": [
+            "what_if",
+            "wait_how_does_that_work",
+            "solve_this",
+            "inside_the_machine"
+          ]
+        },
+        "packageVersionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "packageSha256": {
+          "$ref": "../common.schema.json#/$defs/Sha256"
+        },
+        "minutesSinceGateA": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "x-kpis": [
+        "KPI-01",
+        "KPI-02",
+        "KPI-03",
+        "KPI-05"
+      ]
+    },
+    "video_published": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectId",
+        "series",
+        "publicationId",
+        "route",
+        "platform",
+        "verification",
+        "packageMatch"
+      ],
+      "properties": {
+        "projectId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "series": {
+          "enum": [
+            "what_if",
+            "wait_how_does_that_work",
+            "solve_this",
+            "inside_the_machine"
+          ]
+        },
+        "publicationId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "route": {
+          "enum": [
+            "manual",
+            "connected"
+          ]
+        },
+        "platform": {
+          "enum": [
+            "youtube",
+            "instagram"
+          ]
+        },
+        "verification": {
+          "enum": [
+            "NOT_CHECKED",
+            "PASSED",
+            "PARTIAL",
+            "FAILED"
+          ]
+        },
+        "packageMatch": {
+          "type": "boolean"
+        }
+      },
+      "x-kpis": [
+        "KPI-01"
+      ]
+    },
+    "gate_approved": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate",
+        "responsibility",
+        "targetType",
+        "targetVersion"
+      ],
+      "properties": {
+        "gate": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        },
+        "responsibility": {
+          "enum": [
+            "owner",
+            "editor",
+            "reviewer",
+            "publisher",
+            "analyst"
+          ]
+        },
+        "targetType": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "targetVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reopenedCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "x-kpis": [
+        "KPI-04 context"
+      ]
+    },
+    "run_finished": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runId",
+        "workflowType",
+        "outcome",
+        "attempts",
+        "codeRepairNeeded",
+        "manualTakeover"
+      ],
+      "properties": {
+        "runId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "workflowType": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "outcome": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "codeRepairNeeded": {
+          "type": "boolean"
+        },
+        "manualTakeover": {
+          "type": "boolean"
+        }
+      },
+      "x-kpis": [
+        "KPI-02"
+      ]
+    },
+    "effort_logged": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activity",
+        "minutes"
+      ],
+      "properties": {
+        "activity": {
+          "enum": [
+            "brief",
+            "research_review",
+            "script",
+            "storyboard",
+            "narration",
+            "review",
+            "revision",
+            "packaging",
+            "publishing",
+            "code_repair",
+            "other"
+          ]
+        },
+        "minutes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1440
+        }
+      },
+      "x-kpis": [
+        "KPI-02",
+        "KPI-04"
+      ]
+    },
+    "kpi_baseline_recorded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kpi",
+        "minutes"
+      ],
+      "properties": {
+        "kpi": {
+          "enum": [
+            "KPI-04"
+          ]
+        },
+        "minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "revisions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "costMinor": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      },
+      "x-kpis": [
+        "KPI-04"
+      ]
+    },
+    "cost_settled": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "stage",
+        "attemptOutcome",
+        "estimatedMinor",
+        "actualMinor",
+        "currency"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "stage": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "attemptOutcome": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "revised"
+          ]
+        },
+        "estimatedMinor": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "actualMinor": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "fxRate": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "x-kpis": [
+        "KPI-05"
+      ]
+    },
+    "rubric_scored": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "renderId",
+        "correctness",
+        "clarity",
+        "originality",
+        "readability",
+        "promisePayoff",
+        "mutedReviewPassed",
+        "allAtLeastThreshold"
+      ],
+      "properties": {
+        "renderId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "correctness": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "clarity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "originality": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "readability": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "promisePayoff": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "mutedReviewPassed": {
+          "type": "boolean"
+        },
+        "allAtLeastThreshold": {
+          "type": "boolean"
+        }
+      },
+      "x-kpis": [
+        "KPI-03",
+        "KPI-14"
+      ]
+    },
+    "finding_resolved": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "severity",
+        "material",
+        "disposition"
+      ],
+      "properties": {
+        "severity": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "material": {
+          "type": "boolean"
+        },
+        "disposition": {
+          "type": "string",
+          "maxLength": 40
+        }
+      },
+      "x-kpis": [
+        "KPI-03"
+      ]
+    },
+    "metric_recorded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "publicationId",
+        "measure",
+        "availability",
+        "windowStart",
+        "windowEnd",
+        "source",
+        "coldStart"
+      ],
+      "properties": {
+        "publicationId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "measure": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "availability": {
+          "enum": [
+            "available",
+            "missing",
+            "delayed",
+            "unsupported",
+            "permission_denied"
+          ]
+        },
+        "windowStart": {
+          "$ref": "../common.schema.json#/$defs/Timestamp"
+        },
+        "windowEnd": {
+          "$ref": "../common.schema.json#/$defs/Timestamp"
+        },
+        "denominator": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "source": {
+          "enum": [
+            "manual",
+            "api"
+          ]
+        },
+        "coldStart": {
+          "type": "boolean"
+        }
+      },
+      "x-kpis": [
+        "KPI-06",
+        "KPI-07",
+        "KPI-08",
+        "KPI-09",
+        "KPI-10",
+        "KPI-11",
+        "KPI-13"
+      ]
+    }
+  }
+}

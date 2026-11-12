@@ -1,0 +1,16 @@
+{
+  "sourceEventId": "6f1c2a10-1111-4b7a-9c1d-0a0b0c0d0e01",
+  "eventName": "video.approved",
+  "eventVersion": 1,
+  "occurredAt": "2026-11-20T09:30:00Z",
+  "workspaceId": "0b0c0d0e-2222-4f00-8a00-000000000001",
+  "projectId": "0b0c0d0e-3333-4f00-8a00-000000000002",
+  "memberId": "0b0c0d0e-4444-4f00-8a00-000000000003",
+  "properties": {
+    "projectId": "0b0c0d0e-3333-4f00-8a00-000000000002",
+    "series": "solve_this",
+    "packageVersionId": "0b0c0d0e-5555-4f00-8a00-000000000004",
+    "packageSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "minutesSinceGateA": 2880
+  }
+}

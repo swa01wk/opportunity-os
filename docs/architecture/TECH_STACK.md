@@ -109,7 +109,7 @@ Status: **Draft for G2** (Stage 2b). Living summary: the reason for every choice
 
 ## Monthly cost estimate
 
-Reporting currency INR at an assumed **₹89 per USD**; the actual rate is recorded with each cost (Q-05). Q-05 budget limits stay parked: these numbers are planning estimates, not limits, and are replaced by measured per-video cost from R0 runs (KPI-05).
+Reporting currency INR. Estimates use **₹95 per USD**: the rupee closed at 94.46 on 5 Nov 2026 ([HDFC Sky](https://hdfcsky.com/news/rupee-settles-flat-at-94-46-against-us-dollar)), rounded up so the estimates do not understate cost. Actual costs never use this figure: each attempt records the rate on the day it is settled (Q-05). Q-05 budget limits stay parked: these numbers are planning estimates, not limits, and are replaced by measured per-video cost from R0 runs (KPI-05).
 
 ### Model and TTS usage per video
 
@@ -121,8 +121,8 @@ Assumptions: a 45–60 s Short; LLM list prices from ADR-014 (USD 0.75 per 1M in
 | Script | 20k in, 4k out | 0.03 | 0.08 |
 | Storyboard | 60k in, 20k out | 0.14 | 0.26 |
 | **LLM, one pass** | | **0.26** | **0.56** |
-| **LLM, typical video** (one pass, one script and storyboard revision, half a research re-run) | | **0.48 (≈ ₹43)** | 1.68 if every task used its full budget three times (≈ ₹150) |
-| Narration | ≈ 900 characters per full take; ≈ 4 take-equivalents with auditions and re-takes ≈ 3,600 characters | 0.29 at overage price (≈ ₹26); inside plan credits it is covered by the plan fee | — |
+| **LLM, typical video** (one pass, one script and storyboard revision, half a research re-run) | | **0.48 (≈ ₹46)** | 1.68 if every task used its full budget three times (≈ ₹160) |
+| Narration | ≈ 900 characters per full take; ≈ 4 take-equivalents with auditions and re-takes ≈ 3,600 characters | 0.29 at overage price (≈ ₹27); inside plan credits it is covered by the plan fee | — |
 | Search (Q-29 open) | 20–50 queries | ≈ 0.10–0.25 placeholder | — |
 | Render compute | local machine | 0 now | — |
 
@@ -133,7 +133,7 @@ Assumptions: a 45–60 s Short; LLM list prices from ADR-014 (USD 0.75 per 1M in
 | Infrastructure | ₹0 | Owner's machine (ADR-011); electricity and hardware not counted |
 | LLM and TTS | ₹0 | Free credits in development (Q-05); cost still recorded per attempt |
 | Off-machine backup copy | ₹0–200 | External disk or a small cloud bucket (NFR-14) |
-| **During R2 validation (12 videos a month, published)** | **≈ ₹1,300 typical, up to ≈ ₹4,300** | Typical: LLM 12 × $0.48 + ElevenLabs Starter $6 (75,000 characters, enough for ≈ 20 videos at 3,600) + search ≈ $3. High: every task at full budget, ElevenLabs Creator $22, more search. A paid ElevenLabs plan is required before the first public upload (ADR-013). |
+| **During R2 validation (12 videos a month, published)** | **≈ ₹1,400 typical, up to ≈ ₹4,600** | Typical: LLM 12 × $0.48 + ElevenLabs Starter $6 (75,000 characters, enough for ≈ 20 videos at 3,600) + search ≈ $3. High: every task at full budget, ElevenLabs Creator $22, more search. A paid ElevenLabs plan is required before the first public upload (ADR-013). |
 
 ### Later: AWS Mumbai (after the R2 gate)
 
@@ -151,8 +151,8 @@ Indicative only. Compute uses us-east-1 Fargate list rates (USD 0.04048 per vCPU
 | Secrets Manager, KMS | ≈ 10 secrets, one key | ≈ 5 |
 | Logs and metrics | CloudWatch or self-hosted Grafana stack (ADR-016) | ≈ 10–25 |
 | Cognito, Route 53, ECR, data transfer | one user; small volumes | ≈ 3–5 |
-| **Infrastructure total** | | **≈ 215–265 (≈ ₹19,000–23,500)** |
-| Model, TTS, search usage | 12 videos a month, as above | ≈ 15–50 (≈ ₹1,300–4,300) |
-| **All in** | | **≈ 230–315 (≈ ₹20,500–28,000)** |
+| **Infrastructure total** | | **≈ 215–265 (≈ ₹20,500–25,000)** |
+| Model, TTS, search usage | 12 videos a month, as above | ≈ 15–50 (≈ ₹1,400–4,600) |
+| **All in** | | **≈ 230–315 (≈ ₹22,000–30,000)** |
 
 Largest levers if this is too high: Graviton (ARM) tasks, no NAT gateway, staging off by default, a single RDS instance with two databases. They are decided in the AWS migration spec, not now.

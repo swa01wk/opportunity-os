@@ -1,32 +1,78 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://opportunityos.invalid/contracts/events/workflow-request.schema.json",
-  "x-version": "0.1.0",
+  "x-version": "0.2.0",
   "title": "WorkflowRequest",
   "description": "Durable request written by the API in the same transaction as the command (ADR-003). The dispatcher starts a DBOS workflow whose ID equals requestId, so lost acknowledgements and duplicate dispatch start at most one workflow.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["requestId", "workflowType", "projectId", "requestedBy", "input"],
+  "required": [
+    "requestId",
+    "workflowType",
+    "projectId",
+    "requestedBy",
+    "input"
+  ],
   "properties": {
-    "requestId": { "$ref": "../common.schema.json#/$defs/Uuid" },
-    "workflowType": {
-      "enum": ["research", "script", "storyboard", "narration", "preview", "master", "revision", "package_build", "export_build", "data_export", "retention_sweep"]
+    "requestId": {
+      "$ref": "../common.schema.json#/$defs/Uuid"
     },
-    "projectId": { "$ref": "../common.schema.json#/$defs/Uuid" },
-    "requestedBy": { "$ref": "../common.schema.json#/$defs/Actor" },
+    "workflowType": {
+      "enum": [
+        "research",
+        "script",
+        "storyboard",
+        "narration",
+        "preview",
+        "master",
+        "revision",
+        "package_build",
+        "export_build",
+        "data_export",
+        "retention_sweep",
+        "project_deletion"
+      ]
+    },
+    "projectId": {
+      "$ref": "../common.schema.json#/$defs/Uuid"
+    },
+    "requestedBy": {
+      "$ref": "../common.schema.json#/$defs/Actor"
+    },
     "input": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "contractRef": { "$ref": "../common.schema.json#/$defs/VersionRef" },
-        "scriptRef": { "$ref": "../common.schema.json#/$defs/VersionRef" },
-        "storyboardRef": { "$ref": "../common.schema.json#/$defs/VersionRef" },
-        "revisionId": { "$ref": "../common.schema.json#/$defs/Uuid" },
-        "packageRef": { "$ref": "../common.schema.json#/$defs/VersionRef" },
-        "sceneIds": { "type": "array", "maxItems": 24, "items": { "$ref": "../common.schema.json#/$defs/LocalId" } },
-        "estimatedCost": { "$ref": "../common.schema.json#/$defs/Money", "description": "Run estimate checked against the remaining allowance at request time (R-07). Each task still reserves its own cost before dispatch (R-34)." }
+        "contractRef": {
+          "$ref": "../common.schema.json#/$defs/VersionRef"
+        },
+        "scriptRef": {
+          "$ref": "../common.schema.json#/$defs/VersionRef"
+        },
+        "storyboardRef": {
+          "$ref": "../common.schema.json#/$defs/VersionRef"
+        },
+        "revisionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "packageRef": {
+          "$ref": "../common.schema.json#/$defs/VersionRef"
+        },
+        "sceneIds": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "$ref": "../common.schema.json#/$defs/LocalId"
+          }
+        },
+        "estimatedCost": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "description": "Run estimate checked against the remaining allowance at request time (R-07). Each task still reserves its own cost before dispatch (R-34)."
+        }
       }
     },
-    "notBefore": { "$ref": "../common.schema.json#/$defs/Timestamp" }
+    "notBefore": {
+      "$ref": "../common.schema.json#/$defs/Timestamp"
+    }
   }
 }

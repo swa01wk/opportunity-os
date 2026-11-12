@@ -63,17 +63,17 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 | Part | Docs | Status |
 |---|---|---|
 | 2a | [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md), [ADR-001–014](../docs/adr/README.md) (all accepted), [contracts 0.1.0](../docs/contracts/README.md) | Done (PR #3, merged 2026-11-12) |
-| 2b | [UI_DESIGN.md](../docs/product/UI_DESIGN.md), [TECH_STACK.md](../docs/architecture/TECH_STACK.md), [SECURITY.md](../docs/architecture/SECURITY.md), [OBSERVABILITY.md](../docs/architecture/OBSERVABILITY.md), ADR-015–019 | In review (PR #4) |
+| 2b | [UI_DESIGN.md](../docs/product/UI_DESIGN.md), [TECH_STACK.md](../docs/architecture/TECH_STACK.md), [SECURITY.md](../docs/architecture/SECURITY.md), [OBSERVABILITY.md](../docs/architecture/OBSERVABILITY.md), ADR-015–019, [contracts 0.2.0](../docs/contracts/README.md#change-log) | In review (PR #4); decisions taken 2026-11-13 |
 | 2c | Screens S-01–S-16 (R1/R2), tokens.md: Studio UI tokens and, per A-31, the video house style | Not started |
 
 | G2 check (2a + 2b scope) | Result |
 |---|---|
 | Traceability: every R-xx maps to a component and every user-facing R-xx to a screen | Pass: all Must and Should R-xx → component (2a) and → screen S-01–S-20 (2b, checked by script: 0 unmapped); R3 screens S-17–S-20 listed, prototyped after A-18; Could and Won't not designed. Every KPI-01–14 has an analytics event. |
-| Contracts versioned | Pass: 0.1.0 (`x-version`, in-document versions, OpenAPI `info.version`). Checked: 10 schemas pass the 2020-12 metaschema; valid fixtures pass; 6 schema-level invalid fixtures rejected; 4 semantic fixtures give the expected compiler codes; all OpenAPI `$ref`s resolve; DDL applies to PostgreSQL 16; all 7 diagrams render. |
+| Contracts versioned | Pass: 0.2.0 (additive, change log in contracts README). Re-checked 2026-11-13: 11 schemas pass the 2020-12 metaschema; 5 valid fixtures pass; 6 schema-level invalid fixtures rejected; all OpenAPI `$ref`s resolve; DDL applies to PostgreSQL 16 (44 tables). |
 | Each layer can mock the others | Pass: mocking guide in contracts README; synthetic odd-squares fixtures |
 | No open choice blocks M0 | Pass: ADR-011–014 accepted; Remotion free individual licence; development runs on free credits (Q-05). |
 | Nothing designed that no requirement asks for | Pass: R3 planned only; R-64, R-65, R-78–R-82 not designed |
-| Threat model reviewed | Written (STRIDE TH-01–TH-30, agent risks, accepted risks). **Needs your review and sign-off in this PR.** |
+| Threat model reviewed | Pass: STRIDE TH-01–TH-30, agent risks and accepted risks reviewed and accepted 2026-11-13 (owner delegated to the tech lead) |
 | Screens approved | Not yet: Stage 2c |
 | Every key journey has an SLO | Pass: SLO-01–SLO-10, provisional, calibrate after R0 (A-15) |
 | Every layer has a chosen tool | Pass: TECH_STACK.md; exact pins in M0 lockfiles. Q-29 search API still open (does not block M0). |
@@ -82,18 +82,18 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 - [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-29 (DEC-01–12 are Q-01–Q-12).
 - Parked: Q-05 budget limits. Development uses free credits with costs recorded; real limits are set from measured per-video cost before the AWS move.
+- Before the first real provider call: opt out of ElevenLabs model training on every account; OpenAI calls use `store: false` (SECURITY.md).
 - Specialist checks: none outstanding. Q-14, Q-20, Q-25 and the narrator licence rule were decided by the tech lead at your request (engineering decisions, not legal advice).
 - Hosting: local only through R2; AWS Mumbai after the R2 gate (Q-21). Staging is a second local environment. Risk: the owner's machine is a single point of failure, so backups are copied off it (NFR-14).
 - Narration made on ElevenLabs free credits cannot be published; Gate D blocks it until takes are regenerated on a paid plan (ADR-013).
 - Open, low cost: Q-29 search API (M0 research spec).
-- Open for G2 / 2c: Q-30 access-audit retention (A-30: 1 year, DPDP Rule 6); Q-31 video house style designed in 2c (A-31).
 - Risk: MinIO Community Edition is no longer developed; interim pinned image, replaced in M0 (ADR-015).
-- Contract gaps found in 2b, for the M0 contracts spec (0.2.0): no project deletion endpoint (NFR-10 AC2); `analytics` schema and KPI events (ADR-017); `fetch_source` limited to URLs from search results or the operator (SECURITY TH-14).
 - Risk: DBOS Transact must pass an M0 kill-and-resume spike (ADR-003); if it fails, ADR-003 is superseded before M1 depends on it.
 - Risk: Remotion render time and memory are unmeasured until the R0 baseline (NFR-02, ADR-002).
 
 ## Recent decisions
 
+- 2026-11-13: G2 review items decided (owner delegated to the tech lead): threat model and accepted risks accepted; Q-30 (access audit kept 1 year) and Q-31 (video house style in 2c) accepted; contract gaps closed in contracts 0.2.0 (project delete/archive, KPI baselines, analytics schema, `fetch_source` limited to search results, operator URLs and one-hop links); sessions 12 h idle / 7 days absolute with step-up MFA for Gate E, budget raise, deletion and export; backups 30 dailies plus a pre-migration snapshot; estimates at ₹95/USD, actuals at the recorded rate; breach notices follow DPDP Rule 7.
 - 2026-11-13: Stage 2b ADRs accepted by the tech lead: ADR-015 local object store (MinIO CE interim, replaced in M0), ADR-016 OpenTelemetry + Grafana LGTM, ADR-017 KPI events in PostgreSQL, ADR-018 Studio UI kit, ADR-019 toolchain. Q-30, Q-31 raised.
 
 - 2026-11-13: Q-05 dev rule (no limits, free credits, costs recorded); Q-21 AWS after the R2 gate; Q-14, Q-20, Q-25 answered and narrator licence rule set by the tech lead.

@@ -1,23 +1,36 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://opportunityos.invalid/contracts/agent-tools/tools.schema.json",
-  "x-version": "0.1.0",
+  "x-version": "0.2.0",
   "title": "Agent tools",
   "description": "Tools a model may call during a bounded task (R-63). Every tool is read-only: none writes domain records, spends budget beyond the task reservation, approves, or publishes (R-43). Tool results that carry outside content are marked untrusted and are never treated as instructions (NFR-05). The worker persists task outputs only after validating them against task-io.schema.json.",
   "$defs": {
     "search_sources.input": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["query"],
+      "required": [
+        "query"
+      ],
       "properties": {
-        "query": { "type": "string", "minLength": 2, "maxLength": 200 },
-        "maxResults": { "type": "integer", "minimum": 1, "maximum": 10, "default": 5 }
+        "query": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 200
+        },
+        "maxResults": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 5
+        }
       }
     },
     "search_sources.output": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["results"],
+      "required": [
+        "results"
+      ],
       "properties": {
         "results": {
           "type": "array",
@@ -25,12 +38,29 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["resultId", "title", "url"],
+            "required": [
+              "resultId",
+              "title",
+              "url"
+            ],
             "properties": {
-              "resultId": { "$ref": "../common.schema.json#/$defs/LocalId" },
-              "title": { "type": "string", "maxLength": 300 },
-              "url": { "type": "string", "format": "uri", "maxLength": 2000 },
-              "snippet": { "type": "string", "maxLength": 500, "description": "Untrusted." }
+              "resultId": {
+                "$ref": "../common.schema.json#/$defs/LocalId"
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2000
+              },
+              "snippet": {
+                "type": "string",
+                "maxLength": 500,
+                "description": "Untrusted."
+              }
             }
           }
         }
@@ -39,47 +69,137 @@
     "fetch_source.input": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["url"],
+      "required": [
+        "url"
+      ],
       "properties": {
-        "url": { "type": "string", "format": "uri", "pattern": "^https://", "maxLength": 2000 }
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "maxLength": 2000
+        }
       },
-      "description": "Fetched by SourceFetcher (ADR-009): HTTPS only, no private-network or metadata addresses, at most 3 redirects, size cap 5 MB, HTML/PDF/plain text only."
+      "description": "Fetched by SourceFetcher (ADR-009): HTTPS only, no private-network or metadata addresses, at most 3 redirects, size cap 5 MB, HTML/PDF/plain text only. Permitted URLs (0.2.0, SECURITY TH-14): a URL returned by search_sources in this run, a URL in the input operatorSourceUrls, or a URL listed in `links` of a page already fetched in this run (one hop from a search result or operator URL, at most budget.maxLinkHops per run). Any other URL is refused with tool error `url_not_permitted`; refusal does not fail the task."
     },
     "fetch_source.output": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sourceId", "finalUrl", "retrievedAt", "contentType", "untrustedText", "truncated"],
+      "required": [
+        "sourceId",
+        "finalUrl",
+        "retrievedAt",
+        "contentType",
+        "untrustedText",
+        "truncated"
+      ],
       "properties": {
-        "sourceId": { "$ref": "../common.schema.json#/$defs/Uuid", "description": "Source record created for provenance; claims cite this ID." },
-        "finalUrl": { "type": "string", "format": "uri", "maxLength": 2000 },
-        "title": { "type": "string", "maxLength": 300 },
-        "publisher": { "type": "string", "maxLength": 200 },
-        "publishedAt": { "type": "string", "maxLength": 40 },
-        "retrievedAt": { "$ref": "../common.schema.json#/$defs/Timestamp" },
-        "contentType": { "enum": ["text/html", "application/pdf", "text/plain"] },
-        "untrustedText": { "type": "string", "maxLength": 60000, "description": "Extracted text, wrapped in untrusted-content delimiters when placed in the prompt. Not stored beyond the task; only short excerpts are kept (A-25)." },
-        "truncated": { "type": "boolean" }
+        "sourceId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "description": "Source record created for provenance; claims cite this ID."
+        },
+        "finalUrl": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2000
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "publisher": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "publishedAt": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "retrievedAt": {
+          "$ref": "../common.schema.json#/$defs/Timestamp"
+        },
+        "contentType": {
+          "enum": [
+            "text/html",
+            "application/pdf",
+            "text/plain"
+          ]
+        },
+        "untrustedText": {
+          "type": "string",
+          "maxLength": 60000,
+          "description": "Extracted text, wrapped in untrusted-content delimiters when placed in the prompt. Not stored beyond the task; only short excerpts are kept (A-25)."
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "links": {
+          "type": "array",
+          "maxItems": 100,
+          "description": "Outbound links found in the fetched page, normalised to absolute HTTPS URLs. Untrusted; usable as one-hop fetch targets (0.2.0).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "url"
+            ],
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://",
+                "maxLength": 2000
+              },
+              "text": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "Anchor text. Untrusted."
+              }
+            }
+          }
+        }
       }
     },
     "compute_demonstration.input": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["function", "params"],
+      "required": [
+        "function",
+        "params"
+      ],
       "properties": {
-        "function": { "type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$" },
-        "params": { "type": "object", "maxProperties": 20 }
+        "function": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,63}$"
+        },
+        "params": {
+          "type": "object",
+          "maxProperties": 20
+        }
       },
       "description": "Runs an allowlisted function from capabilities.json → demonstrationFunctions. Deterministic, no side effects. Persisting a DemonstrationModel needs Gate B review."
     },
     "compute_demonstration.output": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["ok"],
+      "required": [
+        "ok"
+      ],
       "properties": {
-        "ok": { "type": "boolean" },
-        "results": { "type": "object" },
-        "resultsSha256": { "$ref": "../common.schema.json#/$defs/Sha256" },
-        "error": { "type": "string", "maxLength": 300, "description": "Domain error, e.g. n outside 1..12." }
+        "ok": {
+          "type": "boolean"
+        },
+        "results": {
+          "type": "object"
+        },
+        "resultsSha256": {
+          "$ref": "../common.schema.json#/$defs/Sha256"
+        },
+        "error": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Domain error, e.g. n outside 1..12."
+        }
       }
     },
     "list_capabilities.input": {
@@ -94,21 +214,32 @@
     "validate_scene_spec.input": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["videoSpec"],
+      "required": [
+        "videoSpec"
+      ],
       "properties": {
-        "videoSpec": { "$ref": "../media/video-spec.schema.json" }
+        "videoSpec": {
+          "$ref": "../media/video-spec.schema.json"
+        }
       }
     },
     "validate_scene_spec.output": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["valid", "errors"],
+      "required": [
+        "valid",
+        "errors"
+      ],
       "properties": {
-        "valid": { "type": "boolean" },
+        "valid": {
+          "type": "boolean"
+        },
         "errors": {
           "type": "array",
           "maxItems": 200,
-          "items": { "$ref": "../media/render-job.schema.json#/$defs/ValidationError" }
+          "items": {
+            "$ref": "../media/render-job.schema.json#/$defs/ValidationError"
+          }
         }
       },
       "description": "Dry-run compile (render job kind = validate). No pixels rendered."

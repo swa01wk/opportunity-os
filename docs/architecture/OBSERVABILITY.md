@@ -98,7 +98,7 @@ Span attributes use an **allowlist** at the Collector: unknown attributes are dr
 
 ## Product analytics events (per KPI-xx)
 
-Written to `analytics.event` by the outbox relay from the listed domain event (ADR-017); never written directly. Properties are typed and contain no free text or personal data beyond the member UUID. KPIs are SQL views over these events plus current state, shown on a "Validation" Grafana dashboard. R3 events arrive with the R3 spec.
+Written to `analytics.event` by the outbox relay from the listed domain event (ADR-017); never written directly. Contract: [analytics/events.schema.json](../contracts/analytics/events.schema.json) (0.2.0). Properties are typed and contain no free text or personal data beyond the member UUID. KPIs are SQL views over these events plus current state, shown on a "Validation" Grafana dashboard. R3 events arrive with the R3 spec.
 
 | Analytics event | From domain event | Properties | KPIs |
 |---|---|---|---|
@@ -107,7 +107,7 @@ Written to `analytics.event` by the outbox relay from the listed domain event (A
 | `gate.approved` | `approval.recorded` (A–E) | gate, responsibility, targetType, targetVersion, reopenedCount | Lead-time context for KPI-04 |
 | `run.finished` | `run.state_changed` to a terminal state | runId, workflowType, outcome, attempts, codeRepairNeeded, manualTakeover | KPI-02 |
 | `effort.logged` | `effort.recorded` | activity (incl. `code_repair`), minutes | KPI-02, KPI-04 |
-| `kpi.baseline_recorded` | one-off entry of the Q-13 manual baseline (M0 spec) | kpi, minutes, revisions, costMinor, currency | KPI-04 |
+| `kpi.baseline_recorded` | `kpi.baseline_recorded`, from `POST /kpi-baselines` (S-14) | kpi, minutes, revisions, costMinor, currency | KPI-04 |
 | `cost.settled` | `budget.settled` | provider, stage, attemptOutcome (succeeded / failed / revised), estimatedMinor, actualMinor, currency, fxRate | KPI-05 |
 | `rubric.scored` | `rubric.scored` | renderId, correctness, clarity, originality, readability, promisePayoff, mutedReviewPassed, allAtLeastThreshold | KPI-03, KPI-14 |
 | `finding.resolved` | `finding.resolved` | severity, material, disposition | KPI-03 (zero unresolved material) |
@@ -129,4 +129,4 @@ Written to `analytics.event` by the outbox relay from the listed domain event (A
 | KPI-13 Growth study reach | Sum of `metric.recorded` views per upload in the study window; never presented as people (R-76); R3, conditional |
 | KPI-14 Comprehension and readability | Share of approved videos whose final `rubric.scored.mutedReviewPassed` is true |
 
-Contract follow-up: the `analytics` schema, the `kpi.baseline_recorded` entry path and these event names are added by the M0 contracts spec (ADR-017).
+The `analytics` schema, the baseline entry path and these event names are in contracts 0.2.0 (`db/schema.sql`, `openapi.yaml`, `analytics/events.schema.json`).

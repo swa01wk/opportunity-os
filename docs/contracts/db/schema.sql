@@ -1,4 +1,4 @@
--- OpportunityOS database schema DRAFT 0.1.0 (Stage 2a).
+-- OpportunityOS database schema DRAFT 0.2.0 (Stage 2a; 0.2.0 Stage 2b: project archive/deletion, KPI baselines, analytics schema).
 -- Agreed shape for M0; the real schema is created by Alembic migrations (ADR-006).
 -- Conventions:
 --   * every domain table has workspace_id; row-level security keys on it (NFR-04)
@@ -6,10 +6,11 @@
 --   * parent rows hold head pointers + row_version for If-Match (optimistic concurrency)
 --   * sha256 columns hold canonical-JSON or file hashes; large files live in object storage (ADR-007)
 --   * money is amount_minor bigint + currency char(3) (+ fx_rate where converted)
--- Schemas: app (domain), media (render jobs), dbos (owned by DBOS Transact, ADR-003; not listed here).
+-- Schemas: app (domain), media (render jobs), analytics (KPI events, ADR-017), dbos (owned by DBOS Transact, ADR-003; not listed here).
 
 CREATE SCHEMA IF NOT EXISTS app;
 CREATE SCHEMA IF NOT EXISTS media;
+CREATE SCHEMA IF NOT EXISTS analytics;
 
 -- ---------- Workspace, members, brand, projects (F-01) ----------
 CREATE TABLE app.workspace (
@@ -65,6 +66,8 @@ CREATE TABLE app.project (
   brand_kit_version int NOT NULL,         -- pinned (R-02)
   narrator jsonb NOT NULL,                -- provider, voice_id, settings; pinned per take (R-03)
   row_version int NOT NULL DEFAULT 1,
+  archived_at timestamptz,                -- hidden from lists; nothing deleted (0.2.0)
+  deletion_requested_at timestamptz,      -- set by DELETE; purge run removes the rest (NFR-10 AC2)
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -385,6 +388,19 @@ CREATE TABLE app.effort_entry (           -- R-36, KPI-04
 );
 
 -- ---------- Assets and rights (F-15) ----------
+CREATE TABLE app.kpi_baseline (           -- KPI-04 manual baseline (Q-13); insert-only
+  id uuid PRIMARY KEY,
+  workspace_id uuid NOT NULL REFERENCES app.workspace(id),
+  kpi text NOT NULL CHECK (kpi IN ('KPI-04')),
+  measured_on date NOT NULL,
+  method text NOT NULL,
+  active_minutes int NOT NULL CHECK (active_minutes > 0),
+  revisions int,
+  cost_minor bigint, cost_currency char(3),
+  recorded_by uuid NOT NULL REFERENCES app.member(id),
+  recorded_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE TABLE app.asset (
   id uuid PRIMARY KEY, workspace_id uuid NOT NULL,
   kind text NOT NULL CHECK (kind IN ('font','sound_effect','image','voice','other')),
@@ -423,6 +439,21 @@ CREATE TABLE media.render_job (
   attempts int NOT NULL DEFAULT 0,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- ---------- KPI analytics events (ADR-017); written only by the outbox relay ----------
+CREATE TABLE analytics.event (
+  id bigserial PRIMARY KEY,
+  source_event_id uuid NOT NULL UNIQUE,   -- outbox event id; makes relay delivery idempotent
+  event_name text NOT NULL,               -- analytics/events.schema.json
+  event_version int NOT NULL,
+  occurred_at timestamptz NOT NULL,
+  workspace_id uuid NOT NULL,
+  project_id uuid,
+  member_id uuid,                         -- actor UUID only; no names or emails
+  properties jsonb NOT NULL
+);
+CREATE INDEX analytics_event_name_time ON analytics.event (event_name, occurred_at);
+-- Grafana reads KPI views through a read-only role (analytics_ro), created by the M0 migration.
 
 -- R3 tables (connection, oauth_credential, experiment, learning_record, opportunity_rating)
 -- are added by the spec that starts R3 (A-18); not part of this draft.
