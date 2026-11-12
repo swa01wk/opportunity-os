@@ -40,7 +40,7 @@ All gates are signed by the product owner / tech lead (same person).
 
 | Part | Docs | Status |
 |---|---|---|
-| 2a | [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md), [ADR-001–014](../docs/adr/README.md), [contracts 0.1.0](../docs/contracts/README.md) | In review |
+| 2a | [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md), [ADR-001–014](../docs/adr/README.md) (all accepted), [contracts 0.1.0](../docs/contracts/README.md) | In review |
 | 2b | UI_DESIGN.md, TECH_STACK.md, SECURITY.md, OBSERVABILITY.md | Not started |
 | 2c | Screens S-xx, tokens.md | Not started |
 
@@ -49,7 +49,7 @@ All gates are signed by the product owner / tech lead (same person).
 | Traceability: every R-xx maps to a component | Pass: all Must and Should R-xx mapped (R3 as planned components); Could and Won't marked not designed. R-xx → screen is 2b. |
 | Contracts versioned | Pass: 0.1.0 (`x-version`, in-document versions, OpenAPI `info.version`). Checked: 10 schemas pass the 2020-12 metaschema; valid fixtures pass; 6 schema-level invalid fixtures rejected; 4 semantic fixtures give the expected compiler codes; all OpenAPI `$ref`s resolve; DDL applies to PostgreSQL 16; all 7 diagrams render. |
 | Each layer can mock the others | Pass: mocking guide in contracts README; synthetic odd-squares fixtures |
-| No open choice blocks M0 | **Gap:** ADR-011 host and ADR-012 auth are Proposed; ADR-013 TTS and ADR-014 LLM block the R0 spike, not the M0 skeleton (fakes); Remotion licensee unconfirmed (Q-07) |
+| No open choice blocks M0 | Pass: ADR-011–014 accepted 2026-11-12; Remotion free individual licence. First paid call still needs Q-05 limits. |
 | Nothing designed that no requirement asks for | Pass: R3 planned only; R-64, R-65, R-78–R-82 not designed |
 | Threat model reviewed | Not in 2a: SECURITY.md (2b) |
 | Screens approved | Not in 2a: Stage 2c |
@@ -58,15 +58,17 @@ All gates are signed by the product owner / tech lead (same person).
 
 - [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-29 (DEC-01–12 are Q-01–Q-12).
 - Parked: Q-05 budget limits, due before the first paid provider call.
-- Specialist confirmation due before G2: Q-06 narrator licence, Q-07 Remotion licence, Q-14 and Q-20 privacy and DPDP Act, Q-25 stored excerpt length.
-- Your decision: ADR-011 cloud host (Q-21), ADR-012 auth (Q-22), ADR-013 TTS and ADR-014 LLM (Q-06), Remotion licensee (Q-07).
+- Specialist confirmation due before G2: Q-14 and Q-20 privacy and DPDP Act, Q-25 stored excerpt length. Before the first public upload: Q-06 narrator licence.
+- Q-05 budget limits now block the first ElevenLabs or OpenAI call (R0 spike).
+- Planning item for G3: when AWS is provisioned; R1 is a hosted release, so before R1 acceptance. Until then the hosted parts of NFR-13, NFR-14 and NFR-15 cannot be verified.
 - Open, low cost: Q-29 search API (M0 research spec).
 - Risk: DBOS Transact must pass an M0 kill-and-resume spike (ADR-003); if it fails, ADR-003 is superseded before M1 depends on it.
 - Risk: Remotion render time and memory are unmeasured until the R0 baseline (NFR-02, ADR-002).
 
 ## Recent decisions
 
-- 2026-11-12: Stage 2a ADRs accepted: ADR-001 modular monolith (backend, agent, media, web), ADR-002 Remotion only, ADR-003 DBOS Transact durable execution via outbox, ADR-004 FastAPI, ADR-005 Next.js, ADR-006 PostgreSQL, ADR-007 S3 storage, ADR-008 Pydantic → JSON Schema → TS, ADR-009 provider adapters, ADR-010 transactional outbox. ADR-011–014 proposed.
+- 2026-11-12: Provider decisions: local only now, AWS Mumbai later (ADR-011, Q-21); Keycloak locally, Cognito when hosted (ADR-012, Q-22); ElevenLabs (ADR-013) and OpenAI gpt-5.4-mini-2026-03-17 (ADR-014) (Q-06); Remotion free individual licence (Q-07).
+- 2026-11-12: Stage 2a ADRs accepted: ADR-001 modular monolith (backend, agent, media, web), ADR-002 Remotion only, ADR-003 DBOS Transact durable execution via outbox, ADR-004 FastAPI, ADR-005 Next.js, ADR-006 PostgreSQL, ADR-007 S3 storage, ADR-008 Pydantic → JSON Schema → TS, ADR-009 provider adapters, ADR-010 transactional outbox.
 - 2026-11-12: G1 Requirements baseline signed by the product owner / tech lead (PR #2).
 - 2026-11-12: Q-03: no launch date; build properly through R0 → R1 → R2, without the smaller January launch.
 - 2026-11-12: Q-07: Remotion is the only renderer; no Temporal, no Manim. ADRs follow in Stage 2.

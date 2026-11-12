@@ -1,22 +1,34 @@
-# ADR-013: Text-to-speech provider for the narrator
-Status: Proposed — awaiting your decision (Q-06); narrator licence needs a specialist    Date: 2026-11-12
+# ADR-013: ElevenLabs for narration
+Status: Accepted (narrator licence still needs a specialist check)    Date: 2026-11-12 (decided by the product owner; Q-06)
 
 ## Context
-One licensed English narrator (NFR-16). Measured timing, not estimates, drives scenes and captions, so the provider must return word- or character-level timestamps (R-26). The operator must fix pronunciation, including notation such as "n squared" (R-25). The licence must allow commercial use of the synthetic voice on YouTube and Instagram (A-06, specialist review). Cost is recorded per take (R-35).
+- There is one licensed English narrator (NFR-16).
+- Measured timing, not estimates, drives scenes and captions, so the provider must return timestamps (R-26).
+- The operator must be able to fix pronunciation, including notation (R-25).
+- Each take's cost is recorded (R-35).
+- The voice licence must allow commercial use on YouTube and Instagram (A-06).
 
-## Options
-
-| | A. ElevenLabs | B. Azure AI Speech | C. Google Cloud Text-to-Speech | D. Any TTS + our forced aligner |
-|---|---|---|---|---|
-| Timing data | Character-level `alignment` returned with the audio ("convert with timestamps") [ElevenLabs](https://elevenlabs.io/docs/api-reference/streaming-with-timestamps) | Word-boundary events from the Speech SDK | Only at SSML `<mark>` points you insert | Whatever the aligner produces |
-| Pronunciation | Pronunciation dictionaries (up to 3 per request) | SSML phonemes and custom lexicons | SSML phonemes | Provider-dependent |
-| Voice quality | Strong narration voices | Strong neural voices | Good | Provider-dependent |
-| Region | Vendor-hosted | Central India region available | asia-south1 available | — |
-| Commercial voice rights | Depends on plan tier; check for YouTube/Instagram | Standard neural voices licensed for product use; custom voices gated | Standard voices licensed for product use | Provider-dependent |
-| Extra work | Least | SDK event plumbing | Insert marks per phrase | We own an alignment model (more to evaluate) |
-
-## Recommendation
-**A. ElevenLabs** as the narrator provider for quality and built-in alignment, with **B. Azure** as the fallback adapter. Decide after an M0 audition of the odd-squares script on both (pronunciation, pacing, alignment accuracy, cost per minute).
+Options proposed in Stage 2a: ElevenLabs, Azure AI Speech, Google Cloud TTS, or any TTS plus our own forced aligner.
 
 ## Decision
-Pending. No TTS call is made until you approve the provider and the narrator licence is confirmed by a specialist.
+- **ElevenLabs** behind the `TtsProvider` adapter (ADR-009), using the "convert with timestamps" endpoint.
+  - The endpoint returns audio with a character-level `alignment` ([ElevenLabs](https://elevenlabs.io/docs/api-reference/streaming-with-timestamps)).
+  - `media.audio` turns that alignment into the word and phrase times in `timing.schema.json`, with `alignmentSource = provider_characters`.
+- **Pronunciation:** the workspace pronunciation list (`/pronunciations`) is synced to an ElevenLabs pronunciation dictionary. Its ID and version are pinned in each take (`pronunciationSetSha256`). ElevenLabs allows up to 3 dictionaries per request.
+- **Pinning:** `voiceId`, `modelId` and voice settings are set in configuration and pinned per take (R-03). Changing any of them invalidates every affected scene (R-32).
+- **No fallback provider is wired now.** The adapter and its shared fixtures keep a second provider possible later (NFR-11).
+
+## Alternatives
+- **Azure AI Speech:** good voices and word-boundary events, but more plumbing; kept as the documented fallback.
+- **Google Cloud TTS:** timing only at inserted SSML marks.
+- **Our own forced aligner:** another model to run and evaluate.
+
+## Consequences
+Before the first real call:
+- **Q-05 budget limits** must be set; paid dispatch is blocked while the allowance is null (R-34).
+- An **ElevenLabs plan that permits commercial use** of the chosen voice.
+
+Before the first public upload (R2):
+- **Specialist check of the narrator licence** (Q-06 follow-up).
+
+Separately, the API key lives in `.env` locally (git-ignored) and in Secrets Manager on AWS (NFR-06).

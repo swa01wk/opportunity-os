@@ -1,24 +1,35 @@
-# ADR-014: LLM provider for research, script and storyboard tasks
-Status: Proposed — awaiting your decision (Q-06)    Date: 2026-11-12
+# ADR-014: OpenAI GPT-5.4 mini for the three agent tasks
+Status: Accepted    Date: 2026-11-12 (decided by the product owner; Q-06)
 
 ## Context
-Three bounded tasks (R-63): research (sources → claims with locations), script (beats with claim IDs), storyboard (VideoSpec within the capability catalogue). Each needs schema-constrained output, tool use for read-only tools (`docs/contracts/agent-tools/`), resistance to prompt injection in fetched pages (NFR-05), pinned model versions and per-call cost (R-50, R-35). Evaluation decides quality (NFR-17). Provider must be swappable (ADR-009). Disclosure: this ADR was drafted by Claude, an Anthropic model, which is one of the options.
+There are three bounded tasks (R-63): research, script and storyboard. Each needs:
+- output constrained to a schema;
+- read-only tool calls (`docs/contracts/agent-tools/`);
+- resistance to prompt injection from fetched pages (NFR-05);
+- pinned model versions and a recorded cost for every call (R-50, R-35);
+- evaluation across all four series (NFR-17).
 
-## Options
-
-| | A. Anthropic (Claude API) | B. OpenAI | C. Google (Gemini API) |
-|---|---|---|---|
-| Structured output | JSON-schema tool output | JSON-schema structured outputs | JSON-schema response format |
-| Tool use | Yes | Yes | Yes |
-| Long source context | Large context windows | Large context windows | Very large context windows |
-| Built-in web search | Available as a server tool | Available as a tool | Grounding with Search |
-| Version pinning | Dated model IDs | Dated model IDs | Versioned model IDs |
-| Data use | API data not used for training by default (check terms) | Same (check terms) | Paid tier terms (check) |
-
-Built-in web search tools are **not** used: research goes through our `search_sources` / `fetch_source` tools so that every source is recorded, size-bounded and SSRF-checked (NFR-05, R-08).
-
-## Recommendation
-Wire **two** providers behind `LlmProvider` in M0 (A and B are both credible on schema-constrained tool use), run the R0 evaluation fixtures (odd-squares plus one brief from another series) on both, and choose the primary by task success, claim accuracy, schema-valid rate and cost per task. Use one model tier per task, pinned in config.
+The provider must stay swappable (ADR-009).
 
 ## Decision
-Pending your choice of the two candidates to evaluate (or a single provider if you prefer to skip the comparison). No paid call before approval and before Q-05 budget limits are set.
+- **Model:** `gpt-5.4-mini`, pinned to the dated snapshot **`gpt-5.4-mini-2026-03-17`** ([OpenAI model page](https://developers.openai.com/api/docs/models/gpt-5.4-mini)).
+  - Context window: 400k tokens.
+  - Output: up to 128k tokens.
+  - Supports structured outputs and function calling.
+- **Structured outputs** carry each task's output schema (`task-io.schema.json`), and **function calling** carries the tools (`tools.schema.json`). A response that fails our own Pydantic validation counts as `schema_invalid` and uses up one of the task's retries.
+- **Reasoning effort per task** is set in config and recorded with each attempt. Starting values: `medium` for research and storyboard, `low` for script. They are tuned on the R0 evaluation fixtures.
+- **The provider's built-in web search is not used.** Research goes through our `search_sources` / `fetch_source` tools, so every source is recorded, size-bounded and SSRF-checked (R-08, NFR-05).
+- **Cost:** the adapter estimates cost before each call for reservation and records actual tokens and cost afterwards. List price on 2026-11-12 is USD 0.75 per 1M input tokens, 0.075 per 1M cached input and 4.50 per 1M output. Prices sit in configuration, not code, and are converted to INR at a recorded rate (Q-05).
+- **Knowledge cutoff** (August 2025) does not limit research, which works from fetched sources. Script and storyboard tasks work only from approved claims.
+
+## Alternatives
+- **Evaluating two providers before choosing:** dropped by the owner's decision; the adapter and evaluation suite still allow a later switch.
+- **A larger model tier:** higher cost per task; reconsider per task only if the R0 evaluation shows a quality gap.
+
+## Consequences
+- Before the first real call:
+  - Q-05 budget limits must be set (R-34).
+  - An OpenAI API key, in `.env` locally and Secrets Manager on AWS.
+  - Data-use terms recorded in SECURITY.md (Stage 2b).
+- Changing the snapshot or reasoning effort is a versioned config change that must pass the evaluation suite (NFR-17).
+- Synthetic data only in prompts and fixtures (A-23).

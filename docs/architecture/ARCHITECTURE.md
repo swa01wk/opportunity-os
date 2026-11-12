@@ -14,9 +14,9 @@ A modular monolith (ADR-001). The **Studio** (Next.js) talks only to the **API**
 flowchart LR
   op["Channel operator and reviewer<br/>(P01, P02; one owner at R1)"]
   oos["OpportunityOS<br/>internal studio"]
-  idp["Auth provider<br/>(ADR-012, pending)"]
-  llm["LLM provider<br/>(ADR-014, pending)"]
-  tts["TTS provider<br/>(ADR-013, pending)"]
+  idp["Keycloak locally, Cognito when hosted<br/>(ADR-012)"]
+  llm["OpenAI gpt-5.4-mini<br/>(ADR-014)"]
+  tts["ElevenLabs<br/>(ADR-013)"]
   search["Search API<br/>(Q-29)"]
   web["Public web sources"]
   yt["YouTube<br/>manual upload at R2"]
@@ -70,8 +70,8 @@ flowchart TB
 | api | Uvicorn, stateless | 1–2 instances | long-running work |
 | worker | DBOS workflows, queues per provider | 1 instance at R1 (queues bound concurrency) | public HTTP endpoint |
 | render | HTTP job service + bounded render pool, private network only | 1 instance, CPU/memory capped (NFR-12) | database writes outside `media` schema |
-| PostgreSQL | managed (host per ADR-011) | vertical | media files |
-| Object storage | managed S3-compatible; MinIO locally | — | anything public |
+| PostgreSQL | container locally; RDS when on AWS (ADR-011) | vertical | media files |
+| Object storage | MinIO locally; S3 when on AWS (ADR-011) | — | anything public |
 
 ## Components (C4 level 3)
 
@@ -276,8 +276,8 @@ None: there is no existing system or data (DISCOVERY.md not needed, Stage 1). Sc
 
 ## Deployment
 
-- **Local:** Docker Compose runs web, api, worker, render, PostgreSQL and MinIO; `make up` (PROCESS). Fake adapters by default; real providers only with keys in a git-ignored `.env`.
-- **Staging and production:** the same images on the host chosen in ADR-011, separate credentials and buckets per environment, PostgreSQL PITR and daily snapshots (RPO 24 h, RTO one working day, A-16).
+- **Now, local only (ADR-011):** Docker Compose on the owner's machine runs web, api, worker, render, PostgreSQL, MinIO (object lock on) and Keycloak; `make up` (PROCESS). Fake adapters by default; ElevenLabs and OpenAI only with keys in a git-ignored `.env` and a budget allowance set (Q-05). Backup is a scheduled `pg_dump` plus a bucket copy.
+- **Later, AWS Mumbai (ADR-011):** the same images on ECS Fargate, RDS PostgreSQL with PITR, S3 Object Lock, Secrets Manager, Cognito (ADR-012); separate staging and production. When is set at G3, before R1 acceptance.
 - render runs on a private network only, with CPU, memory and time limits per job (NFR-12).
 
 ## Quality scenarios (per NFR-xx)

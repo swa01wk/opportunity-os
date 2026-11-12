@@ -1,5 +1,5 @@
 # ADR-009: Every external provider sits behind an adapter
-Status: Accepted (individual providers: ADR-011–ADR-014)    Date: 2026-11-12
+Status: Accepted (providers: ADR-012 identity, ADR-013 TTS, ADR-014 LLM; storage per ADR-007/011)    Date: 2026-11-12
 
 ## Context
 LLM, TTS, auth, storage and publishing providers will change (NFR-11, A-06). Costs must be estimated and recorded per call (R-34, R-35), calls must be versioned for provenance (R-50, R-54), and no provider is called before you approve it (A-06).

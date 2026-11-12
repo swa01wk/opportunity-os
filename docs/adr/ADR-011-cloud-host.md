@@ -1,27 +1,23 @@
-# ADR-011: Cloud host for staging and production
-Status: Proposed — awaiting your decision (Q-21)    Date: 2026-11-12
+# ADR-011: Local first; AWS Mumbai when hosting is needed
+Status: Accepted    Date: 2026-11-12 (decided by the product owner; Q-21)
 
 ## Context
-Five containers (ADR-001), managed PostgreSQL (ADR-006), S3-compatible storage with object lock (ADR-007), separate staging and production credentials (NFR-13), daily backups with RPO 24 h / RTO one working day (A-16), and a render container that needs several CPU cores and 4–8 GB memory for Chrome (NFR-12). One operator runs it, so operating effort matters as much as price. Data is the owner's account plus aggregate analytics (A-20); DPDP applicability is confirmed by a specialist (Q-20).
+The system runs five containers (ADR-001), PostgreSQL (ADR-006) and S3-compatible storage with object lock (ADR-007). Hosted needs are separate staging and production credentials (NFR-13), daily backups with RPO 24 h and RTO one working day (A-16, NFR-14) and alerting (NFR-15). One person operates it. The data is the owner's account plus aggregate analytics (A-20).
 
-## Options
-
-| | A. AWS Mumbai (ap-south-1) | B. Google Cloud Mumbai (asia-south1) | C. Developer PaaS + managed DB + R2 |
-|---|---|---|---|
-| Containers | ECS Fargate services (api, web, worker, render) | Cloud Run services (api, web); worker and render with always-allocated CPU or Cloud Run Jobs | Fly.io (has a Mumbai `bom` region) or Render/Railway |
-| PostgreSQL | RDS PostgreSQL, automated snapshots, PITR | Cloud SQL PostgreSQL, PITR | Provider-managed PostgreSQL (check region and PITR) |
-| Storage | S3 with Object Lock (native fit for ADR-007) | GCS (S3 interoperability is partial; retention lock differs) | Cloudflare R2 (S3 API; object lock support to verify) |
-| Secrets | Secrets Manager / SSM | Secret Manager | Platform secrets |
-| Ops effort | Highest: VPC, ALB, IAM, IaC (Terraform/CDK) | Medium: fewer moving parts; long-running worker needs care | Lowest: deploy from Dockerfiles |
-| Fixed cost | Highest (RDS, ALB, NAT or VPC endpoints) | Medium | Lowest |
-| Lock-in | Medium (Fargate, S3 portable) | Medium | Low |
-| Risks | Setup time before M0 exit | DBOS worker and multi-minute renders fit Cloud Run's request model poorly | Regional capacity and managed-Postgres maturity vary by provider; one more vendor for storage |
-
-## Recommendation
-**A. AWS Mumbai**, deployed with Terraform from M0, because every hard requirement (object lock, PITR, long-running workers, per-environment IAM) is native and nothing in ADR-003 or ADR-007 needs a workaround. Choose **C** instead if lowest fixed cost and setup time matter more than those guarantees; then ADR-007's object lock becomes an application-level rule.
+Options proposed in Stage 2a: AWS Mumbai, Google Cloud Mumbai, or a developer PaaS (Fly.io / Render / Railway + Cloudflare R2).
 
 ## Decision
-Pending. Nothing is provisioned until you choose. The monthly cost estimate is written in TECH_STACK.md (Stage 2b) for the option you pick.
+- **Now: local only.** The whole stack runs on the owner's machine with Docker Compose: web, api, worker, render, PostgreSQL, MinIO (object lock and versioning on) and Keycloak (ADR-012). No cloud account is provisioned.
+- **When it scales: AWS Mumbai (ap-south-1)**, deployed with Terraform. The target shape is ECS Fargate services for web, api, worker and render, RDS PostgreSQL with point-in-time restore, S3 with Object Lock, Secrets Manager and Cognito (ADR-012).
+- When AWS is introduced is a delivery-plan decision, set at G3 (Stage 3). It is not tied to a date here.
+
+## Alternatives
+- **Google Cloud Mumbai:** the long-running DBOS worker and multi-minute renders fit Cloud Run's request model poorly.
+- **Developer PaaS + R2:** lowest cost, but object lock, point-in-time restore and long-running workers need workarounds.
+- **AWS from day one:** fixed cost and setup time before there is anything to host.
 
 ## Consequences
-Whichever option: Docker images are the same everywhere (PROCESS CI/CD); the host is reached only through Terraform/config, not from application code.
+- Easier: no cloud spend or setup during early milestones; the same Docker images move to AWS unchanged.
+- Harder: until AWS exists, the hosted parts of NFR-13 (staging), NFR-14 (restore rehearsal) and NFR-15 (alerting) cannot be verified. Locally, backup is a scheduled `pg_dump` plus a MinIO bucket copy, and a restore is rehearsed from them.
+- Must do: keep everything host-neutral. That means the S3 API only (no MinIO-specific calls), configuration from the environment, and no AWS SDK outside the adapters. The project brief describes R1 as a hosted release, so the delivery plan must put AWS provisioning before R1 acceptance. This is flagged for G3.
+- Cost estimate: TECH_STACK.md (Stage 2b) gives local cost as zero infrastructure plus provider usage, and an AWS estimate for later.

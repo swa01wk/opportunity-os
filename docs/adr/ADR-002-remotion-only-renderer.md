@@ -1,5 +1,5 @@
 # ADR-002: Remotion is the only renderer
-Status: Accepted (licence tier pending: see Q-07)    Date: 2026-11-12
+Status: Accepted    Date: 2026-11-12
 
 ## Context
 The Signal Motion Engine (PRD §9) needs persistent objects, frame-accurate actions at 30 fps, equation typography, captions and 1080×1920 output (R-18–R-23, R-27, R-29, NFR-16). PRD §14.2 proposed Remotion + FFmpeg with Manim only where a brief needs it. Q-07 decided: Remotion only, no Manim. The compiler must never execute generated code (NFR-05).
@@ -19,5 +19,5 @@ The Signal Motion Engine (PRD §9) needs persistent objects, frame-accurate acti
 ## Consequences
 - Easier: one component library shared by the Studio preview (Remotion Player) and the renderer; React skills apply everywhere.
 - Harder: Chrome in a container is memory-hungry; scene clips must be rendered with bounded concurrency.
-- Licence: Remotion is free for individuals and companies of up to three people; otherwise a company licence is needed, and automated server-side rendering most closely matches the "Automators" tier (per-render with a monthly minimum) [Remotion pricing](https://www.remotion.dev/docs/license/pricing). Which tier applies depends on who the licensee is. **Open: you confirm the licensee entity (Q-07 follow-up).** Recorded as a dependency licence in TECH_STACK.md (Stage 2b).
+- Licence: Remotion is free for individuals and companies of up to three people; otherwise a company licence is needed, and automated server-side rendering most closely matches the "Automators" tier (per-render with a monthly minimum) [Remotion pricing](https://www.remotion.dev/docs/license/pricing). **Licensee: the owner as an individual, so the free licence applies** (decided 2026-11-12, Q-07). Re-check if ownership moves to a company of more than three people; a company licence is then needed before further use. Recorded as a dependency licence in TECH_STACK.md (Stage 2b).
 - Must do: an M0 render spike measures preview and master time on the odd-squares fixture (NFR-02).
