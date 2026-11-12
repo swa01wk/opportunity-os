@@ -1,6 +1,6 @@
 # Architecture
 
-Status: **Draft for G2** (Stage 2a). Baselined at G2; after that it changes only through change control. Requirements: [REQUIREMENTS.md](../product/REQUIREMENTS.md). Decisions: [ADRs](../adr/README.md). Contracts: [docs/contracts](../contracts/README.md). Security, observability, UI and tech-stack detail follow in Stage 2b and 2c.
+Status: **Draft for G2** (Stage 2a). Baselined at G2; after that it changes only through change control. Requirements: [REQUIREMENTS.md](../product/REQUIREMENTS.md). Decisions: [ADRs](../adr/README.md). Contracts: [docs/contracts](../contracts/README.md). Security, observability, UI and tech stack: [SECURITY.md](SECURITY.md), [OBSERVABILITY.md](OBSERVABILITY.md), [UI_DESIGN.md](../product/UI_DESIGN.md), [TECH_STACK.md](TECH_STACK.md) (Stage 2b); screens in Stage 2c.
 
 Scope: R0 → R1 → R2 (one workspace, one owner, one house brand, English, one narrator, 1080×1920 at 30 fps, manual publication and manual metrics). R3 components are shown as **planned** (dashed) and are built only after A-18. R4/R5 are not designed.
 
@@ -21,7 +21,7 @@ flowchart LR
   web["Public web sources"]
   yt["YouTube<br/>manual upload at R2"]
   ytapi["YouTube Data and Analytics API<br/>R3 planned"]
-  otel["Telemetry backend<br/>(Stage 2b)"]
+  otel["OTel Collector + Grafana LGTM<br/>(ADR-016)"]
 
   op -- "briefs, reviews, approvals, manual publication records" --> oos
   op -- "uploads the approved bundle by hand (R2)" --> yt
@@ -71,7 +71,7 @@ flowchart TB
 | worker | DBOS workflows, queues per provider | 1 instance at R1 (queues bound concurrency) | public HTTP endpoint |
 | render | HTTP job service + bounded render pool, private network only | 1 instance, CPU/memory capped (NFR-12) | database writes outside `media` schema |
 | PostgreSQL | container locally; RDS when on AWS (ADR-011) | vertical | media files |
-| Object storage | MinIO locally; S3 when on AWS (ADR-011) | — | anything public |
+| Object storage | local S3-compatible store (ADR-015); S3 when on AWS (ADR-011) | — | anything public |
 
 ## Components (C4 level 3)
 
@@ -276,7 +276,7 @@ None: there is no existing system or data (DISCOVERY.md not needed, Stage 1). Sc
 
 ## Deployment
 
-- **Now, local only (ADR-011):** Docker Compose on the owner's machine runs web, api, worker, render, PostgreSQL, MinIO (object lock on) and Keycloak; `make up` (PROCESS). Fake adapters by default; ElevenLabs and OpenAI with keys in a git-ignored `.env` (free credits in development; costs recorded, Q-05). A second Compose environment with its own credentials is staging (NFR-13). Backup is a scheduled `pg_dump` plus a bucket copy, also kept off the machine.
+- **Now, local only (ADR-011):** Docker Compose on the owner's machine runs web, api, worker, render, PostgreSQL, a local S3-compatible store (ADR-015; MinIO CE interim) and Keycloak, plus the OTel Collector and Grafana LGTM (ADR-016); `make up` (PROCESS). Fake adapters by default; ElevenLabs and OpenAI with keys in a git-ignored `.env` (free credits in development; costs recorded, Q-05). A second Compose environment with its own credentials is staging (NFR-13). Backup is a scheduled `pg_dump` plus a bucket copy, also kept off the machine.
 - **Later, AWS Mumbai (ADR-011):** the same images on ECS Fargate, RDS PostgreSQL with PITR, S3 Object Lock, Secrets Manager, Cognito (ADR-012); separate staging and production. After the R2 gate (owner decision, Q-21).
 - render runs on a private network only, with CPU, memory and time limits per job (NFR-12).
 

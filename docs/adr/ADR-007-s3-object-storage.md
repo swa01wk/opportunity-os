@@ -1,5 +1,5 @@
 # ADR-007: S3-compatible object storage for artifacts
-Status: Accepted (provider follows ADR-011)    Date: 2026-11-12
+Status: Accepted (provider follows ADR-011) · Local store amended by ADR-015    Date: 2026-11-12
 
 ## Context
 Audio takes, scene clips, previews, masters, captions, covers, manifests and export bundles must be immutable, private and reachable only through short-lived signed access (R-30, R-45, NFR-04, NFR-10). PRD §15 keeps large media out of the database.

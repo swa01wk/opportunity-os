@@ -1,5 +1,5 @@
 # ADR-011: Local first; AWS Mumbai when hosting is needed
-Status: Accepted    Date: 2026-11-12 (decided by the product owner; Q-21)
+Status: Accepted · Local store amended by ADR-015    Date: 2026-11-12 (decided by the product owner; Q-21)
 
 ## Context
 The system runs five containers (ADR-001), PostgreSQL (ADR-006) and S3-compatible storage with object lock (ADR-007). Hosted needs are separate staging and production credentials (NFR-13), daily backups with RPO 24 h and RTO one working day (A-16, NFR-14) and alerting (NFR-15). One person operates it. The data is the owner's account plus aggregate analytics (A-20).

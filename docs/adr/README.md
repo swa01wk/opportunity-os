@@ -20,3 +20,8 @@ One ADR per significant choice, written when the choice is made, as `ADR-xxx-<sl
 | [ADR-012](ADR-012-auth-provider.md) | Keycloak (OIDC) locally; Amazon Cognito when hosted | Accepted | 2026-11-12 |
 | [ADR-013](ADR-013-tts-provider.md) | ElevenLabs for narration, with timestamps and pronunciation dictionaries | Accepted (paid plan for published narration) | 2026-11-12 |
 | [ADR-014](ADR-014-llm-provider.md) | OpenAI `gpt-5.4-mini-2026-03-17` for research, script and storyboard | Accepted | 2026-11-12 |
+| [ADR-015](ADR-015-local-object-store.md) | Local object store after MinIO CE retirement: pinned interim, replaced in M0; immutability not tied to the store | Accepted | 2026-11-13 |
+| [ADR-016](ADR-016-observability-stack.md) | OpenTelemetry everywhere; Collector + Grafana LGTM locally | Accepted | 2026-11-13 |
+| [ADR-017](ADR-017-product-analytics-in-postgres.md) | KPI analytics events as a PostgreSQL projection of domain events | Accepted | 2026-11-13 |
+| [ADR-018](ADR-018-studio-ui-kit.md) | Studio UI kit: Tailwind, Radix primitives, TanStack Query, generated API client | Accepted | 2026-11-13 |
+| [ADR-019](ADR-019-toolchain.md) | Build and test toolchain (uv, Ruff, pytest, pnpm, ESLint, Vitest, Playwright, CI scanners) | Accepted | 2026-11-13 |
