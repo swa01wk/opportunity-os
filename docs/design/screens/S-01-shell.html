@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S-01 Sign-in and app shell · OpportunityOS Studio prototype</title>
+<!--
+  S-01 Sign-in and app shell: HTML prototype built from the approved Claude Design canvas (Stage 2c, 14 Nov 2026).
+  Self-contained: no network requests; system fonts stand in for Atkinson Hyperlegible.
+  All data is synthetic. States follow UI_DESIGN.md "Empty, loading and error states".
+  Production code rebuilds this screen with the Studio's components and tokens; never copy this HTML.
+-->
+<style>
+body{margin:0;background:#EEF1F4;font-family:'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', sans-serif;color:#172033;font-size:14px;line-height:20px}
+a{color:#1F5FD6}a:hover{color:#163F96}
+:focus-visible{outline:2px solid #1F5FD6;outline-offset:2px}
+[hidden]{display:none!important}
+code{font-family:'Atkinson Hyperlegible Mono',ui-monospace,Menlo,monospace;font-size:12px}
+.proto{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:6px 16px;background:repeating-linear-gradient(135deg,#FFF2D9 0 10px,#FBE7BF 10px 20px);color:#5A3700;font-size:13px;border-bottom:1px solid #E2C68B}
+.proto label{display:flex;gap:6px;align-items:center}
+.proto select{padding:2px 6px;border:1px solid #8A5300;border-radius:4px;background:#FFFDF7;color:#3A2400;font:inherit}
+.sk{display:block;border-radius:4px;background:linear-gradient(90deg,#F6F8FA 0%,#E3E8EE 50%,#F6F8FA 100%);background-size:200% 100%;animation:sk 1.4s ease-in-out infinite}
+@keyframes sk{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@media (prefers-reduced-motion: reduce){.sk{animation:none}}
+</style>
+</head>
+<body>
+<div class="proto" role="region" aria-label="Prototype controls">
+  <strong>Prototype controls (not part of the Studio)</strong>
+  <label>Screen state <select id="protoState"><option value="ready">Ready (sample data)</option><option value="s1">Loading: redirecting to sign-in</option></select></label>
+  <span>S-01 · data: odd-squares fixtures; names and money are synthetic.</span>
+</div>
+<main><div data-state="ready" data-keep=""><div style="min-height: 1000px; display: flex; flex-direction: column; background: #EEF1F4">
+<header style="display: flex; align-items: center; gap: 12px; padding: 20px 32px; background: #FFFFFF; border-bottom: 1px solid #D5DBE3"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 30 30"><rect x="0" y="0" width="14" height="14" rx="3" fill="#A7B3C9"/><rect x="16" y="0" width="14" height="14" rx="3" fill="#A7B3C9"/><rect x="0" y="16" width="14" height="14" rx="3" fill="#FFE04A"/><rect x="16" y="16" width="14" height="14" rx="3" fill="#A7B3C9"/></svg><span style="font-size: 18px; font-weight: 700">OpportunityOS Studio</span><span style="flex: 1"></span><span style="border: 1px solid #7D8AA0; border-radius: 4px; padding: 0 6px; font-size: 12px">local</span></header>
+<div style="max-width: 1200px; width: 100%; margin: 0 auto; padding: 56px 32px; box-sizing: border-box">
+<h1 style="margin: 0; font-size: 30px; line-height: 38px; font-weight: 700">Original maths and science explainers, reviewed at every step</h1>
+<p style="margin: 10px 0 36px; max-width: 720px; color: #4B5770; font-size: 16px; line-height: 24px">Turn a viewer question into a narrated 9:16 explainer with evidence for every claim and a person signing each gate.</p>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start"><section style="background: #FFFFFF; border: 1px solid #D5DBE3; border-radius: 12px; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; "><h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Sign in to the Studio</h2>
+<p style="margin: 0; color: #4B5770">You continue on your workspace sign-in page with your password and authenticator code. Nothing in the Studio is reachable before that.</p>
+<a href="S-02-projects.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 6px 14px; border-radius: 8px; font-family: 'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; box-sizing: border-box; background: #101C33; color: #F2F5FA; border: 1px solid #101C33">Continue to sign-in</a>
+<p style="margin: 0; font-size: 13px; color: #5F6B82">Signed in as an owner, you hold five responsibilities: owner, editor, reviewer, publisher and analyst. Each approval records which one you used.</p></section><section style="background: #FFFFFF; border: 1px solid #D5DBE3; border-radius: 12px; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; "><h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Sign-in needs your authenticator</h2>
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 4px; background: #FCE8E6; color: #B3261E; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" style="flex: none; color: currentColor"><path d="M5.2 1.5h5.6l3.7 3.7v5.6l-3.7 3.7H5.2l-3.7-3.7V5.2z" fill="currentColor"/><rect x="4.5" y="7" width="7" height="2" rx="1" fill="#FFFFFF"/></svg>Sign-in stopped</span>
+<p style="margin: 0">Your account has no authenticator set up, so the Studio can't let you in. Owners and publishers must use one.</p>
+<p style="margin: 0; color: #4B5770">Set up an authenticator app on the sign-in page, then try again.</p>
+<a href="S-02-projects.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 6px 14px; border-radius: 8px; font-family: 'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; box-sizing: border-box; background: #FFFFFF; color: #172033; border: 1px solid #7D8AA0">Set up authenticator</a></section><section style="background: #FFFFFF; border: 1px solid #D5DBE3; border-radius: 12px; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; "><h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Your session ended</h2>
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 4px; background: #FFF2D9; color: #8A5300; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" style="flex: none; color: currentColor"><path d="M8 1.8l6.6 11.6H1.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 6v3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="currentColor"/></svg>Signed out at 14:05 IST</span>
+<p style="margin: 0">You were on <b>Storyboard and preview</b> for Why Odd Numbers Build Perfect Squares. Saved versions are kept; nothing was approved or sent while you were away.</p>
+<a href="S-07-storyboard.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 6px 14px; border-radius: 8px; font-family: 'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; box-sizing: border-box; background: #101C33; color: #F2F5FA; border: 1px solid #101C33">Sign in and return</a></section></div>
+<p style="margin: 28px 0 0; font-size: 13px; color: #5F6B82">Shown side by side for review: the normal sign-in, the error when no authenticator is set up, and the state after a session expires mid-task.</p>
+</div></div></div><div data-state="s1" hidden style="padding-top: 4px"><div style="padding: 0 24px 32px"><section style="background: #FFFFFF; border: 1px dashed #7D8AA0; border-radius: 12px; padding: 48px 24px; text-align: center"><h3 style="margin: 0 0 6px; font-size: 18px; line-height: 26px">Redirecting to sign-in…</h3><p style="margin: 0 auto 16px; max-width: 560px; color: #4B5770">You are being sent to the workspace sign-in page. If nothing happens in a few seconds, use the button.</p><div style="display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center"><button type="button" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 6px 14px; border-radius: 8px; font-family: 'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; box-sizing: border-box; background: #101C33; color: #F2F5FA; border: 1px solid #101C33">Continue to sign-in</button></div></section></div></div></main>
+<script>
+const sel = document.getElementById('protoState');
+function show(v){
+  document.querySelectorAll('[data-state]').forEach(el => { el.hidden = !(el.dataset.state === v || (el.dataset.state === 'ready' && el.dataset.keep && el.dataset.keep.split(' ').includes(v))); });
+  const q = new URLSearchParams(location.search); q.set('state', v); history.replaceState(null, '', '?' + q.toString());
+}
+sel.addEventListener('change', () => show(sel.value));
+const start = new URLSearchParams(location.search).get('state');
+if (start && [...sel.options].some(o => o.value === start)) sel.value = start;
+show(sel.value);
+</script>
+</body>
+</html>

@@ -23,26 +23,26 @@ All gates are signed by the product owner / tech lead (same person).
 |---|---|---|---|---|---|
 
 ## Screens
-Designed by journey on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS) (journey map, what it solves, J1, J6, J3). HTML prototypes follow once the canvas is approved (PROCESS.md, Stage 2 screens).
+Designed by journey on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS) (journey map, what it solves, J1, J6, J3), approved by you on 2026-11-14. Each approved screen has a self-contained HTML prototype with its empty, loading and error states (PROCESS.md, Stage 2 screens).
 
 | Screen | Requirements | Specs | Status |
 |---|---|---|---|
-| S-01 Sign-in and app shell | R-01, R-05 | — | Client review (canvas) |
-| S-02 Projects | R-01, R-44 | — | Client review (canvas) |
-| S-03 Brief and preflight | R-06, R-07, R-57, Gate A | — | Client review (canvas) |
-| S-04 Project settings and data | R-02–R-04, R-34, R-56, R-60 | — | Client review (canvas) |
-| S-05 Evidence | R-08–R-10 | — | Client review (canvas) |
-| S-06 Script and demonstration | R-11–R-15, R-59, Gate B | — | Client review (canvas) |
-| S-07 Storyboard and preview | R-16, R-18–R-23, R-27, R-28, Gate C | — | Client review (canvas; HTML reference prototype [S-07-storyboard.html](../docs/design/screens/S-07-storyboard.html)) |
-| S-08 Narration | R-25, R-26 | — | Client review (canvas) |
-| S-09 Revision impact | R-31, R-32, R-42 | — | Client review (canvas) |
-| S-10 Compare versions | R-33 | — | Client review (canvas) |
-| S-11 Final review and package | R-29, R-30, R-37, R-38, R-45, R-54, R-55, R-60, Gate D | — | Client review (canvas) |
-| S-12 Publication record (R2) | R-46–R-49, R-72 (manual), Gate E | — | Client review (canvas) |
-| S-13 Runs and recovery | R-50–R-53 | — | Client review (canvas) |
-| S-14 Cost and effort | R-34–R-36 | — | Client review (canvas) |
-| S-15 Library | R-02, R-55, R-62 | — | Client review (canvas) |
-| S-16 Series slate (R2) | R-39, R-58 | — | Client review (canvas) |
+| S-01 Sign-in and app shell | R-01, R-05 | — | Approved (canvas, 2026-11-14); HTML [S-01-shell.html](../docs/design/screens/S-01-shell.html) |
+| S-02 Projects | R-01, R-44 | — | Approved (canvas, 2026-11-14); HTML [S-02-projects.html](../docs/design/screens/S-02-projects.html) |
+| S-03 Brief and preflight | R-06, R-07, R-57, Gate A | — | Approved (canvas, 2026-11-14); HTML [S-03-brief.html](../docs/design/screens/S-03-brief.html) |
+| S-04 Project settings and data | R-02–R-04, R-34, R-56, R-60 | — | Approved (canvas, 2026-11-14); HTML [S-04-settings.html](../docs/design/screens/S-04-settings.html) |
+| S-05 Evidence | R-08–R-10 | — | Approved (canvas, 2026-11-14); HTML [S-05-evidence.html](../docs/design/screens/S-05-evidence.html) |
+| S-06 Script and demonstration | R-11–R-15, R-59, Gate B | — | Approved (canvas, 2026-11-14); HTML [S-06-script.html](../docs/design/screens/S-06-script.html) |
+| S-07 Storyboard and preview | R-16, R-18–R-23, R-27, R-28, Gate C | — | Approved (canvas, 2026-11-14); HTML [S-07-storyboard.html](../docs/design/screens/S-07-storyboard.html) |
+| S-08 Narration | R-25, R-26 | — | Approved (canvas, 2026-11-14); HTML [S-08-narration.html](../docs/design/screens/S-08-narration.html) |
+| S-09 Revision impact | R-31, R-32, R-42 | — | Approved (canvas, 2026-11-14); HTML [S-09-revision.html](../docs/design/screens/S-09-revision.html) |
+| S-10 Compare versions | R-33 | — | Approved (canvas, 2026-11-14); HTML [S-10-compare.html](../docs/design/screens/S-10-compare.html) |
+| S-11 Final review and package | R-29, R-30, R-37, R-38, R-45, R-54, R-55, R-60, Gate D | — | Approved (canvas, 2026-11-14); HTML [S-11-package.html](../docs/design/screens/S-11-package.html) |
+| S-12 Publication record (R2) | R-46–R-49, R-72 (manual), Gate E | — | Approved (canvas, 2026-11-14); HTML [S-12-publication.html](../docs/design/screens/S-12-publication.html) |
+| S-13 Runs and recovery | R-50–R-53 | — | Approved (canvas, 2026-11-14); HTML [S-13-runs.html](../docs/design/screens/S-13-runs.html) |
+| S-14 Cost and effort | R-34–R-36 | — | Approved (canvas, 2026-11-14); HTML [S-14-cost.html](../docs/design/screens/S-14-cost.html) |
+| S-15 Library | R-02, R-55, R-62 | — | Approved (canvas, 2026-11-14); HTML [S-15-library.html](../docs/design/screens/S-15-library.html) |
+| S-16 Series slate (R2) | R-39, R-58 | — | Approved (canvas, 2026-11-14); HTML [S-16-slate.html](../docs/design/screens/S-16-slate.html) |
 | S-17 Connections (R3) | R-66, R-67 | — | Planned (prototype after A-18) |
 | S-18 Publishing calendar (R3) | R-68–R-71 | — | Planned (prototype after A-18) |
 | S-19 Opportunity Lab (R3) | R-73 | — | Planned (prototype after A-18) |
@@ -67,9 +67,9 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 |---|---|---|
 | 2a | [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md), [ADR-001–014](../docs/adr/README.md) (all accepted), [contracts 0.1.0](../docs/contracts/README.md) | Done (PR #3, merged 2026-11-12) |
 | 2b | [UI_DESIGN.md](../docs/product/UI_DESIGN.md), [TECH_STACK.md](../docs/architecture/TECH_STACK.md), [SECURITY.md](../docs/architecture/SECURITY.md), [OBSERVABILITY.md](../docs/architecture/OBSERVABILITY.md), ADR-015–019, [contracts 0.2.0](../docs/contracts/README.md#change-log) | Done (PR #4, merged 2026-11-12); decisions taken 2026-11-13 |
-| 2c | [tokens.md](../docs/design/tokens.md) (Studio UI tokens, video house style brand kit v1 per A-31), the S-07 reference prototype, S-01–S-16 on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS). Addendum: [AGENT_ARCHITECTURE.md](../docs/architecture/AGENT_ARCHITECTURE.md) (maturity per workflow, journeys → agents, execution contract, AG-UI, conformance scenarios), [ADR-020](../docs/adr/ADR-020-ag-ui-event-stream.md), [ADR-021](../docs/adr/ADR-021-agent-runtime-contract.md), [contracts 0.4.0](../docs/contracts/README.md#change-log) | Canvas in client review; agent addendum decided (Q-33–Q-35, ADR-020/021 confirmed 2026-11-14) (PR #5) |
+| 2c | [tokens.md](../docs/design/tokens.md) (Studio UI tokens, video house style brand kit v1 per A-31), the S-07 reference prototype, S-01–S-16 on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS). Addendum: [AGENT_ARCHITECTURE.md](../docs/architecture/AGENT_ARCHITECTURE.md) (maturity per workflow, journeys → agents, execution contract, AG-UI, conformance scenarios), [ADR-020](../docs/adr/ADR-020-ag-ui-event-stream.md), [ADR-021](../docs/adr/ADR-021-agent-runtime-contract.md), [contracts 0.4.0](../docs/contracts/README.md#change-log) | Canvas approved 2026-11-14; HTML S-01–S-16 in review (PR #7); agent addendum decided (Q-33–Q-35, ADR-020/021 confirmed 2026-11-14) (PR #5) |
 
-| G2 check (2a + 2b scope) | Result |
+| G2 check | Result |
 |---|---|
 | Traceability: every R-xx maps to a component and every user-facing R-xx to a screen | Pass: all Must and Should R-xx → component (2a) and → screen S-01–S-20 (2b, checked by script: 0 unmapped); R3 screens S-17–S-20 listed, prototyped after A-18; Could and Won't not designed. Every KPI-01–14 has an analytics event. |
 | Contracts versioned | Pass: 0.4.0 (revision redraft through the agent, Q-34; approval policy versions, Q-35; 0.3.0 agent execution contract and AG-UI stream before it; change log in contracts README). Re-checked 2026-11-14: 13 schemas pass the 2020-12 metaschema; all `$ref`s in `agui/stream.json`, `execution.schema.json` and `openapi.yaml` resolve; the four example AG-UI streams have ordered cursors and their snapshot, activity and tool-call payloads validate; sample TaskContract and AgentResult validate; DDL applies to PostgreSQL 16 (44 tables). AG-UI event field names are checked against the pinned SDK in the M0 relay spec. |
@@ -78,7 +78,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 | Nothing designed that no requirement asks for | Pass: R3 planned only; R-64, R-65, R-78–R-82 not designed |
 | Threat model reviewed | Pass for TH-01–TH-30, agent risks and accepted risks (accepted 2026-11-13, owner delegated to the tech lead). TH-31–TH-34 (AG-UI stream, stale agent results, out-of-scope redrafts) added 2026-11-14, to review at G2 |
 | Agent review checklist (PROCESS.md) | Pass: owners, lifecycle, approval binding (with policy versions, Q-35), schemas, idempotency, reconnect and blocked-state explanation documented in AGENT_ARCHITECTURE.md; maturity per workflow recorded (Q-33); conformance C01–C14 mapped (C08, C13 not applicable) |
-| Screens approved | Not yet: tokens and S-07 in client review; S-01–S-16 follow (Stage 2c step 2) |
+| Screens approved | Pass: canvas approved 2026-11-14 (S-01–S-16, journey by journey). HTML prototypes match the canvas: built from the same generators; each switches between sample data and its UI_DESIGN empty, loading and error states; checked headless (78 states, no script errors, no network requests, every link resolves). |
 | Every key journey has an SLO | Pass: SLO-01–SLO-10, provisional, calibrate after R0 (A-15) |
 | Every layer has a chosen tool | Pass: TECH_STACK.md; exact pins in M0 lockfiles. Q-29 search API still open (does not block M0). |
 
@@ -98,6 +98,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Recent decisions
 
+- 2026-11-14: You approved the screens on the Claude Design canvas. HTML prototypes S-01–S-16 built in docs/design/screens/ (S-07 is the step-1 reference prototype).
 - 2026-11-14: Q-32 accepted: the four moats stay hypotheses until their PRD §1.1 proof is met (moats 1–3 at the R2 gate, moat 4 at R3); no external defensibility claim before R4 pilots show repeat use.
 - 2026-11-14: Product owner: revisions go through the agent (Q-34): the script or storyboard agent redrafts only the targeted beat or scene, impact is shown before any render, hand edits stay available (R-31 AC3). Q-33 maturity targets and Q-35 approval policy versions accepted (delegated to the tech lead; approvals record brand-kit, rubric and content-policy versions; a rubric or policy change reopens Gate D for unpublished packages; scheduled Gate E approvals lapse at their time; R-41 AC3). ADR-020 and ADR-021 confirmed. Contracts 0.4.0. S-09 updated on the canvas.
 - 2026-11-14: Agent architecture redone from the Agentic Application Reference Architecture v1.2, its Engineering Practices Guidebook v1.0 and the Agent Capability Maturity Framework (the 2026-11-13 version, built from the wrong source, was reverted). PROCESS.md: generic "Agent architecture" section (golden rules, maturity per workflow, planes, execution contract, harness, validation stages, tools and effects, approvals, AG-UI, conformance C01–C14, ten agent ADRs) wired through stages 1–7. OpportunityOS: AGENT_ARCHITECTURE.md; ADR-020 (AG-UI on the project stream, observe mode, outbox `seq` cursor) and ADR-021 (thin agent runtime, per-attempt contract and context envelope, stale results rejected) accepted by the tech lead, owner confirms at G2; contracts 0.3.0; TH-31–TH-33; Q-33–Q-35 raised. No requirement changed.
