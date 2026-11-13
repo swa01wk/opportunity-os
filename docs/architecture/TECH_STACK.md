@@ -10,6 +10,7 @@ Status: **Draft for G2** (Stage 2b). Living summary: the reason for every choice
 |---|---|---|---|
 | Python | 3.13 | api, worker, agent, media/audio | ADR-001 |
 | FastAPI + Uvicorn | FastAPI 0.1xx, Uvicorn 0.3x | REST API, SSE | ADR-004 |
+| ag-ui-protocol | 0.1.x, exact pin in M0 | AG-UI event types and SSE encoding in the outbox relay | ADR-020 |
 | Pydantic | 2.x | Canonical contracts; JSON Schema generation | ADR-008 |
 | SQLAlchemy + psycopg | SQLAlchemy 2.0, psycopg 3 | Data access, row locks | ADR-004, ADR-006 |
 | Alembic | 1.x | Migrations with tested downgrades | ADR-006 |
@@ -53,7 +54,8 @@ Status: **Draft for G2** (Stage 2b). Living summary: the reason for every choice
 | TypeScript | 5.x | web, media/scenes, contracts/ts | ADR-005, ADR-008 |
 | Tailwind CSS | 4.x | Styling from tokens.md | ADR-018 |
 | Radix UI primitives | current | Accessible dialogs, menus, tabs | ADR-018 |
-| TanStack Query | 5.x | Server state, SSE-driven invalidation | ADR-018 |
+| TanStack Query | 5.x | Server state, invalidated by AG-UI `CUSTOM` domain events | ADR-018, ADR-020 |
+| @ag-ui/core | current, exact pin in M0 | AG-UI event types and schemas for the project stream | ADR-020 |
 | openapi-typescript + openapi-fetch | current | Typed API client from `openapi.yaml` | ADR-018, ADR-004 |
 | React Hook Form | 7.x | Forms | ADR-018 |
 | Auth.js (generic OIDC) | 5.x | Sign-in with Keycloak / Cognito | ADR-012 |

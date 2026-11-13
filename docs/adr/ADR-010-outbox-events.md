@@ -6,7 +6,7 @@ Approvals, state changes, costs and render completions must be visible to the St
 
 ## Decision
 - Every command writes its domain change, an `audit_log` row and one or more `outbox_event` rows in **one transaction**. Event envelope and types: `docs/contracts/events/`.
-- `worker` relays outbox rows: starts workflows for `workflow.requested` (ADR-003), pushes to the Studio SSE stream, and marks rows delivered. Consumers are idempotent by `eventId`.
+- `worker` relays outbox rows: starts workflows for `workflow.requested` (ADR-003), pushes to the Studio SSE stream (as AG-UI `CUSTOM` events since ADR-020), and marks rows delivered. Consumers are idempotent by `eventId`.
 - Events are facts for projection and notification; they never carry authority. A consumer that acts re-reads current state.
 
 ## Alternatives

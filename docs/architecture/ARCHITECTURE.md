@@ -6,7 +6,7 @@ Scope: R0 → R1 → R2 (one workspace, one owner, one house brand, English, one
 
 ## Shape in one paragraph
 
-A modular monolith (ADR-001). The **Studio** (Next.js) talks only to the **API** (FastAPI). The API owns authorisation, versioned content, approvals and budgets in **PostgreSQL**, and never does long work itself: it writes a durable workflow request in the same transaction as the change. A **worker** (Python, DBOS Transact, ADR-003) runs production workflows: the three bounded **agent** tasks (research, script, storyboard), allowlisted demonstration functions, TTS with measured alignment, and calls to a separate **render service** (Node, Remotion, ADR-002) that compiles a typed VideoSpec into reviewed components and renders clips, previews and masters into content-addressed **object storage** (ADR-007). Nothing the models produce is executed; it is validated data (NFR-05).
+A modular monolith (ADR-001). The **Studio** (Next.js) talks only to the **API** (FastAPI). The API owns authorisation, versioned content, approvals and budgets in **PostgreSQL**, and never does long work itself: it writes a durable workflow request in the same transaction as the change. A **worker** (Python, DBOS Transact, ADR-003) runs production workflows: the three bounded **agent** tasks (research, script, storyboard), allowlisted demonstration functions, TTS with measured alignment, and calls to a separate **render service** (Node, Remotion, ADR-002) that compiles a typed VideoSpec into reviewed components and renders clips, previews and masters into content-addressed **object storage** (ADR-007). Nothing the models produce is executed; it is validated data (NFR-05). How the agents are bounded, routed and shown in the Studio is in [AGENT_ARCHITECTURE.md](AGENT_ARCHITECTURE.md); the Studio follows runs through AG-UI events (ADR-020).
 
 ## Context (C4 level 1)
 
@@ -52,7 +52,7 @@ flowchart TB
   ext["LLM, TTS, search, web sources, auth"]
 
   op -- HTTPS --> webc
-  webc -- "REST + SSE (openapi.yaml)" --> api
+  webc -- "REST + SSE AG-UI events (openapi.yaml, agui/)" --> api
   api -- "SQL, outbox in same tx" --> pg
   api -- "signed URLs (15 min)" --> s3
   worker -- "DBOS state, projections, outbox relay" --> pg
@@ -89,7 +89,7 @@ flowchart LR
     approvals["api.approvals<br/>gates A–E, blockers,<br/>binding, invalidation"]
     review["api.review<br/>findings, rubric, policy,<br/>slate variety"]
     packages["api.packages<br/>packages, export, publication,<br/>corrections, manual metrics, slate"]
-    runs["api.runs<br/>runs, cancel, resume,<br/>takeover, SSE"]
+    runs["api.runs<br/>runs, cancel, resume,<br/>takeover, AG-UI stream"]
     cost["api.cost<br/>budget, costs, effort"]
     assets["api.assets<br/>rights ledger, library"]
     data["api.data<br/>project export, deletion"]
@@ -253,7 +253,7 @@ sequenceDiagram
   end
   R->>S: master + manifest (object lock)
   D->>P: render row (manifest, hashes), project state PRODUCING → QA, outbox render.completed
-  P-->>W: SSE via relay: run and state updates
+  P-->>W: AG-UI events via relay (SSE): RUN_*, STEP_*, ACTIVITY_*, CUSTOM
 ```
 
 Path rules:
@@ -264,7 +264,7 @@ Path rules:
 4. **Authority is re-checked at the effect.** Each step re-reads approval currency, cancellation and budget inside its own transaction immediately before the effect (R-41, R-52, R-34).
 5. **Effects are idempotent.** Provider calls carry the attempt ID; renders are keyed by input hash; storage is content-addressed; result rows are keyed by attempt.
 6. **External uncertainty is recorded, not guessed** (NFR-01). At R2 the only external write is the operator's own upload; at R3 an unknown outcome becomes `PUBLICATION_UNKNOWN` and is reconciled before any new write (R-69).
-7. **Studio learns through events.** The relay pushes outbox events to SSE; the Studio re-queries what it shows.
+7. **Studio learns through events.** The relay turns outbox events into AG-UI events on the project's SSE stream (ADR-020, AGENT_ARCHITECTURE.md); the Studio re-queries what it shows. Events never carry authority.
 
 ### Revision path (R-31, R-32, R-42)
 
@@ -361,7 +361,7 @@ Layers: **B** backend (api, worker), **A** agent, **M** media (render service, `
 | R-47 | Must | B W | api.packages; web.publication |
 | R-48 | Must/Should | B | api.packages (manual states); wf.publisher (planned, connected states) |
 | R-49 | Must | B W | api.packages (corrections); web.publication |
-| R-50 | Must | B W | api.runs, wf.production; web.runs |
+| R-50 | Must | B W | api.runs, wf.production, outbox relay (AG-UI stream, ADR-020); web.runs |
 | R-51 | Must | B W | wf.production (DBOS), api.runs; web.runs |
 | R-52 | Must | B | api.runs, wf.production, wf.budget |
 | R-53 | Must | B W | api (problem responses), media.compiler (ValidationError); web.runs |
@@ -374,7 +374,7 @@ Layers: **B** backend (api, worker), **A** agent, **M** media (render service, `
 | R-60 | Must | B W | api.projects (destination disclosure), api.packages; web.package |
 | R-61 | Must | W | web.* (all R1 surfaces; publication at R2) |
 | R-62 | Must | W B | web.library, api.assets |
-| R-63 | Must | A | agent.runner (tasks.json) |
+| R-63 | Must | A | agent.runner (tasks.json); see AGENT_ARCHITECTURE.md |
 | R-64 | Could | — | Not designed (A-28) |
 | R-65 | Could | — | Not designed (A-28) |
 | R-66 | Should | B W | api.connections (planned) |
