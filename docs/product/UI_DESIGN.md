@@ -38,7 +38,7 @@ Status of every screen is tracked in [STATUS.md](../../plans/STATUS.md#screens).
 | S-04 | Project settings and data | R1 | Destination profile, brand-kit and narrator pins, budget allowance, data export, archive and delete | Set destination (platform, account label, timezone, export profile, disclosure); pick brand version; set allowance (step-up to raise); export project data (step-up); archive; delete a never-published project (step-up, type the title to confirm) | `/projects/{id}` (incl. DELETE), `/destination`, `/budget`, `/data-exports` | S-04-settings.html |
 | S-05 | Evidence | R1 | Claim ledger beside its sources; review each claim | Run or re-run research; add a claim with evidence; mark approved / qualified / unsupported / contradicted / needs specialist / removed; open claim detail (sources, locator, excerpt, every beat and scene using it) | `/claims`, `/claims/{id}`, `/research-runs` | S-05-evidence.html |
 | S-06 | Script and demonstration | R1 | Narration beats side by side with their claims and the verified demonstration | Generate or edit script; edit hook; compute demonstration with reviewed parameters; label example / approximation / illustration; policy checklist; approve **Gate B** | `/script-runs`, `/scripts`, `/demonstrations`, `/approvals` | S-06-script.html |
-| S-07 | Storyboard and preview | R1 (R0 sample) | Scene cards and a playhead over the Remotion Player; see what objects do and when | Generate storyboard; inspect object (ID, colour, meaning, label) and action (op, targets, frames, easing, anchor); see compiler errors and capability gaps per scene; render draft preview or hook-only preview; request a change (→ S-09); approve **Gate C** | `/storyboard-runs`, `/storyboards`, `/capabilities`, `/renders` | [S-07-storyboard.html](../design/screens/S-07-storyboard.html) (reference, client review) |
+| S-07 | Storyboard and preview | R1 (R0 sample) | Scene cards and a scene and caption strip with a playhead, around the Remotion Player and its own controls; see what objects do and when | Generate storyboard; inspect object (ID, colour, meaning, label) and action (op, targets, frames, easing, anchor); see compiler errors and capability gaps per scene; render draft preview or hook-only preview; request a change (→ S-09); approve **Gate C** | `/storyboard-runs`, `/storyboards`, `/capabilities`, `/renders` | [S-07-storyboard.html](../design/screens/S-07-storyboard.html) (reference, client review) |
 | S-08 | Narration | R1 (R0 sample) | Audition voice per scene and fix pronunciation before the master | Generate take (whole or per scene); play per scene; edit pronunciation list (including notation); see measured duration vs plan and the pacing change; see take licence (plan, commercial use) | `/narration-takes`, `/pronunciations` | S-08-narration.html |
 | S-09 | Revision impact | R1 (R0 sample) | Before regenerating, see exactly what a change costs and reopens | Describe the change on a claim, scene or object; view rebuild vs reuse lists, estimated cost, frame shifts, options (extend or shorten another beat), gates that reopen; apply | `/revisions/impact`, `/revisions/{id}/apply` | S-09-revision.html |
 | S-10 | Compare versions | R1 | Compare a revised script, storyboard or master with the last reviewed one | Pick two versions; side-by-side text diff, scene diff, synced dual player for masters | `/compare` | S-10-compare.html |
@@ -165,8 +165,8 @@ Standard per A-17: **WCAG 2.2 AA** for the Studio.
 
 - **Contrast:** text 4.5:1, large text and UI graphics 3:1, in both light and dark Studio themes (tokens in 2c are checked against these ratios).
 - **Not colour alone:** gate status, claim status, QA results and object colour meaning always pair colour with text, icon or shape (also R-20 AC2 for the video).
-- **Keyboard:** every action reachable by keyboard in a logical order; visible focus (2.4.7, 2.4.11 focus not obscured); dialogs trap and return focus; the player has keyboard play, pause, frame step and scene jump; scene cards and the timeline are navigable by arrow keys.
-- **Targets:** at least 24 × 24 px (2.5.8); drag on the timeline always has a non-drag alternative (2.5.7), e.g. frame number inputs.
+- **Keyboard:** every action reachable by keyboard in a logical order; visible focus (2.4.7, 2.4.11 focus not obscured); dialogs trap and return focus; the player has keyboard play, pause, frame step and scene jump; scene cards and the scene strip are reachable by keyboard.
+- **Targets:** at least 24 × 24 px (2.5.8); dragging the seek bar always has a non-drag alternative (2.5.7): frame step buttons and a frame number input.
 - **Motion and flashing:** Studio UI motion respects `prefers-reduced-motion`; nothing in the Studio flashes more than three times per second. Video content is checked separately by `media.qa` (≤ 3 flashes/s, NFR-08).
 - **Media review:** S-11 offers a muted-with-captions playback mode and a phone-size frame so the KPI-14 review is done the way viewers watch (PRD §2.2).
 - **Forms:** labels on every field, errors announced and linked to the field, no time limits on review screens except the signed media URL, which renews silently.
@@ -210,12 +210,12 @@ Every user-facing Must and Should requirement maps to at least one screen. Requi
 | R-18 | Must | S-07 | Compiler errors per scene and field |
 | R-19 | Must | S-07 | Family shown per scene; components are media layer |
 | R-20 | Must | S-07 | Object inspector: ID, colour, meaning, label |
-| R-21 | Must | S-07 | Action lanes on the timeline |
+| R-21 | Must | S-07 | Action list per scene and action inspector (op, targets, frames, easing, anchor); no multi-track timeline (PRD §13 defers it) |
 | R-22 | Must | S-07, S-09 | Continuity flags; inheriting scenes marked invalid |
 | R-23 | Must | S-07, S-11, S-15 | House style visible in previews; brand kit in S-15 |
 | R-25 | Must | S-08 | |
 | R-26 | Must | S-08, S-07 | Pacing change shown, never silent |
-| R-27 | Must | S-07, S-11 | Caption lane and overlay; QA result |
+| R-27 | Must | S-07, S-11 | Caption strip and overlay; QA result |
 | R-28 | Must | S-07 | |
 | R-29 | Must | S-11 | Media QA results |
 | R-30 | Must | S-11, S-13 | Manifest view |

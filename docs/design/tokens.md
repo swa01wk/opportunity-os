@@ -18,7 +18,7 @@ Reference prototype: [S-07 Storyboard and preview](screens/S-07-storyboard.html)
 ## Design intent
 
 - **The video is the only bright thing.** The Studio is a quiet, cool-grey workspace. Saturated colour belongs to the video canvas, where each colour means one odd-number layer. Studio status colours are muted and always come with an icon and words, so they never compete with or get confused for layer meaning.
-- **Layer colours only appear on the video canvas.** When the Studio shows a layer colour (inspector swatch, timeline lane), it sits on a small `color.canvas` chip, the same background the viewer sees it on.
+- **Layer colours only appear on the video canvas.** When the Studio shows a layer colour (inspector swatch, object list), it sits on a small `color.canvas` chip, the same background the viewer sees it on.
 - **One typeface family for legibility.** Atkinson Hyperlegible Next (Studio and video) was designed so that similar characters (1, l, I; 0, O; 3, 8) cannot be confused. That is the job of both a review tool full of hashes and a phone-size maths video.
 - **Primary actions use the video canvas colour.** Solid "night" buttons tie the Studio to the canvas it controls.
 
@@ -73,7 +73,7 @@ Scale (ratio ≈ 1.2, base 14 px for a dense review tool at 1280 px+):
 
 | Token | Size / line height | Weight | Use |
 |---|---|---|---|
-| `ui.text.xs` | 12 / 16 | 400 | Timeline ruler, frame ticks, captions on swatches |
+| `ui.text.xs` | 12 / 16 | 400 | Scene strip, caption strip, swatch labels |
 | `ui.text.sm` | 13 / 18 | 400 | Table cells, metadata, chips |
 | `ui.text.base` | 14 / 20 | 400 | Body, inputs, buttons (500) |
 | `ui.text.md` | 16 / 24 | 500 | Panel titles, dialog body lead |

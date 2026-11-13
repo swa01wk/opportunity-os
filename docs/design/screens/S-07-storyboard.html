@@ -211,21 +211,31 @@ dl.kv dt{color:var(--ui-color-ink-muted)} dl.kv dd{margin:0;min-width:0;overflow
 
 /* Timeline */
 .tlpanel{margin:0 20px 24px}
+.rbar{background:#0B1220;color:#E8EDF5;padding:6px 12px 8px;border-top:1px solid #1E2A42}
+.seek{width:100%;margin:0 0 4px;accent-color:#E8EDF5;height:16px;cursor:pointer}
+.seek:focus-visible{outline:2px solid #7FB2FF;outline-offset:2px}
+.rrow{display:flex;align-items:center;gap:2px}
+.rbtn{background:none;border:0;color:#E8EDF5;width:32px;height:32px;display:grid;place-items:center;border-radius:6px;cursor:pointer}
+.rbtn:hover{background:#1E2A42}
+.rbtn:focus-visible{outline:2px solid #7FB2FF;outline-offset:0}
+.rbtn[disabled]{color:#8E9AB0;cursor:not-allowed;background:none}
+.rtime{font-size:13px;margin:0 10px 0 4px;color:#E8EDF5}
+.rslot{display:inline-flex;gap:2px;padding-left:8px;margin-left:4px;border-left:1px solid #2E3A55}
+.protonote{margin:0;font-size:12px;line-height:16px;padding:6px 8px;border-radius:var(--ui-radius-sm);background:repeating-linear-gradient(135deg,#FFF2D9 0 10px,#FBE7BF 10px 20px);color:#5A3700}
+.sblock{border:0;border-left:1px solid var(--ui-color-line-strong);background:none;text-align:left;cursor:pointer;color:var(--ui-color-ink);font:inherit;font-size:12px;line-height:15px}
+.sblock:hover{background:var(--ui-color-sunken)}
+.cap{position:absolute;top:3px;height:20px;border:1px solid var(--ui-color-line-strong);background:var(--ui-color-panel);border-radius:3px;font-size:12px;line-height:18px;padding:0 5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--ui-color-ink)}
+.cap.on{border-color:var(--ui-color-focus);background:var(--ui-color-info-bg)}
 .tl{position:relative;padding:0 0 8px;user-select:none}
 .tlrow{display:grid;grid-template-columns:150px 1fr;align-items:center;min-height:22px}
 .tlrow .ln{font-size:12px;line-height:16px;padding:0 10px 0 14px;display:flex;align-items:center;gap:6px;color:var(--ui-color-ink-muted);white-space:nowrap;overflow:hidden}
-.tlrow .tr{position:relative;height:22px;border-bottom:1px dashed var(--ui-color-line);cursor:pointer}
+.tlrow .tr{position:relative;height:26px;border-bottom:1px dashed var(--ui-color-line);cursor:pointer}
 .ruler .tr{height:36px;border-bottom:1px solid var(--ui-color-line-strong)}
 .sblock{position:absolute;top:2px;bottom:2px;border-left:1px solid var(--ui-color-line-strong);padding:2px 6px;font-size:12px;line-height:15px;overflow:hidden;white-space:nowrap}
 .sblock b{font-weight:600}
 .sblock.cur{background:var(--ui-color-sunken)}
 .sblock.err{background:var(--ui-color-danger-bg);color:var(--ui-color-danger)}
 .tick{position:absolute;bottom:0;height:6px;border-left:1px solid var(--ui-color-line-strong)}
-.bar{position:absolute;top:3px;height:16px;border:1px solid var(--ui-color-line-strong);background:var(--ui-color-sunken);border-radius:3px;font-size:11px;line-height:14px;padding:0 4px;overflow:hidden;white-space:nowrap;color:var(--ui-color-ink);cursor:pointer;text-align:left;min-width:4px}
-.bar:hover{background:var(--ui-color-panel)}
-.bar[aria-pressed="true"]{border:2px solid var(--ui-color-focus);background:var(--ui-color-info-bg)}
-.bar.err{border-color:var(--ui-color-danger);background:var(--ui-color-danger-bg);color:var(--ui-color-danger);border-style:dashed}
-.bar.cap{background:var(--ui-color-panel);border-style:solid}
 .playhead{position:absolute;top:0;bottom:8px;width:2px;background:var(--ui-color-focus);pointer-events:none;margin-left:149px}
 .playhead::before{content:"";position:absolute;top:0;left:-5px;border:6px solid transparent;border-top:8px solid var(--ui-color-focus)}
 
@@ -295,6 +305,8 @@ dialog::backdrop{background:rgb(7 13 26 / .5)}
     <symbol id="i-fnext" viewBox="0 0 16 16"><rect x="11.2" y="3" width="1.8" height="10" fill="currentColor"/><path d="M3 3v10l6.8-5z" fill="currentColor"/></symbol>
     <symbol id="i-sprev" viewBox="0 0 16 16"><path d="M8 3v10L1.5 8zM14.5 3v10L8 8z" fill="currentColor"/></symbol>
     <symbol id="i-snext" viewBox="0 0 16 16"><path d="M1.5 3v10L8 8zM8 3v10l6.5-5z" fill="currentColor"/></symbol>
+    <symbol id="i-vol" viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor"/><path d="M11.5 5.5a3.5 3.5 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-full" viewBox="0 0 16 16"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="n-projects" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="4" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="11" width="14" height="5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
     <symbol id="n-slate" viewBox="0 0 20 20"><rect x="3" y="3" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="3" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="11" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="11" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
     <symbol id="n-library" viewBox="0 0 20 20"><path d="M4 3.5h3v13H4zM9 3.5h3v13H9zM13.3 4.2l2.8-.8 3 12.4-2.8.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
@@ -374,16 +386,27 @@ dialog::backdrop{background:rgb(7 13 26 / .5)}
             <div id="stageMsg"></div>
           </div></div>
         </div>
+        <div class="rbar" role="group" aria-label="Player controls">
+          <input class="seek" id="seek" type="range" min="0" max="1349" step="1" value="0" aria-label="Seek">
+          <div class="rrow">
+            <button class="rbtn" type="button" id="bPlay" aria-label="Play"><svg class="i"><use href="#i-play"/></svg></button>
+            <button class="rbtn" type="button" id="bMute" aria-label="Volume: no narration audio yet" disabled><svg class="i"><use href="#i-vol"/></svg></button>
+            <span class="rtime num" id="tread">0:00 / 0:45</span>
+            <span class="rslot" role="group" aria-label="Frame and scene steps">
+              <button class="rbtn" type="button" id="bSprev" aria-label="Previous scene"><svg class="i"><use href="#i-sprev"/></svg></button>
+              <button class="rbtn" type="button" id="bFprev" aria-label="Back one frame"><svg class="i"><use href="#i-fprev"/></svg></button>
+              <button class="rbtn" type="button" id="bFnext" aria-label="Forward one frame"><svg class="i"><use href="#i-fnext"/></svg></button>
+              <button class="rbtn" type="button" id="bSnext" aria-label="Next scene"><svg class="i"><use href="#i-snext"/></svg></button>
+            </span>
+            <span class="spacer"></span>
+            <button class="rbtn" type="button" id="bFull" aria-label="Fullscreen"><svg class="i"><use href="#i-full"/></svg></button>
+          </div>
+        </div>
         <div class="controls">
           <div class="crow">
-            <button class="btn icon" type="button" id="bSprev" aria-label="Previous scene"><svg class="i"><use href="#i-sprev"/></svg></button>
-            <button class="btn icon" type="button" id="bFprev" aria-label="Back one frame"><svg class="i"><use href="#i-fprev"/></svg></button>
-            <button class="btn icon primary" type="button" id="bPlay" aria-label="Play"><svg class="i"><use href="#i-play"/></svg></button>
-            <button class="btn icon" type="button" id="bFnext" aria-label="Forward one frame"><svg class="i"><use href="#i-fnext"/></svg></button>
-            <button class="btn icon" type="button" id="bSnext" aria-label="Next scene"><svg class="i"><use href="#i-snext"/></svg></button>
-            <span class="tread num" id="tread" aria-live="off">0.0 s · f0</span>
             <label class="hint" for="frameIn">Frame</label>
             <input class="frameinput num" id="frameIn" type="number" min="0" max="1349" value="0">
+            <span class="subtle num" id="sceneRead" style="font-size:13px"></span>
             <span class="spacer"></span>
             <div class="seg" role="group" aria-label="Preview size">
               <button type="button" aria-pressed="true" id="szPhone">Phone 360×640</button>
@@ -393,11 +416,11 @@ dialog::backdrop{background:rgb(7 13 26 / .5)}
           <div class="crow">
             <label class="toggle"><input type="checkbox" id="tgCap" checked> Captions</label>
             <label class="toggle"><input type="checkbox" id="tgSafe"> Safe zones</label>
-            <span class="subtle" id="playerSrc" style="font-size:13px">Player: live from storyboard v1 · brand kit v1</span>
             <span class="spacer"></span>
-            <span class="hint">Space play · ← → frame · [ ] scene</span>
+            <span class="subtle" id="playerSrc" style="font-size:13px">Player: live from storyboard v1 · brand kit v1</span>
           </div>
           <div class="provisional" id="provNote"><svg class="i"><use href="#i-warn"/></svg><span><b>Timing provisional.</b> No measured narration take yet, so scene lengths are the storyboard's plan. The master waits for a take from <a href="S-08-narration.html">Narration</a>.</span></div>
+          <p class="protonote"><b>Prototype note:</b> the dark bar stands for the Remotion Player's own controls (play, seek, volume, fullscreen). Frame and scene steps go in its custom-controls slot. Keys: Space play, ← → frame, Shift ← → ten frames, [ ] scene.</p>
         </div>
       </section>
 
@@ -413,7 +436,7 @@ dialog::backdrop{background:rgb(7 13 26 / .5)}
     </div>
 
     <section class="panel tlpanel" aria-labelledby="tlH">
-      <header><h3 id="tlH">Timeline</h3><span class="subtle">Actions by object, at 30 fps. Select a bar to inspect it; arrow keys move between bars.</span><span class="spacer"></span><span class="subtle num" id="tlScale"></span></header>
+      <header><h3 id="tlH">Scenes and captions</h3><span class="subtle">Select a scene to jump to it. Each action's frames are in the inspector.</span></header>
       <div class="tl" id="tl"></div>
     </section>
   </div>
@@ -478,12 +501,7 @@ scenes.forEach(s=>s.actions.forEach(a=>actions.push({...a, scene:s, absStart:s.s
 actions.sort((a,b)=>a.absStart-b.absStart);
 const demoAt = path => { const m=path.match(/^results\.layers\[(\d+)\]\.(\w+)$/); return m ? DEMO.results.layers[+m[1]][m[2]] : null; };
 
-/* Lanes: one per object, square split into its layer groups */
-const LANES = [{id:'captions', label:'Captions'}, {id:'question',label:'question'}, {id:'sum',label:'sum'}, {id:'total',label:'total'}, {id:'square',label:'square'}]
-  .concat(sq.groups.map(g=>({id:g.id,label:g.id,color:g.colorToken})))
-  .concat([{id:'formula',label:'formula'},{id:'takeaway',label:'takeaway'},{id:'brand',label:'brand'}]);
 function laneOf(t){ if(groupOf[t]) return groupOf[t]; if(groupById[t]) return t; if(termOwner[t]) return termOwner[t]; return t; }
-function lanesFor(a){ return [...new Set(a.targets.map(laneOf))]; }
 
 /* ---------- Easing (tokens.md 2.5) ---------- */
 function bez(x1,y1,x2,y2){ return t=>{ if(t<=0) return 0; if(t>=1) return 1; let u=t; for(let i=0;i<8;i++){ const x=3*(1-u)*(1-u)*u*x1+3*(1-u)*u*u*x2+u*u*u-t; const dx=3*(1-u)*(1-u)*x1+6*(1-u)*u*(x2-x1)+3*u*u*(1-x2); if(Math.abs(dx)<1e-6) break; u-=x/dx; u=Math.min(1,Math.max(0,u)); } return 3*(1-u)*(1-u)*u*y1+3*(1-u)*u*u*y2+u*u*u; }; }
@@ -656,10 +674,12 @@ function drawSelection(){
 const sceneAt=f=>scenes.find(s=>f>=s.start&&f<s.end)||scenes[scenes.length-1];
 const fmt=f=>(f/FPS).toFixed(1)+' s · f'+f;
 function updateReadout(f){
-  document.getElementById('tread').textContent=`${fmt(f)} / ${(TOTAL/FPS).toFixed(1)} s`;
+  const mmss=x=>{const t=Math.floor(x/FPS);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
+  document.getElementById('tread').textContent=`${mmss(f)} / ${mmss(TOTAL)}`;
+  const sk=document.getElementById('seek'); sk.value=f; sk.setAttribute('aria-valuetext',fmt(f));
+  { const c=sceneAt(f); document.getElementById('sceneRead').textContent=`${fmt(f)} · scene ${c.idx+1} ${SCENE_NAMES[c.beat]}`; }
   const fi=document.getElementById('frameIn'); if(document.activeElement!==fi) fi.value=f;
-  const ph=document.getElementById('playhead'); if(ph) ph.style.left=(f/TOTAL*100)+'%';
-  const cur=sceneAt(f);
+    const cur=sceneAt(f);
   document.querySelectorAll('.scard').forEach(c=>c.setAttribute('aria-current', String(+c.dataset.idx===cur.idx)));
   document.querySelectorAll('.sblock').forEach(b=>b.classList.toggle('cur', +b.dataset.idx===cur.idx));
   if(curSceneShown!==cur.idx){ curSceneShown=cur.idx; if(activeTab==='scene') renderInspector(); }
@@ -669,6 +689,8 @@ function seek(f){ frame=clamp(Math.round(f),0,TOTAL-1); render(frame); }
 let last=0;
 function tick(t){ if(!playing) return; if(!last) last=t; const df=Math.floor((t-last)/(1000/FPS)); if(df>0){ last+=df*1000/FPS; let nf=frame+df; const end=loopRange?loopRange[1]:TOTAL; if(nf>=end){ if(loopRange){ nf=loopRange[0]; } else { nf=TOTAL-1; setPlay(false); } } seek(nf); } requestAnimationFrame(tick); }
 function setPlay(p){ playing=p; last=0; const b=document.getElementById('bPlay'); b.setAttribute('aria-label',p?'Pause':'Play'); b.innerHTML=`<svg class="i"><use href="#i-${p?'pause':'play'}"/></svg>`; if(p) requestAnimationFrame(tick); }
+document.getElementById('seek').addEventListener('input',e=>{ setPlay(false); seek(+e.target.value); });
+document.getElementById('bFull').onclick=()=>{ const sc=document.getElementById('screen'); if(document.fullscreenElement) document.exitFullscreen(); else if(sc.requestFullscreen) sc.requestFullscreen(); };
 document.getElementById('bPlay').onclick=()=>{ if(!playing&&frame>=TOTAL-1) seek(0); setPlay(!playing); };
 document.getElementById('bFprev').onclick=()=>{ setPlay(false); seek(frame-1); };
 document.getElementById('bFnext').onclick=()=>{ setPlay(false); seek(frame+1); };
@@ -749,7 +771,7 @@ function renderInspector(){
     <h4>Objects</h4><ul class="ilist">${objectsIn(s).map(id=>{ const d=describeObj(id); return `<li><button type="button" data-obj="${id}">${d.color?sw(d.color):''}<span class="mono">${id}</span><span class="r">${d.type}</span></button></li>`; }).join('')}</ul>
     <h4>Actions</h4><ul class="ilist">${s.actions.map(a=>`<li><button type="button" data-act="${a.id}"><span>${a.op}</span><span class="mono">${a.targets.length>1?a.targets[0]+' +'+(a.targets.length-1):a.targets[0]}</span><span class="r num">f${a.startFrame}–${a.endFrame}</span></button></li>`).join('')}</ul>`;
   } else if(activeTab==='object'){
-    if(!selected||selected.kind!=='object'){ h+='<div class="empty"><h4>No object selected</h4><p>Select an object in the preview, a lane in the timeline or an item in the Scene tab.</p></div>'; }
+    if(!selected||selected.kind!=='object'){ h+='<div class="empty"><h4>No object selected</h4><p>Select an object in the preview or in the object list on the Scene tab.</p></div>'; }
     else { const d=describeObj(selected.id); const acts=actionsTouching(selected.id);
       h+=`<h4><span class="mono">${d.id}</span></h4><dl class="kv">
         <dt>Type</dt><dd>${d.type}</dd><dt>Meaning</dt><dd>${d.role}</dd>
@@ -764,7 +786,7 @@ function renderInspector(){
       </dl><h4>Actions on this object (${acts.length})</h4><ul class="ilist">${acts.map(a=>`<li><button type="button" data-act="${a.id}"><span>${a.op}</span><span class="subtle">${SCENE_NAMES[a.scene.beat]}</span><span class="r num">f${a.absStart}–${a.absEnd}</span></button></li>`).join('')}</ul>`; }
   } else if(activeTab==='action'){
     const a=selected&&selected.kind==='action'?actions.find(x=>x.id===selected.id):null;
-    if(!a){ h+='<div class="empty"><h4>No action selected</h4><p>Select a bar in the timeline or an action in the Scene tab.</p></div>'; }
+    if(!a){ h+='<div class="empty"><h4>No action selected</h4><p>Select an action in the Scene tab, or in the action list on the Object tab.</p></div>'; }
     else { const err=ERRORS.find(e=>e.action===a.id);
       h+=`<h4><span class="mono">${a.id}</span></h4>${err?`<div class="prob"><span class="code">${err.code}</span><p>${err.message}</p></div>`:''}<dl class="kv">
         <dt>Family</dt><dd>${a.family}</dd><dt>Operation</dt><dd>${a.op}</dd>
@@ -796,59 +818,33 @@ function renderProblems(){
 function selectObject(id){ selected={kind:'object',id}; setTab('object'); drawSelection(); markBars(); }
 function selectAction(id){ selected={kind:'action',id}; const a=actions.find(x=>x.id===id); if(a&&(frame<a.absStart||frame>a.absEnd)) seek(a.absStart); setTab('action'); markBars(); }
 
-/* ---------- Timeline ---------- */
+/* ---------- Scene and caption strip (replaces a multi-track timeline; PRD §13 defers one) ---------- */
+let phScale=1;
 function renderTimeline(){
   const tl=document.getElementById('tl'); tl.innerHTML='';
-  if(UI.mode==='empty'){ tl.innerHTML='<div class="empty"><p>The timeline shows each object\'s actions once a storyboard exists.</p></div>'; return; }
-  if(UI.mode==='loading'){ tl.innerHTML='<div style="padding:12px 14px">'+'<div class="sk" style="height:16px;margin:8px 0"></div>'.repeat(6)+'</div>'; return; }
+  if(UI.mode==='empty'){ tl.innerHTML='<div class="empty"><p>Scenes and captions appear here once a storyboard exists.</p></div>'; return; }
+  if(UI.mode==='loading'){ tl.innerHTML='<div style="padding:12px 14px">'+'<div class="sk" style="height:16px;margin:8px 0"></div>'.repeat(2)+'</div>'; return; }
   const pct=f=>(f/TOTAL*100)+'%';
-  const ruler=document.createElement('div'); ruler.className='tlrow ruler'; ruler.innerHTML='<div class="ln">Scene</div><div class="tr"></div>';
+  const ruler=document.createElement('div'); ruler.className='tlrow ruler'; ruler.innerHTML='<div class="ln">Scenes</div><div class="tr"></div>';
   const rt=ruler.querySelector('.tr');
-  scenes.forEach(s=>{ const d=document.createElement('div'); d.className='sblock'+(errsFor(s).length?' err':''); d.dataset.idx=s.idx; d.style.left=pct(s.start); d.style.width=pct(s.durationFrames); d.innerHTML=`<b>${s.idx+1} ${SCENE_NAMES[s.beat]}</b><br><span class="num">${(s.start/FPS).toFixed(1)} s</span>`; rt.appendChild(d); });
-  for(let f=0;f<=TOTAL;f+=30){ const t=document.createElement('div'); t.className='tick'; t.style.left=pct(f); if(f%150===0) t.style.height='10px'; rt.appendChild(t); }
+  scenes.forEach(s=>{ const d=document.createElement('button'); d.type='button'; d.className='sblock'+(errsFor(s).length?' err':''); d.dataset.idx=s.idx; d.style.left=pct(s.start); d.style.width=pct(s.durationFrames);
+    d.innerHTML=`<b>${s.idx+1} ${SCENE_NAMES[s.beat]}</b><br><span class="num">${(s.start/FPS).toFixed(1)} s</span>`;
+    d.setAttribute('aria-label',`Jump to scene ${s.idx+1}, ${SCENE_NAMES[s.beat]}, ${(s.start/FPS).toFixed(1)} seconds${errsFor(s).length?', has problems':''}`);
+    d.onclick=e=>{ e.stopPropagation(); setPlay(false); loopRange=null; seek(s.start); setTab('scene'); }; rt.appendChild(d); });
   tl.appendChild(ruler);
-  LANES.forEach(L=>{
-    const row=document.createElement('div'); row.className='tlrow';
-    row.innerHTML=`<div class="ln" title="${L.id}">${L.color?sw(L.color):''}<span class="mono">${L.label}</span></div><div class="tr" data-lane="${L.id}"></div>`;
-    const tr=row.querySelector('.tr');
-    if(L.id==='captions'){ CAPTIONS.forEach((c,i)=>{ const b=document.createElement('div'); b.className='bar cap'; b.style.left=pct(c.from); b.style.width=pct(c.to-c.from); b.textContent=c.text; b.title=c.text; tr.appendChild(b); }); }
-    else actions.filter(a=>lanesFor(a).includes(L.id)).forEach(a=>{
-      const b=document.createElement('button'); b.type='button'; b.className='bar'; b.dataset.act=a.id; b.tabIndex=-1;
-      if(ERRORS.some(e=>e.action===a.id)) b.classList.add('err');
-      b.style.left=pct(a.absStart); b.style.width=`calc(${pct(a.absEnd-a.absStart)} - 1px)`;
-      const n=a.targets.filter(t=>laneOf(t)===L.id).length;
-      b.textContent=a.op+(n>1?` ×${n}`:'');
-      b.setAttribute('aria-label',`${a.op} ${a.targets.join(', ')}, frames ${a.absStart} to ${a.absEnd}, scene ${a.scene.idx+1} ${SCENE_NAMES[a.scene.beat]}`);
-      b.setAttribute('aria-pressed','false'); b.title=`${a.id}: ${a.op} ${a.targets.join(', ')} · f${a.absStart}–${a.absEnd}`;
-      b.onclick=e=>{ e.stopPropagation(); selectAction(a.id); };
-      tr.appendChild(b);
-    });
-    tr.addEventListener('click',e=>{ if(e.target!==tr) return; const r=tr.getBoundingClientRect(); setPlay(false); seek((e.clientX-r.left)/r.width*TOTAL); if(L.id!=='captions') selectObject(L.id); });
-    tl.appendChild(row);
-  });
-  rt.addEventListener('click',e=>{ const r=rt.getBoundingClientRect(); setPlay(false); seek((e.clientX-r.left)/r.width*TOTAL); });
+  const row=document.createElement('div'); row.className='tlrow'; row.innerHTML='<div class="ln">Captions</div><div class="tr"></div>';
+  const tr=row.querySelector('.tr');
+  CAPTIONS.forEach(c=>{ const b=document.createElement('div'); b.className='cap'; b.dataset.from=c.from; b.style.left=pct(c.from); b.style.width=`calc(${pct(c.to-c.from)} - 2px)`; b.textContent=c.text; b.title=`${c.text} · f${c.from}–${c.to}${c.anchor?' · '+c.anchor:''}`; tr.appendChild(b); });
+  tl.appendChild(row);
+  [rt,tr].forEach(t=>t.addEventListener('click',e=>{ const r=t.getBoundingClientRect(); setPlay(false); seek((e.clientX-r.left)/r.width*TOTAL); }));
   const ph=document.createElement('div'); ph.className='playhead'; ph.id='playhead'; tl.appendChild(ph);
-  const first=tl.querySelector('.bar[data-act]'); if(first) first.tabIndex=0;
-  const w=tl.querySelector('.tr').getBoundingClientRect().width; document.getElementById('tlScale').textContent=`1 s ≈ ${(w/TOTAL*FPS).toFixed(0)} px`;
-  // playhead lives in the track column
-  const resize=()=>{ const trw=tl.querySelector('.ruler .tr'); ph.style.marginLeft=trw.offsetLeft+'px'; ph.style.width='2px'; ph.style.left='0'; ph.style.transform=''; phScale=trw.getBoundingClientRect().width; updatePH(); };
-  resize(); window.onresize=()=>{ resize(); };
-  tl.addEventListener('keydown',navBars);
-  markBars(); updatePH();
+  const resize=()=>{ ph.style.marginLeft=rt.offsetLeft+'px'; ph.style.left='0'; phScale=rt.getBoundingClientRect().width; updatePH(); };
+  resize(); window.onresize=resize;
 }
-let phScale=1;
-function updatePH(){ const ph=document.getElementById('playhead'); if(ph) ph.style.left=(frame/TOTAL*phScale)+'px'; }
+function updatePH(){ const ph=document.getElementById('playhead'); if(ph) ph.style.left=(frame/TOTAL*phScale)+'px';
+  document.querySelectorAll('#tl .cap').forEach(c=>{ const cap=CAPTIONS.find(x=>x.from===+c.dataset.from); c.classList.toggle('on',frame>=cap.from&&frame<cap.to); }); }
 const _ur=updateReadout; updateReadout=function(f){ _ur(f); updatePH(); };
-function navBars(e){
-  if(!e.target.classList.contains('bar')) return;
-  const rows=[...document.querySelectorAll('#tl .tr[data-lane]')].map(r=>[...r.querySelectorAll('.bar[data-act]')]).filter(r=>r.length);
-  let ri=rows.findIndex(r=>r.includes(e.target)), bi=rows[ri].indexOf(e.target);
-  if(e.key==='ArrowRight') bi=Math.min(bi+1,rows[ri].length-1); else if(e.key==='ArrowLeft') bi=Math.max(bi-1,0);
-  else if(e.key==='ArrowDown'||e.key==='ArrowUp'){ const x=e.target.offsetLeft; ri=clamp(ri+(e.key==='ArrowDown'?1:-1),0,rows.length-1); bi=rows[ri].reduce((best,b,i)=>Math.abs(b.offsetLeft-x)<Math.abs(rows[ri][best].offsetLeft-x)?i:best,0); }
-  else if(e.key==='Enter'||e.key===' '){ return; } else return;
-  e.preventDefault(); e.target.tabIndex=-1; const n=rows[ri][bi]; n.tabIndex=0; n.focus();
-}
-function markBars(){ document.querySelectorAll('.bar[data-act]').forEach(b=>b.setAttribute('aria-pressed',String(!!selected&&selected.kind==='action'&&selected.id===b.dataset.act))); }
+function markBars(){}
 
 /* ---------- Gate C dialog (R-40, R-41, R-05) ---------- */
 const dlg=document.getElementById('gateDlg');
