@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://opportunityos.invalid/contracts/agui/stream.json",
-  "x-version": "0.3.0",
+  "x-version": "0.4.0",
   "title": "AG-UI project event stream",
   "description": "How GET /projects/{projectId}/events encodes run progress and domain events as AG-UI events (ADR-020, docs/architecture/AGENT_ARCHITECTURE.md). Event shapes are the pinned AG-UI SDK's (ag-ui-protocol for Python, @ag-ui/core for TypeScript); this file fixes only how OpportunityOS uses them. AG-UI events are a projection of DomainEvents and attempt spans; they carry no authority, and every command goes through the REST API.",
   "x-agui": {
@@ -100,7 +100,7 @@
     "StepName": {
       "type": "string",
       "description": "Workflow step names shown in the run indicator and S-13.",
-      "pattern": "^(research|script|storyboard|demonstration|narration|tts\\.scene\\.[a-z0-9_.-]+|alignment|captions|compile|render\\.clip\\.scene\\.[a-z0-9_.-]+|assembly|mix|qa|package_build|export_build|budget\\.reserve|budget\\.settle)$"
+      "pattern": "^(research|script|storyboard|revision\\.impact|demonstration|narration|tts\\.scene\\.[a-z0-9_.-]+|alignment|captions|compile|render\\.clip\\.scene\\.[a-z0-9_.-]+|assembly|mix|qa|package_build|export_build|budget\\.reserve|budget\\.settle)$"
     },
     "ActivityType": {
       "enum": [

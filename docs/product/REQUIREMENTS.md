@@ -1,6 +1,6 @@
 # Requirements
 
-Baseline derived from [PRD v2.0](../sources/PRD-v2.0.md) (revised in discovery on 13 Nov 2026: §1.1 added). Status: **Draft for G1**. Baselined at G1; after that it changes only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)). Open gaps and the assumptions we build on live in [QUESTIONS.md](QUESTIONS.md).
+Baseline derived from [PRD v2.0](../sources/PRD-v2.0.md) (revised in discovery on 13 Nov 2026: §1.1 added). Revised in discovery on 14 Nov 2026 by product-owner decisions Q-34 (R-31 AC3) and Q-35 (R-41 AC3). Status: **Draft for G1**. Baselined at G1; after that it changes only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)). Open gaps and the assumptions we build on live in [QUESTIONS.md](QUESTIONS.md).
 
 ## Summary
 
@@ -24,6 +24,7 @@ The PRD owns these; this baseline traces to them (PROCESS.md, Stage 1 product fr
 - **Personas:** P01–P06 ([PRD §2.1](../sources/PRD-v2.0.md#21-persona-definitions)). R1–R2 build for P01 and P02 only.
 - **User journeys:** J1–J8 ([PRD §6.2–6.10](../sources/PRD-v2.0.md#62-journey-map)). In scope: J1, J6 and J3; J2 and J4 are R3 (Should); J5, J7 and J8 are Won't.
 - **User stories:** US-01–US-26 ([PRD §6.1](../sources/PRD-v2.0.md#61-user-story-catalogue)). Each R-xx lists the stories it serves.
+- **Agent steps:** which journey steps an agent performs, what it prepares, who decides, and each workflow's maturity level (Q-33): [AGENT_ARCHITECTURE.md](../architecture/AGENT_ARCHITECTURE.md#maturity-per-workflow).
 - **Value and defensibility:** problems solved and moat hypotheses 1–4 ([PRD §1.1](../sources/PRD-v2.0.md#11-what-the-product-solves-and-defensibility)). The KPIs that test each hypothesis are in [KPIs and the moat hypotheses](#kpis-and-the-moat-hypotheses).
 
 ## Features (F-xx)
@@ -246,6 +247,7 @@ Must · R1 (R0 sample) · PRD §9.3, §10.3, §13 · FR-07 · US-09
 
 - AC1: Given a requested change on a claim, scene or object, when the operator asks for it, then before regeneration they see the artifacts to rebuild and reuse, estimated cost, timing shifts and approvals that will reopen.
 - AC2: Given the PRD §10.3 example ("hold two seconds longer"), when previewed, then later offsets are shown as shifting, with the option to shorten another beat.
+- AC3 (Q-34): Given a revision request on a claim, beat, scene or object, when the operator submits it, then the script or storyboard agent redrafts only the targeted beats or scenes as a new draft version; changes outside the target are rejected; the operator sees the redraft and its impact (AC1) before anything is rendered, and can still edit the draft by hand.
 
 #### R-32 Dependency-aware reuse
 Must · R0 · PRD §9.3 · FR-07 · US-09 · QA-04
@@ -307,6 +309,7 @@ Must · R1 · PRD §8.1 · FR-09 · US-12 · QA-05
 
 - AC1: Given an approval, when recorded, then it binds actor, responsibility, immutable target version or hash, action scope, destination account where relevant and timestamp.
 - AC2: Given a target that has changed since approval, when an action relies on it, then the stale approval is rejected.
+- AC3 (Q-35): Given an approval, when recorded, then it also stores the brand-kit, rubric and content-policy versions in force; when the rubric or content policy changes, Gate D reopens for packages not yet published; a Gate E approval for a scheduled release lapses if its approved time passes with no recorded publication. Approvals have no other time expiry.
 
 #### R-42 Changes reopen approvals
 Must · R1 · PRD §8.1 · FR-09 · US-05, US-09 · QA-05

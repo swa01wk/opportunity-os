@@ -1,5 +1,5 @@
 # ADR-021: Agent runtime: task contract, context envelope and result acceptance
-Status: Accepted (tech lead, 14 Nov 2026; owner to confirm at G2)    Date: 2026-11-14
+Status: Accepted (confirmed by the owner, 14 Nov 2026)    Date: 2026-11-14
 
 ## Context
 PROCESS.md (Agent architecture) asks each agentic product to decide, before agent implementation, the harness interface and checkpoints (topic 2), task and event schemas (3), tool authorisation (4), leases and reconciliation (5) and context freshness and memory (6). OpportunityOS already has bounded task contracts (R-63, `tasks.json`), durable workflows (ADR-003) and version-bound approvals (R-41), but nothing bound an agent result to the exact inputs it read, so an owner's edit during a run could let a stale draft through (conformance C09). Requirements: R-50, R-51, R-52, R-63, NFR-01, NFR-05.
@@ -12,6 +12,7 @@ PROCESS.md (Agent architecture) asks each agentic product to decide, before agen
 - **Fencing.** Results are keyed by attempt; heads move only with `If-Match`; the storing transaction re-reads bound hashes and cancellation.
 - **Tools.** The tool host checks `permittedTools` and budget before every call, and all agent tools stay read-only. There is no code-execution sandbox, because no generated code runs (NFR-05).
 - **`AgentResult`** always has empty `proposedActions` and `proposedGraphChanges` at R1–R2.
+- **Revision redraft (Q-34).** A revision runs the script or storyboard task with a `revisionScope` (target beat or scene IDs). Its acceptance stage compares the result with the base version and rejects any change outside the scope with `out_of_scope_change`.
 
 ## Alternatives
 - **LangGraph or an agent SDK as the harness.** Adds its own state and checkpoint model next to DBOS (two competing state authorities) for three single-agent tasks. Revisit behind the same interface if R-64 chat or R-75 needs it, after the conformance tests pass.

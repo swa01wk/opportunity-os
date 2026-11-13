@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://opportunityos.invalid/contracts/agent-tools/execution.schema.json",
-  "x-version": "0.3.0",
+  "x-version": "0.4.0",
   "title": "Agent execution contract",
   "description": "Per-attempt TaskContract, ContextEnvelope and AgentResult for the bounded agent tasks (ADR-021, docs/architecture/AGENT_ARCHITECTURE.md). The static part of each contract (tools, budgets, retries, failure states, postconditions) is in tasks.json; this file adds what binds one attempt to the exact inputs it read and what it returns. An AgentResult is never an approval: its output is a draft version reviewed at a gate.",
   "$defs": {
@@ -20,6 +20,7 @@
         "unknown_claim_reference",
         "spec_invalid",
         "capability_gap",
+        "out_of_scope_change",
         "budget_exhausted",
         "timed_out",
         "provider_error",
@@ -198,6 +199,9 @@
         },
         "promptSha256": {
           "$ref": "../common.schema.json#/$defs/Sha256"
+        },
+        "revisionScope": {
+          "$ref": "task-io.schema.json#/$defs/RevisionScope"
         }
       }
     },

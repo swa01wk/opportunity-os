@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: OpportunityOS API
-  version: 0.3.0
+  version: 0.4.0
   description: |
     Studio-facing API for R1–R2 (PRD §13). Owned by `backend/` (ADR-004).
     R3 endpoints (connections, connected publishing, experiments, opportunity lab) are added by the
@@ -460,6 +460,25 @@ paths:
               additionalProperties: false
               properties:
                 option: { type: string, description: 'Chosen option from the impact preview, e.g. extend_total or shorten_other_beat (R-31 AC2).' }
+      responses:
+        '202': { $ref: '#/components/responses/RunAccepted' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /revisions/{revisionId}:
+    parameters: [ { $ref: '#/components/parameters/revisionId' } ]
+    get:
+      tags: [revisions]
+      operationId: getRevision
+      summary: The revision with its latest impact (scope before the redraft, full after it) and the redraft version (R-31, Q-34)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/RevisionImpact' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+  /revisions/{revisionId}/redraft:
+    parameters: [ { $ref: '#/components/parameters/revisionId' } ]
+    post:
+      tags: [revisions]
+      operationId: redraftRevision
+      summary: Run the script or storyboard agent on the revision's target only (Q-34, R-31 AC3). Produces a draft version; renders nothing. The full impact is then available from getRevision before apply.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
       responses:
         '202': { $ref: '#/components/responses/RunAccepted' }
         '409': { $ref: '#/components/responses/Problem' }
@@ -1123,10 +1142,12 @@ components:
       required: [request, target]
       properties:
         request: { type: string, maxLength: 1000, description: 'e.g. "hold the row-and-column explanation two seconds longer and make the corner clearer".' }
+        mode: { enum: [agent_redraft, manual_edit], default: agent_redraft, description: 'Q-34: the agent redrafts by default; manual_edit when the operator edits the draft by hand.' }
         target:
           type: object
           properties:
             claimId: { $ref: '#/components/schemas/Uuid' }
+            segmentId: { type: string, description: 'Script beat or narration segment.' }
             sceneId: { type: string }
             objectId: { type: string }
     RevisionImpact:
@@ -1134,6 +1155,15 @@ components:
       required: [revisionId, rebuild, reuse, estimate, reopenedGates, options]
       properties:
         revisionId: { $ref: '#/components/schemas/Uuid' }
+        stage: { enum: [scope, full], description: 'scope = before the redraft (task, targets, agent cost, gates likely to reopen); full = after it, from the actual draft (R-31 AC1).' }
+        redraft:
+          type: object
+          properties:
+            taskType: { enum: [script, storyboard] }
+            targetIds: { type: array, items: { type: string } }
+            estimate: { $ref: 'common.schema.json#/$defs/Money' }
+            draft: { $ref: 'common.schema.json#/$defs/VersionRef' }
+            runId: { $ref: '#/components/schemas/Uuid' }
         rebuild: { type: array, items: { type: string }, description: 'Artifacts to regenerate: e.g. tts:scene.explanation, clip:scene.explanation, captions, assembly, mix.' }
         reuse: { type: array, items: { type: string } }
         estimate: { $ref: 'common.schema.json#/$defs/Money' }
@@ -1232,6 +1262,8 @@ components:
         destinationId: { $ref: '#/components/schemas/Uuid' }
         current: { type: boolean }
         invalidatedReason: { type: string }
+        policyVersions: { $ref: 'events/domain-event.schema.json#/$defs/PolicyVersions' }
+        lapsesAt: { type: string, format: date-time, description: 'Gate E scheduled releases only: the approval lapses if no publication is recorded by then (Q-35).' }
         createdAt: { type: string, format: date-time }
     GateStatus:
       type: object

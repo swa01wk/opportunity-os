@@ -1,5 +1,5 @@
 # ADR-020: AG-UI events on the Studio's project event stream
-Status: Accepted (tech lead, 14 Nov 2026; owner to confirm at G2)    Date: 2026-11-14
+Status: Accepted (confirmed by the owner, 14 Nov 2026)    Date: 2026-11-14
 
 ## Context
 The Studio follows long-running work (research, script, storyboard, narration, preview, master, revision) on one SSE stream per project, `GET /projects/{projectId}/events`. Until now each `data:` line was a raw DomainEvent (ADR-010), and the Studio inferred run progress from event types, with no resume cursor beyond the event ID.

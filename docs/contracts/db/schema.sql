@@ -243,7 +243,10 @@ CREATE TABLE app.revision (
   request text NOT NULL,                  -- operator instruction
   target jsonb NOT NULL,                  -- claim / scene / object refs
   impact jsonb NOT NULL,                  -- rebuild, reuse, cost estimate, timing shifts, reopened gates (R-31)
-  status text NOT NULL CHECK (status IN ('previewed','applied','discarded')),
+  mode text NOT NULL DEFAULT 'agent_redraft' CHECK (mode IN ('agent_redraft','manual_edit')),   -- Q-34
+  redraft_run_id uuid,                    -- execution_run of the scoped agent redraft
+  draft_ref jsonb,                        -- VersionRef of the redrafted script or storyboard
+  status text NOT NULL CHECK (status IN ('previewed','redrafting','redrafted','applied','discarded')),
   created_by uuid NOT NULL REFERENCES app.member(id),
   created_at timestamptz NOT NULL DEFAULT now()
 );
@@ -279,6 +282,8 @@ CREATE TABLE app.approval (               -- R-40, R-41; insert-only
   actor_member_id uuid NOT NULL REFERENCES app.member(id),   -- members only (R-43)
   responsibility text NOT NULL,
   evidence jsonb NOT NULL,                -- what was shown at the gate
+  policy_versions jsonb NOT NULL,         -- brand kit, rubric, content policy in force (R-41 AC3, Q-35)
+  lapses_at timestamptz,                  -- Gate E scheduled release only (Q-35)
   invalidated_at timestamptz, invalidated_reason text,
   created_at timestamptz NOT NULL DEFAULT now()
 );

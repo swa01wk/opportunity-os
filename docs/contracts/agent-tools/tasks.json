@@ -1,6 +1,6 @@
 {
   "$comment": "Task contracts for the three bounded model tasks (R-63, PRD §14.1). Budgets are ceilings per task run; actual money limits come from the project allowance (R-34, Q-05). Numbers are starting values, tuned from the R0 evaluation and changed only through a spec. Each task also names its output disposition and reviewing gate; per-attempt bindings are in execution.schema.json (ADR-021). Every task can also fail with stale_input or cancelled.",
-  "contractVersion": "0.3.0",
+  "contractVersion": "0.4.0",
   "tasks": [
     {
       "taskType": "research",
@@ -61,13 +61,15 @@
         "unknown_claim_reference",
         "budget_exhausted",
         "timed_out",
-        "provider_error"
+        "provider_error",
+        "out_of_scope_change"
       ],
       "postconditions": [
         "every claimId is one of the input claims",
         "beat kinds follow the series narrative structure (R-57)",
         "estimated narration fits the target duration at the pinned pace",
-        "every bound input version is still the head version when the result is stored (else stale_input)"
+        "every bound input version is still the head version when the result is stored (else stale_input)",
+        "with a revisionScope, every beat or scene outside targetIds equals the previous version (else out_of_scope_change)"
       ],
       "evaluationFixtures": "agent/evals/script/",
       "outputDisposition": "draft_version",
@@ -98,13 +100,15 @@
         "capability_gap",
         "budget_exhausted",
         "timed_out",
-        "provider_error"
+        "provider_error",
+        "out_of_scope_change"
       ],
       "postconditions": [
         "videoSpec passes validate_scene_spec, or every remaining error is listed under unsupportedNeeds",
         "every scene references script segments that exist",
         "displayed values reference demonstration results (valueRef), never typed-in numbers",
-        "every bound input version is still the head version when the result is stored (else stale_input)"
+        "every bound input version is still the head version when the result is stored (else stale_input)",
+        "with a revisionScope, every beat or scene outside targetIds equals the previous version (else out_of_scope_change)"
       ],
       "evaluationFixtures": "agent/evals/storyboard/",
       "outputDisposition": "draft_version",

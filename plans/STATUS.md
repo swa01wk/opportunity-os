@@ -59,6 +59,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 | Every PRD section maps to an R-xx / NFR-xx / KPI-xx or is out of scope | Pass with note: §2.4, §6.11, §22–25 and §27 hold no product requirement and are marked "input to" a Stage 2–3 doc |
 | Every Must has acceptance criteria | Pass (all Must and Should items have Given/When/Then) |
 | Questions answered or assumptions accepted | Pass: Q-03 and Q-07 answered, Q-05 parked with an interim rule, all other assumptions accepted (2026-11-12) |
+| Agent steps have a maturity target and a named approver (PROCESS.md, added 2026-11-14) | Pass: Q-33 accepted; table in [AGENT_ARCHITECTURE.md](../docs/architecture/AGENT_ARCHITECTURE.md#maturity-per-workflow); every agent output is a draft approved at S-05, Gate B, Gate C or on S-09 by the owner |
 
 ## Design (Stage 2)
 
@@ -66,17 +67,17 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 |---|---|---|
 | 2a | [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md), [ADR-001–014](../docs/adr/README.md) (all accepted), [contracts 0.1.0](../docs/contracts/README.md) | Done (PR #3, merged 2026-11-12) |
 | 2b | [UI_DESIGN.md](../docs/product/UI_DESIGN.md), [TECH_STACK.md](../docs/architecture/TECH_STACK.md), [SECURITY.md](../docs/architecture/SECURITY.md), [OBSERVABILITY.md](../docs/architecture/OBSERVABILITY.md), ADR-015–019, [contracts 0.2.0](../docs/contracts/README.md#change-log) | Done (PR #4, merged 2026-11-12); decisions taken 2026-11-13 |
-| 2c | [tokens.md](../docs/design/tokens.md) (Studio UI tokens, video house style brand kit v1 per A-31), the S-07 reference prototype, S-01–S-16 on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS). Addendum: [AGENT_ARCHITECTURE.md](../docs/architecture/AGENT_ARCHITECTURE.md) (maturity per workflow, journeys → agents, execution contract, AG-UI, conformance scenarios), [ADR-020](../docs/adr/ADR-020-ag-ui-event-stream.md), [ADR-021](../docs/adr/ADR-021-agent-runtime-contract.md), [contracts 0.3.0](../docs/contracts/README.md#change-log) | Canvas in client review; agent addendum in review (PR #5) |
+| 2c | [tokens.md](../docs/design/tokens.md) (Studio UI tokens, video house style brand kit v1 per A-31), the S-07 reference prototype, S-01–S-16 on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS). Addendum: [AGENT_ARCHITECTURE.md](../docs/architecture/AGENT_ARCHITECTURE.md) (maturity per workflow, journeys → agents, execution contract, AG-UI, conformance scenarios), [ADR-020](../docs/adr/ADR-020-ag-ui-event-stream.md), [ADR-021](../docs/adr/ADR-021-agent-runtime-contract.md), [contracts 0.4.0](../docs/contracts/README.md#change-log) | Canvas in client review; agent addendum decided (Q-33–Q-35, ADR-020/021 confirmed 2026-11-14) (PR #5) |
 
 | G2 check (2a + 2b scope) | Result |
 |---|---|
 | Traceability: every R-xx maps to a component and every user-facing R-xx to a screen | Pass: all Must and Should R-xx → component (2a) and → screen S-01–S-20 (2b, checked by script: 0 unmapped); R3 screens S-17–S-20 listed, prototyped after A-18; Could and Won't not designed. Every KPI-01–14 has an analytics event. |
-| Contracts versioned | Pass: 0.3.0 (agent execution contract and AG-UI stream, ADR-020/021; 0.2.0 additive before it; change log in contracts README). Re-checked 2026-11-14: 13 schemas pass the 2020-12 metaschema; all `$ref`s in `agui/stream.json`, `execution.schema.json` and `openapi.yaml` resolve; the three example AG-UI streams have ordered cursors and their snapshot, activity and tool-call payloads validate; sample TaskContract and AgentResult validate; DDL applies to PostgreSQL 16 (44 tables). AG-UI event field names are checked against the pinned SDK in the M0 relay spec. |
+| Contracts versioned | Pass: 0.4.0 (revision redraft through the agent, Q-34; approval policy versions, Q-35; 0.3.0 agent execution contract and AG-UI stream before it; change log in contracts README). Re-checked 2026-11-14: 13 schemas pass the 2020-12 metaschema; all `$ref`s in `agui/stream.json`, `execution.schema.json` and `openapi.yaml` resolve; the four example AG-UI streams have ordered cursors and their snapshot, activity and tool-call payloads validate; sample TaskContract and AgentResult validate; DDL applies to PostgreSQL 16 (44 tables). AG-UI event field names are checked against the pinned SDK in the M0 relay spec. |
 | Each layer can mock the others | Pass: mocking guide in contracts README; synthetic odd-squares fixtures |
 | No open choice blocks M0 | Pass: ADR-011–014 accepted; Remotion free individual licence; development runs on free credits (Q-05). |
 | Nothing designed that no requirement asks for | Pass: R3 planned only; R-64, R-65, R-78–R-82 not designed |
-| Threat model reviewed | Pass for TH-01–TH-30, agent risks and accepted risks (accepted 2026-11-13, owner delegated to the tech lead). TH-31–TH-33 (AG-UI stream, stale agent results) added 2026-11-14, to review at G2 |
-| Agent review checklist (PROCESS.md) | Pass with open items: owners, lifecycle, approval binding, schemas, idempotency, reconnect and blocked-state explanation documented in AGENT_ARCHITECTURE.md; conformance C01–C14 mapped (C08, C13 not applicable). Open: Q-33 maturity targets, Q-34 revision redraft, Q-35 approval policy revision and expiry |
+| Threat model reviewed | Pass for TH-01–TH-30, agent risks and accepted risks (accepted 2026-11-13, owner delegated to the tech lead). TH-31–TH-34 (AG-UI stream, stale agent results, out-of-scope redrafts) added 2026-11-14, to review at G2 |
+| Agent review checklist (PROCESS.md) | Pass: owners, lifecycle, approval binding (with policy versions, Q-35), schemas, idempotency, reconnect and blocked-state explanation documented in AGENT_ARCHITECTURE.md; maturity per workflow recorded (Q-33); conformance C01–C14 mapped (C08, C13 not applicable) |
 | Screens approved | Not yet: tokens and S-07 in client review; S-01–S-16 follow (Stage 2c step 2) |
 | Every key journey has an SLO | Pass: SLO-01–SLO-10, provisional, calibrate after R0 (A-15) |
 | Every layer has a chosen tool | Pass: TECH_STACK.md; exact pins in M0 lockfiles. Q-29 search API still open (does not block M0). |
@@ -84,7 +85,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 ## Open questions and risks
 
 - [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-35 (DEC-01–12 are Q-01–Q-12).
-- Open for you at G2: Q-32 (moat claims), Q-33 (agent maturity per workflow), Q-34 (who redrafts on revision), Q-35 (approval policy revision and expiry).
+- Open for you at G2: Q-32 (moat claims).
 - Parked: Q-05 budget limits. Development uses free credits with costs recorded; real limits are set from measured per-video cost before the AWS move.
 - Before the first real provider call: opt out of ElevenLabs model training on every account; OpenAI calls use `store: false` (SECURITY.md).
 - Specialist checks: none outstanding. Q-14, Q-20, Q-25 and the narrator licence rule were decided by the tech lead at your request (engineering decisions, not legal advice).
@@ -97,6 +98,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Recent decisions
 
+- 2026-11-14: Product owner: revisions go through the agent (Q-34): the script or storyboard agent redrafts only the targeted beat or scene, impact is shown before any render, hand edits stay available (R-31 AC3). Q-33 maturity targets and Q-35 approval policy versions accepted (delegated to the tech lead; approvals record brand-kit, rubric and content-policy versions; a rubric or policy change reopens Gate D for unpublished packages; scheduled Gate E approvals lapse at their time; R-41 AC3). ADR-020 and ADR-021 confirmed. Contracts 0.4.0. S-09 updated on the canvas.
 - 2026-11-14: Agent architecture redone from the Agentic Application Reference Architecture v1.2, its Engineering Practices Guidebook v1.0 and the Agent Capability Maturity Framework (the 2026-11-13 version, built from the wrong source, was reverted). PROCESS.md: generic "Agent architecture" section (golden rules, maturity per workflow, planes, execution contract, harness, validation stages, tools and effects, approvals, AG-UI, conformance C01–C14, ten agent ADRs) wired through stages 1–7. OpportunityOS: AGENT_ARCHITECTURE.md; ADR-020 (AG-UI on the project stream, observe mode, outbox `seq` cursor) and ADR-021 (thin agent runtime, per-attempt contract and context envelope, stale results rejected) accepted by the tech lead, owner confirms at G2; contracts 0.3.0; TH-31–TH-33; Q-33–Q-35 raised. No requirement changed.
 - 2026-11-13: Product owner: the PRD may be revised in place during discovery (until G3), with a dated revision note; PRD §1.1 "What the product solves and defensibility" added (problems solved, four moat hypotheses, proof checkpoints). Q-32 raised. PROCESS.md: Stage 1 starts with product framing (personas, journeys, stories, value and moat hypotheses); Stage 2 screens go UI_DESIGN.md → Claude Design canvas by journey → client review on the canvas → HTML in the repo. Figma not used.
 - 2026-11-13: S-01–S-16 designed on the Claude Design canvas, one page per journey (J1, J6, J3), plus a journey map and a "What it solves" page.

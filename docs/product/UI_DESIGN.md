@@ -38,7 +38,7 @@ Moats (PRD §1.1): 1 typed scene library and compiler · 2 trust · 3 cheap targ
 | S-16 | J3 step 1 (R2) | US-21 | A series that keeps repeating itself | 1, 4 |
 | S-15 | J3 step 2 | US-01, US-21 | Rights doubts; a brand change breaking published videos | 2 |
 
-**Agents in the journeys.** Which steps an agent performs, what it prepares, who decides and each workflow's maturity level are owned by [AGENT_ARCHITECTURE.md](../architecture/AGENT_ARCHITECTURE.md#journeys--agents). On screen, agent work is always a draft awaiting a person: S-05 (research), S-06 (script), S-07 (storyboard), and on S-09 an optional "Redraft with agent" if A-34 is accepted. A run rejected because its inputs changed shows "Inputs changed during the run; run again" (ADR-021).
+**Agents in the journeys.** Which steps an agent performs, what it prepares, who decides and each workflow's maturity level are owned by [AGENT_ARCHITECTURE.md](../architecture/AGENT_ARCHITECTURE.md#journeys--agents). On screen, agent work is always a draft awaiting a person: S-05 (research), S-06 (script), S-07 (storyboard), and S-09 (revision), where the agent redrafts only the targeted beat or scene and the owner sees the redraft and its impact before anything renders (Q-34). A run rejected because its inputs changed shows "Inputs changed during the run; run again" (ADR-021).
 
 ## Studio frame (shared on every screen)
 
@@ -67,7 +67,7 @@ Status of every screen is tracked in [STATUS.md](../../plans/STATUS.md#screens).
 | S-06 | Script and demonstration | R1 | Narration beats side by side with their claims and the verified demonstration | Generate or edit script; edit hook; compute demonstration with reviewed parameters; label example / approximation / illustration; policy checklist; approve **Gate B** | `/script-runs`, `/scripts`, `/demonstrations`, `/approvals` | S-06-script.html |
 | S-07 | Storyboard and preview | R1 (R0 sample) | Scene cards and a scene and caption strip with a playhead, around the Remotion Player and its own controls; see what objects do and when | Generate storyboard; inspect object (ID, colour, meaning, label) and action (op, targets, frames, easing, anchor); see compiler errors and capability gaps per scene; render draft preview or hook-only preview; request a change (→ S-09); approve **Gate C** | `/storyboard-runs`, `/storyboards`, `/capabilities`, `/renders` | [S-07-storyboard.html](../design/screens/S-07-storyboard.html) (reference, client review) |
 | S-08 | Narration | R1 (R0 sample) | Audition voice per scene and fix pronunciation before the master | Generate take (whole or per scene); play per scene; edit pronunciation list (including notation); see measured duration vs plan and the pacing change; see take licence (plan, commercial use) | `/narration-takes`, `/pronunciations` | S-08-narration.html |
-| S-09 | Revision impact | R1 (R0 sample) | Before regenerating, see exactly what a change costs and reopens | Describe the change on a claim, scene or object; view rebuild vs reuse lists, estimated cost, frame shifts, options (extend or shorten another beat), gates that reopen; apply | `/revisions/impact`, `/revisions/{id}/apply` | S-09-revision.html |
+| S-09 | Revision impact | R1 (R0 sample) | Ask for a change in words; the agent redrafts only that part; see exactly what it costs and reopens before anything renders | Describe the change on a claim, beat, scene or object; see the scope (which agent, which targets, agent cost); redraft with the agent (Q-34); review the redraft beside the approved version; view rebuild vs reuse lists, estimated cost, frame shifts, options (extend or shorten another beat), gates that reopen; edit by hand, redraft again, discard or apply | `/revisions/impact`, `/revisions/{id}/redraft`, `/revisions/{id}`, `/revisions/{id}/apply` | S-09-revision.html |
 | S-10 | Compare versions | R1 | Compare a revised script, storyboard or master with the last reviewed one | Pick two versions; side-by-side text diff, scene diff, synced dual player for masters | `/compare` | S-10-compare.html |
 | S-11 | Final review and package | R1 | Review the final-quality master and approve the exact export package | Play master (phone-size frame and full size); media QA results; findings with disposition; rubric (5 dimensions incl. muted-with-captions); metadata, cover, description with attribution; audience (made-for-kids) setting with no default; AI disclosure assessment; rights and provenance; approve **Gate D**; build export bundle | `/renders/{id}`, `/findings`, `/renders/{id}/rubric`, `/packages`, `/exports`, `/approvals` | S-11-package.html |
 | S-12 | Publication record | R2 | Record a manual upload truthfully and keep it honest afterwards | Approve **Gate E** (account, publish-now or time); record actual account, external ID, URL, time, visibility; record verification (NOT_CHECKED / PASSED / PARTIAL / FAILED) with evidence; flag package mismatch; propose a correction; enter manual metric (labelled manual, cold-start) | `/publications`, `/verifications`, `/corrections`, `/metric-snapshots`, `/approvals` | S-12-publication.html |
@@ -123,10 +123,14 @@ flowchart TD
   trig{Trigger} -->|change wanted| pick[Select claim, scene or object<br/>S-05, S-06 or S-07]
   trig -->|run failed / paused| s13[Runs and recovery · S-13]
   trig -->|problem in published video| corr[S-12 propose correction<br/>nothing external changes]
-  pick --> s09[Revision impact · S-09<br/>rebuild vs reuse, cost, frame shifts,<br/>options, gates that reopen]
+  pick --> s09[Revision · S-09<br/>describe change, scope and agent cost]
+  s09 -->|redraft| ag[Script or storyboard agent<br/>redrafts the target only, draft]
+  ag --> imp[S-09 impact: redraft vs approved,<br/>rebuild vs reuse, cost, frame shifts,<br/>options, gates that reopen]
+  imp -->|redraft again| ag
+  imp -->|apply| run
   s09 -->|over allowance| bud[S-04 / S-14 raise allowance<br/>needs new authority]
   bud --> s09
-  s09 -->|apply| run[Revision run<br/>run indicator]
+  run[Revision run<br/>run indicator]
   run --> s10[Compare · S-10<br/>new vs last reviewed]
   s10 --> reg{Which gates reopened?}
   reg -->|claim| s05[S-05 then Gate B on S-06]
@@ -177,7 +181,7 @@ Every prototype in 2c shows its empty, loading and error states. Shared rules fi
 | S-06 | No script yet | Script run | Unknown claim reference; demonstration domain error or mismatch; policy checklist failure blocks Gate B |
 | S-07 | No storyboard yet | Storyboard run; preview rendering with per-scene progress | Compiler errors per scene and field (unknown reference, frame out of range, continuity break, colour meaning, caption overlap, safe zone); capability gap; preview layout failure |
 | S-08 | No take yet | Take generating | TTS provider failure (retryable); take no longer fits (pacing change shown, never silent speed-up); free-plan take flagged "not publishable" |
-| S-09 | Nothing changed | Computing impact | Impact exceeds remaining allowance; change touches an approved version (shows which gates reopen) |
+| S-09 | Nothing changed | Computing scope; agent redrafting (step from the stream); computing impact | Impact exceeds remaining allowance; change touches an approved version (shows which gates reopen); redraft changed something outside the target (rejected, with what it tried to change); inputs changed during the redraft |
 | S-10 | Only one version exists | Loading both versions | One version deleted by retention (shown as retained metadata only) |
 | S-11 | No master yet | Master rendering; QA running | Failed media check; open material finding; rights blocker (incl. narration without commercial licence); audience setting unset; Gate D refused with blockers |
 | S-12 | Awaiting manual upload | — | Gate E not current for this package or account; recorded URL's package differs from approved (flag); verification PARTIAL needs a reason |
