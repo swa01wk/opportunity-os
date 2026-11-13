@@ -1,0 +1,19 @@
+{"seq": "101", "data": {"type": "STATE_SNAPSHOT", "snapshot": {"projectId": "00000000-0000-4000-8000-0000000000a1", "asOfSeq": 101, "productionState": "RESEARCHING", "activeRuns": [], "blockers": []}}}
+{"seq": "102", "data": {"type": "RUN_STARTED", "threadId": "00000000-0000-4000-8000-0000000000a1", "runId": "00000000-0000-4000-8000-0000000000b2"}}
+{"seq": "103", "data": {"type": "STEP_STARTED", "stepName": "budget.reserve"}}
+{"seq": "104", "data": {"type": "STEP_FINISHED", "stepName": "budget.reserve"}}
+{"seq": "105", "data": {"type": "STEP_STARTED", "stepName": "research"}}
+{"seq": "105.1", "data": {"type": "TOOL_CALL_START", "toolCallId": "tc-1", "toolCallName": "search_sources", "parentMessageId": "att-research-1"}}
+{"seq": "105.2", "data": {"type": "TOOL_CALL_ARGS", "toolCallId": "tc-1", "delta": "{\"tool\": \"search_sources\", \"queryCount\": 3}"}}
+{"seq": "105.3", "data": {"type": "TOOL_CALL_END", "toolCallId": "tc-1"}}
+{"seq": "105.4", "data": {"type": "TOOL_CALL_RESULT", "messageId": "tr-1", "toolCallId": "tc-1", "content": "{\"outcome\": \"ok\", \"count\": 8}"}}
+{"seq": "105.5", "data": {"type": "TOOL_CALL_START", "toolCallId": "tc-2", "toolCallName": "fetch_source", "parentMessageId": "att-research-1"}}
+{"seq": "105.6", "data": {"type": "TOOL_CALL_ARGS", "toolCallId": "tc-2", "delta": "{\"tool\": \"fetch_source\", \"domain\": \"example.org\"}"}}
+{"seq": "105.7", "data": {"type": "TOOL_CALL_END", "toolCallId": "tc-2"}}
+{"seq": "105.8", "data": {"type": "TOOL_CALL_RESULT", "messageId": "tr-2", "toolCallId": "tc-2", "content": "{\"outcome\": \"refused\", \"reason\": \"ssrf_guard\"}"}}
+{"seq": "106", "data": {"type": "STEP_FINISHED", "stepName": "research"}}
+{"seq": "107", "data": {"type": "CUSTOM", "name": "opportunityos.claim.created", "value": {"$comment": "DomainEvent elided in this fixture"}}}
+{"seq": "108", "data": {"type": "STEP_STARTED", "stepName": "budget.settle"}}
+{"seq": "109", "data": {"type": "STEP_FINISHED", "stepName": "budget.settle"}}
+{"seq": "110", "data": {"type": "RUN_FINISHED", "threadId": "00000000-0000-4000-8000-0000000000a1", "runId": "00000000-0000-4000-8000-0000000000b2"}}
+{"seq": "111", "data": {"type": "CUSTOM", "name": "opportunityos.project.state_changed", "value": {"$comment": "DomainEvent elided: RESEARCHING, claims awaiting review on S-05"}}}

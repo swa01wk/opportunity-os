@@ -342,7 +342,7 @@ CREATE TABLE app.execution_run (          -- projection of a DBOS workflow
   id uuid PRIMARY KEY,                    -- = workflow_request.id = DBOS workflow id
   workspace_id uuid NOT NULL, project_id uuid NOT NULL,
   workflow_type text NOT NULL,
-  state text NOT NULL,                    -- pending, running, waiting_approval, paused_budget, succeeded, failed, cancelled
+  state text NOT NULL,                    -- pending, running, waiting_approval, paused_budget, succeeded, failed, cancelled (cancelling = cancel_requested_at set, not yet cancelled)
   cancel_requested_at timestamptz,
   code_repair_needed boolean NOT NULL DEFAULT false,   -- KPI-02
   created_at timestamptz NOT NULL DEFAULT now(), finished_at timestamptz
@@ -355,6 +355,8 @@ CREATE TABLE app.task_attempt (
   error_class text, error jsonb,
   provider text, model_or_voice text, prompt_sha256 char(64), tool_versions jsonb,
   input_sha256 char(64), output_ref jsonb,
+  input_bindings jsonb,                   -- ContextEnvelope inputs: role + VersionRef (agent-tools/execution.schema.json, ADR-021)
+  validation jsonb,                       -- AgentResult validation stages (schema, policy_freshness, acceptance)
   estimated_cost_minor bigint, actual_cost_minor bigint, currency char(3), fx_rate numeric,
   taken_over_by uuid REFERENCES app.member(id),        -- R-51 AC2
   started_at timestamptz NOT NULL, finished_at timestamptz,
@@ -413,6 +415,7 @@ CREATE TABLE app.asset (
 -- ---------- Events and audit (ADR-010) ----------
 CREATE TABLE app.outbox_event (
   id uuid PRIMARY KEY, workspace_id uuid NOT NULL,
+  seq bigserial NOT NULL UNIQUE,           -- AG-UI stream cursor (ADR-020); monotonic per database, so per workspace
   type text NOT NULL, body jsonb NOT NULL,             -- events/domain-event.schema.json
   created_at timestamptz NOT NULL DEFAULT now(), delivered_at timestamptz
 );

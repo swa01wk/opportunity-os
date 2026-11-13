@@ -1,0 +1,328 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opportunityos.invalid/contracts/agui/stream.json",
+  "x-version": "0.3.0",
+  "title": "AG-UI project event stream",
+  "description": "How GET /projects/{projectId}/events encodes run progress and domain events as AG-UI events (ADR-020, docs/architecture/AGENT_ARCHITECTURE.md). Event shapes are the pinned AG-UI SDK's (ag-ui-protocol for Python, @ag-ui/core for TypeScript); this file fixes only how OpportunityOS uses them. AG-UI events are a projection of DomainEvents and attempt spans; they carry no authority, and every command goes through the REST API.",
+  "x-agui": {
+    "sdk": {
+      "python": "ag-ui-protocol",
+      "typescript": "@ag-ui/core",
+      "pin": "exact versions in the M0 lockfiles; upgrades are their own spec (pre-1.0)"
+    },
+    "transport": "text/event-stream; one stream per open project; SSE id is the cursor: '<seq>' for events projected from a DomainEvent (seq = outbox_event.seq, per-workspace monotonic) and '<seq>.<n>' for events from attempt spans after that DomainEvent; Last-Event-ID resumes after it",
+    "threadId": "projectId",
+    "runId": "execution_run.id",
+    "runStartedBy": "REST command returning 202 (observe mode); the AG-UI run request is not used at R1-R2",
+    "eventsUsed": [
+      "RUN_STARTED",
+      "RUN_FINISHED",
+      "RUN_ERROR",
+      "STEP_STARTED",
+      "STEP_FINISHED",
+      "TOOL_CALL_START",
+      "TOOL_CALL_ARGS",
+      "TOOL_CALL_END",
+      "TOOL_CALL_RESULT",
+      "ACTIVITY_SNAPSHOT",
+      "ACTIVITY_DELTA",
+      "STATE_SNAPSHOT",
+      "CUSTOM"
+    ],
+    "eventsNotUsed": [
+      "TEXT_MESSAGE_START",
+      "TEXT_MESSAGE_CONTENT",
+      "TEXT_MESSAGE_END",
+      "TEXT_MESSAGE_CHUNK",
+      "TOOL_CALL_CHUNK",
+      "STATE_DELTA",
+      "MESSAGES_SNAPSHOT",
+      "RAW",
+      "reasoning and sub-agent events"
+    ],
+    "onConnect": "STATE_SNAPSHOT first (schema #/$defs/ProjectRunState), then events after the cursor",
+    "mapping": [
+      {
+        "source": "run.state_changed to running",
+        "event": "RUN_STARTED"
+      },
+      {
+        "source": "run.state_changed to succeeded",
+        "event": "RUN_FINISHED"
+      },
+      {
+        "source": "run.state_changed to failed, or run.cancelled",
+        "event": "RUN_ERROR",
+        "code": "#/$defs/RunErrorCode"
+      },
+      {
+        "source": "workflow step or task_attempt.started / task_attempt.finished",
+        "event": "STEP_STARTED / STEP_FINISHED",
+        "stepName": "#/$defs/StepName"
+      },
+      {
+        "source": "agent tool call inside a task attempt",
+        "event": "TOOL_CALL_START, TOOL_CALL_ARGS, TOOL_CALL_END, TOOL_CALL_RESULT",
+        "args": "#/$defs/ToolCallArgsSummary",
+        "result": "#/$defs/ToolCallResultSummary"
+      },
+      {
+        "source": "render progress; run paused for budget, waiting for a gate, or taken over",
+        "event": "ACTIVITY_SNAPSHOT / ACTIVITY_DELTA",
+        "activityType": "#/$defs/ActivityType"
+      },
+      {
+        "source": "every DomainEvent",
+        "event": "CUSTOM",
+        "name": "opportunityos.<DomainEvent.type>",
+        "value": "../events/domain-event.schema.json"
+      },
+      {
+        "source": "agent result stored (task_attempt.finished succeeded) and its version-created DomainEvent",
+        "event": "STEP_FINISHED then CUSTOM opportunityos.<script|storyboard>.version_created",
+        "note": "the draft awaits its gate; no AG-UI event can approve it"
+      }
+    ],
+    "cursor": {
+      "pattern": "^[0-9]+(\\.[0-9]+)?$",
+      "clientRule": "apply events in cursor order; drop any cursor at or below the last applied; on a gap in <seq>, reconnect (a reconnect always starts with STATE_SNAPSHOT)",
+      "fixtures": "examples/agui/*.stream.jsonl hold one SSE frame per line as {seq, data}"
+    },
+    "auth": "Bearer token checked on connect, scoped to workspace and project like every route (SECURITY TH-32). The server closes the stream when the token expires; the client reconnects with the refreshed token and Last-Event-ID.",
+    "redaction": "Events carry summaries and IDs only: no page text, prompts, model output, secrets, signed URLs or email addresses (SECURITY TH-31). Full payloads are read through authorised API routes.",
+    "authority": "None. Approve, return, cancel, retry, resume, take over, redraft and raise budget are REST commands with If-Match and the version hash. After an event the Studio re-reads what it shows.",
+    "generativeUi": "Not used at R1-R2: the Studio renders fixed components; agents cannot request UI."
+  },
+  "$defs": {
+    "RunErrorCode": {
+      "$ref": "../common.schema.json#/$defs/ErrorClass"
+    },
+    "StepName": {
+      "type": "string",
+      "description": "Workflow step names shown in the run indicator and S-13.",
+      "pattern": "^(research|script|storyboard|demonstration|narration|tts\\.scene\\.[a-z0-9_.-]+|alignment|captions|compile|render\\.clip\\.scene\\.[a-z0-9_.-]+|assembly|mix|qa|package_build|export_build|budget\\.reserve|budget\\.settle)$"
+    },
+    "ActivityType": {
+      "enum": [
+        "opportunityos.render_progress",
+        "opportunityos.run_paused"
+      ]
+    },
+    "RenderProgress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenes"
+      ],
+      "properties": {
+        "scenes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sceneId",
+              "status"
+            ],
+            "properties": {
+              "sceneId": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "queued",
+                  "rendering",
+                  "reused",
+                  "done",
+                  "failed"
+                ]
+              },
+              "percent": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          }
+        }
+      }
+    },
+    "RunPaused": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason"
+      ],
+      "properties": {
+        "reason": {
+          "enum": [
+            "budget",
+            "awaiting_approval",
+            "manual_takeover",
+            "cancelling"
+          ]
+        },
+        "unblockAction": {
+          "enum": [
+            "raise_allowance",
+            "open_gate",
+            "take_over",
+            "none"
+          ],
+          "description": "The one Studio action that unblocks the run (R-53, R-61)."
+        },
+        "gate": {
+          "$ref": "../events/domain-event.schema.json#/$defs/Gate",
+          "description": "Set when reason = awaiting_approval."
+        }
+      }
+    },
+    "ToolCallArgsSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool"
+      ],
+      "description": "Never page text, prompts, model output, secrets or signed URLs (SECURITY TH-31).",
+      "properties": {
+        "tool": {
+          "enum": [
+            "search_sources",
+            "fetch_source",
+            "compute_demonstration",
+            "list_capabilities",
+            "validate_scene_spec"
+          ]
+        },
+        "domain": {
+          "type": "string",
+          "description": "Host of a fetched URL only, e.g. example.org"
+        },
+        "queryCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "ToolCallResultSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome"
+      ],
+      "properties": {
+        "outcome": {
+          "enum": [
+            "ok",
+            "refused",
+            "denied",
+            "failed"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "not_permitted",
+            "budget",
+            "ssrf_guard",
+            "not_in_search_results",
+            "timeout",
+            "provider_error",
+            "injection_suspected",
+            "other"
+          ],
+          "description": "Coded, never free text from a page or the model."
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "ProjectRunState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectId",
+        "asOfSeq",
+        "activeRuns"
+      ],
+      "properties": {
+        "projectId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "activeRuns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "runId",
+              "workflowType",
+              "status"
+            ],
+            "properties": {
+              "runId": {
+                "$ref": "../common.schema.json#/$defs/Uuid"
+              },
+              "workflowType": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "pending",
+                  "running",
+                  "paused",
+                  "cancelling"
+                ]
+              },
+              "currentStep": {
+                "$ref": "#/$defs/StepName"
+              },
+              "stepIndex": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "stepCount": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "paused": {
+                "$ref": "#/$defs/RunPaused"
+              }
+            }
+          }
+        },
+        "asOfSeq": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "outbox seq this snapshot reflects; the stream continues after it."
+        },
+        "productionState": {
+          "$ref": "../events/domain-event.schema.json#/$defs/ProductionState"
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "unblockAction"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "maxLength": 60
+              },
+              "unblockAction": {
+                "type": "string",
+                "maxLength": 40
+              }
+            }
+          },
+          "description": "Why the project is blocked or waiting, so the Studio can say what unblocks it."
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: OpportunityOS API
-  version: 0.2.0
+  version: 0.3.0
   description: |
     Studio-facing API for R1–R2 (PRD §13). Owned by `backend/` (ADR-004).
     R3 endpoints (connections, connected publishing, experiments, opportunity lab) are added by the
@@ -140,12 +140,12 @@ paths:
     get:
       tags: [runs]
       operationId: streamProjectEvents
-      summary: Server-Sent Events of DomainEvent for this project (ADR-010)
+      summary: AG-UI event stream for this project (ADR-020); domain events arrive as CUSTOM events (ADR-010)
       parameters:
-        - { name: Last-Event-ID, in: header, schema: { type: string } }
+        - { name: Last-Event-ID, in: header, description: 'Cursor of the last applied event (agui/stream.json x-agui.cursor); the stream resumes after it', schema: { type: string, pattern: '^[0-9]+(\.[0-9]+)?$' } }
       responses:
         '200':
-          description: SSE stream; each `data:` line is a DomainEvent
+          description: SSE stream of AG-UI events (agui/stream.json). Each frame's `id:` is its cursor. STATE_SNAPSHOT first on every connect, then RUN_*, STEP_*, summarised TOOL_CALL_*, ACTIVITY_* and CUSTOM `opportunityos.<DomainEvent.type>` carrying the DomainEvent. Scoped to the caller's workspace and project; closed when the token expires. Events carry no authority.
           content:
             text/event-stream:
               schema: { type: string }

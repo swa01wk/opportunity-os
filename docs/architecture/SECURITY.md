@@ -85,13 +85,16 @@ S spoofing · T tampering · R repudiation · I information disclosure · D deni
 | TH-28 | publication | T / R | Exported file is changed before manual upload, or the wrong file is uploaded | Package hash in the bundle; S-12 records the URL and flags a mismatch with the approved package (R-47 AC2) | QA-09 |
 | TH-29 | R3 credentials (planned) | I / E | OAuth refresh token stolen, or analytics scope used to publish | Tokens encrypted with an application key (KMS on AWS); stored scopes checked per action; revocation deletes tokens (R-66, NFR-06) | QA-10 (R3) |
 | TH-30 | R3 publishing (planned) | T | Lost acknowledgement causes a duplicate public post | `PUBLICATION_UNKNOWN` and reconcile before any new write (R-69) | QA-07 (R3) |
+| TH-31 | AG-UI stream | I | Tool-call or activity events leak page text, prompts, model output, secrets or signed URLs to the browser or its logs | Tool calls are sent as coded summaries only (tool, host, counts, outcome, coded reason; `agui/stream.json`); the relay builds events from an allowlist of fields; redaction as for logs (ADR-020) | QA-08, QA-10 |
+| TH-32 | AG-UI stream | S / E | A forged, replayed or cross-project event makes the Studio show a false state, or is treated as authority | Stream authorised per workspace and project like any route and closed when the token expires; events are display-only and every command re-checks `If-Match` and the version hash; the Studio re-queries after events; reconnect starts with `STATE_SNAPSHOT`, drops duplicate cursors and never replays actions (ADR-020) | QA-05, QA-10, C10 |
+| TH-33 | agent tasks | T | A draft built from inputs that changed during the run (an edited claim, script or brand kit) reaches a gate as if current | Each attempt binds its input versions and hashes; the storing transaction re-reads them and rejects a changed one with `stale_input` (ADR-021) | C09 |
 
 ## Authentication and roles
 
 **Authentication** (ADR-012): OIDC authorization-code flow with PKCE; Keycloak locally with TOTP MFA required, Cognito when hosted. No local password store.
 
 **Sessions** (decided 2026-11-13; the aim is that a long review or render never loses work):
-- Access token 10 minutes, refreshed silently with a rotating refresh token; the SSE stream reconnects with the new token.
+- Access token 10 minutes, refreshed silently with a rotating refresh token; the AG-UI SSE stream closes at expiry and reconnects with the new token, resuming from `Last-Event-ID` (ADR-020).
 - Idle timeout 12 hours (a full working day of review); absolute session lifetime 7 days, then sign in again with MFA.
 - **Step-up** for the actions that cannot be undone or that spend: Gate E release, raising a budget allowance, deleting a project, exporting project data. They need a sign-in with MFA in the last 15 minutes (`auth_time`), otherwise the API returns `step_up_required` and the Studio re-prompts in place, keeping the dialog's content (openapi.yaml 0.2.0).
 - Expiry never discards saved work: every edit is a saved version before the token matters.
@@ -224,6 +227,8 @@ The three agent tasks are bounded by `docs/contracts/agent-tools/tasks.json` (R-
 | **Generated-code execution** (project hard limit) | Model writes JS, Python or shell that we run | No code path evaluates model output; the render service accepts only validated VideoSpec mapped to reviewed components (NFR-05, ADR-002); Semgrep rule bans `eval`, `exec`, `new Function`, `subprocess` on task output | QA-01, CI |
 
 LLM04 (data and model poisoning) and LLM08 (vector and embedding weaknesses) do not apply: we train nothing and have no retrieval store.
+
+**Agent conformance.** The faults and attacks in PROCESS.md's conformance scenarios (C01–C14) are mapped to this product, with the ones that do not apply, in [AGENT_ARCHITECTURE.md](AGENT_ARCHITECTURE.md#conformance-scenarios). Stage 3 makes them `T-xx`.
 
 ## Accepted risks
 
