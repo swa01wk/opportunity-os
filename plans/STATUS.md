@@ -12,7 +12,7 @@ All gates are signed by the product owner / tech lead (same person).
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
 | 2 Design | G2 Design review and screens | Done: 2a, 2b, 2c merged (HTML prototypes S-01–S-16 merged in #7); all G2 checks pass; **your G2 signature is not yet recorded** | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5, #7 |
-| 3 Plan | G3 Milestone scope and dates | In review: DEVELOPMENT_PLAN, TEST_STRATEGY, DELIVERY_PLAN, AGENTS.md, CLAUDE.md, Cursor rules, ADR-022 | | docs/stage-3-plan |
+| 3 Plan | G3 Milestone scope and dates | In review: DEVELOPMENT_PLAN, TEST_STRATEGY, DELIVERY_PLAN, AGENTS.md, CLAUDE.md, Cursor rules, ADR-022 | | docs/stage-3-plan, #8 |
 
 | Milestone | Scope | Status | Exit date |
 |---|---|---|---|
