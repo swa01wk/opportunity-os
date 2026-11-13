@@ -1,8 +1,8 @@
 # UI design
 
-Status: **Draft for G2** (Stage 2b). Screens are listed here; HTML prototypes follow in Stage 2c (`docs/design/screens/S-xx-<name>.html`) and are approved by you at G2. Baselined at G2; after that this doc and the approved screens change only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)).
+Status: **Draft for G2** (Stage 2b; Stage 2c in progress). Screens are listed here, designed by journey on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS) and reviewed there by you; approved screens are then built as HTML prototypes (`docs/design/screens/S-xx-<name>.html`) and approved at G2 (PROCESS.md, Stage 2 screens). S-07 already has an HTML reference prototype. Baselined at G2; after that this doc and the approved screens change only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)).
 
-Owners of related facts: requirements [REQUIREMENTS.md](REQUIREMENTS.md) · assumptions [QUESTIONS.md](QUESTIONS.md) · components and states [ARCHITECTURE.md](../architecture/ARCHITECTURE.md) · API [openapi.yaml](../contracts/openapi.yaml) · who may do what [SECURITY.md](../architecture/SECURITY.md#authentication-and-roles) · Studio tokens [tokens.md](../design/tokens.md) (2c).
+Owners of related facts: requirements [REQUIREMENTS.md](REQUIREMENTS.md) · assumptions [QUESTIONS.md](QUESTIONS.md) · components and states [ARCHITECTURE.md](../architecture/ARCHITECTURE.md) · API [openapi.yaml](../contracts/openapi.yaml) · who may do what [SECURITY.md](../architecture/SECURITY.md#authentication-and-roles) · Studio UI tokens and video house style [tokens.md](../design/tokens.md).
 
 ## Scope and principles
 
@@ -13,6 +13,33 @@ Owners of related facts: requirements [REQUIREMENTS.md](REQUIREMENTS.md) · assu
 - **Original look.** No reference screenshots exist. The Studio UI style (tokens.md, 2c) and the video house style shown in previews are derived only from PRD §5.2 and the §10 storyboard. Sample data in prototypes is synthetic, using the odd-squares fixture.
 - **R3 screens are listed, not prototyped,** until you promote R3 (A-18). They are here so every Should requirement has a home.
 
+## Journeys, stories and what each screen solves
+
+Personas, journeys, stories and the value and moat hypotheses are owned by the PRD (§2.1, §6, §1.1). In scope here: J1 Idea to video, J6 Revision and recovery, J3 Branded series. J2 and J4 (R3) get screens S-17–S-20 after A-18; J5, J7 and J8 are out of scope. The [canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS) shows each journey as a page of linked screens, plus a "What it solves" page.
+
+Moats (PRD §1.1): 1 typed scene library and compiler · 2 trust · 3 cheap targeted revision · 4 learning loop.
+
+| Screen | Journey step | Stories | Problem it solves | Builds moat |
+|---|---|---|---|---|
+| S-01 | J1 step 1 | US-01 | Only accountable, signed-in people can act | 2 |
+| S-02 | J1 step 2 | US-01, US-10 | One view of every video's state, gates and spend | 2, 3 |
+| S-04 | J1 step 3 | US-01, US-10, US-26 | Consistent brand and voice, bounded spend, data you can take away | 2 |
+| S-03 | J1 step 4 · Gate A | US-02, US-10 | Not paying for a video that can't be made; hypothesis recorded up front | 1, 4 |
+| S-05 | J1 step 5 | US-03 | Scattered, unchecked facts | 2 |
+| S-06 | J1 step 6 · Gate B | US-04, US-05 | Plausible-looking but wrong numbers | 1, 2 |
+| S-07 | J1 step 7 · Gate C | US-06, US-08 | Animation that looks right but teaches something wrong | 1 |
+| S-08 | J1 step 8 | US-07 | Speech and animation drifting apart; speech never sped up | 1 |
+| S-11 | J1 step 9 · Gate D | US-11, US-12 | Approving something other than what ships | 2 |
+| S-12 | J1 step 10 · Gate E (R2) | US-13, US-19 | “Uploaded” mistaken for “published”; result set against the hypothesis | 2, 4 |
+| S-09 | J6 step 1 | US-09, US-10 | A small change meaning a full redo, with surprise costs | 3 |
+| S-10 | J6 step 2 | US-11 | Re-reviewing everything after a change | 3, 2 |
+| S-13 | J6 step 3 | US-14 | Failures that restart everything or repeat a public action | 3 |
+| S-14 | J6 step 4 | US-10 | Unknown cost and effort per video | 3 |
+| S-16 | J3 step 1 (R2) | US-21 | A series that keeps repeating itself | 1, 4 |
+| S-15 | J3 step 2 | US-01, US-21 | Rights doubts; a brand change breaking published videos | 2 |
+
+**Agents in the journeys.** Which steps an agent performs, what it prepares, who decides and each workflow's maturity level are owned by [AGENT_ARCHITECTURE.md](../architecture/AGENT_ARCHITECTURE.md#journeys--agents). On screen, agent work is always a draft awaiting a person: S-05 (research), S-06 (script), S-07 (storyboard), and S-09 (revision), where the agent redrafts only the targeted beat or scene and the owner sees the redraft and its impact before anything renders (Q-34). A run rejected because its inputs changed shows "Inputs changed during the run; run again" (ADR-021).
+
 ## Studio frame (shared on every screen)
 
 | Element | What it shows | Requirements |
@@ -21,7 +48,7 @@ Owners of related facts: requirements [REQUIREMENTS.md](REQUIREMENTS.md) · assu
 | Project header | Title, series, production state badge (R-44 states), brief version, destination label and timezone | R-44, R-04 |
 | Gate strip | Gates A–E, each: not started · awaiting review · approved (version + hash) · reopened (reason) · blocked (count). Status is text plus icon, never colour alone | R-40, R-41, R-42 |
 | Spend meter | Allowance, reserved, actual (INR, provider USD at recorded rate), paused-for-budget state | R-34, R-35, R-61 AC2 |
-| Run indicator | Active run, current step, progress from SSE; link to S-13 | R-50 |
+| Run indicator | Active run, current step, progress, and why it is waiting or paused, from the AG-UI stream (`RUN_*`, `STEP_*`, `ACTIVITY_*`; ADR-020); link to S-13 | R-50, R-61 |
 | Approval dialog | Gate, target and version hash, responsibility used, evidence checklist, outstanding blockers (each linking to its fix), approve / return with reason | R-40, R-41, R-43, R-09, R-37, R-55, R-59 |
 | Error panel | Error class (retryable provider failure, invalid content, deterministic render defect, uncertain public action), the named scene / object / claim / account, and the matching repair button | R-53 |
 | Version chip | `v3 · a1b2c3d` with "compare" (S-10) and "history" | R-33, R-41 |
@@ -38,9 +65,9 @@ Status of every screen is tracked in [STATUS.md](../../plans/STATUS.md#screens).
 | S-04 | Project settings and data | R1 | Destination profile, brand-kit and narrator pins, budget allowance, data export, archive and delete | Set destination (platform, account label, timezone, export profile, disclosure); pick brand version; set allowance (step-up to raise); export project data (step-up); archive; delete a never-published project (step-up, type the title to confirm) | `/projects/{id}` (incl. DELETE), `/destination`, `/budget`, `/data-exports` | S-04-settings.html |
 | S-05 | Evidence | R1 | Claim ledger beside its sources; review each claim | Run or re-run research; add a claim with evidence; mark approved / qualified / unsupported / contradicted / needs specialist / removed; open claim detail (sources, locator, excerpt, every beat and scene using it) | `/claims`, `/claims/{id}`, `/research-runs` | S-05-evidence.html |
 | S-06 | Script and demonstration | R1 | Narration beats side by side with their claims and the verified demonstration | Generate or edit script; edit hook; compute demonstration with reviewed parameters; label example / approximation / illustration; policy checklist; approve **Gate B** | `/script-runs`, `/scripts`, `/demonstrations`, `/approvals` | S-06-script.html |
-| S-07 | Storyboard and preview | R1 (R0 sample) | Scene cards and a playhead over the Remotion Player; see what objects do and when | Generate storyboard; inspect object (ID, colour, meaning, label) and action (op, targets, frames, easing, anchor); see compiler errors and capability gaps per scene; render draft preview or hook-only preview; request a change (→ S-09); approve **Gate C** | `/storyboard-runs`, `/storyboards`, `/capabilities`, `/renders` | S-07-storyboard.html |
+| S-07 | Storyboard and preview | R1 (R0 sample) | Scene cards and a scene and caption strip with a playhead, around the Remotion Player and its own controls; see what objects do and when | Generate storyboard; inspect object (ID, colour, meaning, label) and action (op, targets, frames, easing, anchor); see compiler errors and capability gaps per scene; render draft preview or hook-only preview; request a change (→ S-09); approve **Gate C** | `/storyboard-runs`, `/storyboards`, `/capabilities`, `/renders` | [S-07-storyboard.html](../design/screens/S-07-storyboard.html) (reference, client review) |
 | S-08 | Narration | R1 (R0 sample) | Audition voice per scene and fix pronunciation before the master | Generate take (whole or per scene); play per scene; edit pronunciation list (including notation); see measured duration vs plan and the pacing change; see take licence (plan, commercial use) | `/narration-takes`, `/pronunciations` | S-08-narration.html |
-| S-09 | Revision impact | R1 (R0 sample) | Before regenerating, see exactly what a change costs and reopens | Describe the change on a claim, scene or object; view rebuild vs reuse lists, estimated cost, frame shifts, options (extend or shorten another beat), gates that reopen; apply | `/revisions/impact`, `/revisions/{id}/apply` | S-09-revision.html |
+| S-09 | Revision impact | R1 (R0 sample) | Ask for a change in words; the agent redrafts only that part; see exactly what it costs and reopens before anything renders | Describe the change on a claim, beat, scene or object; see the scope (which agent, which targets, agent cost); redraft with the agent (Q-34); review the redraft beside the approved version; view rebuild vs reuse lists, estimated cost, frame shifts, options (extend or shorten another beat), gates that reopen; edit by hand, redraft again, discard or apply | `/revisions/impact`, `/revisions/{id}/redraft`, `/revisions/{id}`, `/revisions/{id}/apply` | S-09-revision.html |
 | S-10 | Compare versions | R1 | Compare a revised script, storyboard or master with the last reviewed one | Pick two versions; side-by-side text diff, scene diff, synced dual player for masters | `/compare` | S-10-compare.html |
 | S-11 | Final review and package | R1 | Review the final-quality master and approve the exact export package | Play master (phone-size frame and full size); media QA results; findings with disposition; rubric (5 dimensions incl. muted-with-captions); metadata, cover, description with attribution; audience (made-for-kids) setting with no default; AI disclosure assessment; rights and provenance; approve **Gate D**; build export bundle | `/renders/{id}`, `/findings`, `/renders/{id}/rubric`, `/packages`, `/exports`, `/approvals` | S-11-package.html |
 | S-12 | Publication record | R2 | Record a manual upload truthfully and keep it honest afterwards | Approve **Gate E** (account, publish-now or time); record actual account, external ID, URL, time, visibility; record verification (NOT_CHECKED / PASSED / PARTIAL / FAILED) with evidence; flag package mismatch; propose a correction; enter manual metric (labelled manual, cold-start) | `/publications`, `/verifications`, `/corrections`, `/metric-snapshots`, `/approvals` | S-12-publication.html |
@@ -96,10 +123,14 @@ flowchart TD
   trig{Trigger} -->|change wanted| pick[Select claim, scene or object<br/>S-05, S-06 or S-07]
   trig -->|run failed / paused| s13[Runs and recovery · S-13]
   trig -->|problem in published video| corr[S-12 propose correction<br/>nothing external changes]
-  pick --> s09[Revision impact · S-09<br/>rebuild vs reuse, cost, frame shifts,<br/>options, gates that reopen]
+  pick --> s09[Revision · S-09<br/>describe change, scope and agent cost]
+  s09 -->|redraft| ag[Script or storyboard agent<br/>redrafts the target only, draft]
+  ag --> imp[S-09 impact: redraft vs approved,<br/>rebuild vs reuse, cost, frame shifts,<br/>options, gates that reopen]
+  imp -->|redraft again| ag
+  imp -->|apply| run
   s09 -->|over allowance| bud[S-04 / S-14 raise allowance<br/>needs new authority]
   bud --> s09
-  s09 -->|apply| run[Revision run<br/>run indicator]
+  run[Revision run<br/>run indicator]
   run --> s10[Compare · S-10<br/>new vs last reviewed]
   s10 --> reg{Which gates reopened?}
   reg -->|claim| s05[S-05 then Gate B on S-06]
@@ -136,7 +167,7 @@ Every prototype in 2c shows its empty, loading and error states. Shared rules fi
 **Shared rules**
 - **Empty** explains why and offers the next action ("No claims yet. Run research or add a claim."). Empty is used only when the data truly has no items.
 - **Unavailable** is a distinct state with a reason ("Average % viewed: not entered yet", "Not supported by this platform"), never a blank, dash or zero (R-61 AC2, R-72 AC2).
-- **Loading** uses skeletons for lists and panels; long work shows the run indicator with the current step from SSE, never a spinner without a step. If SSE drops, a banner says "Live updates paused, reconnecting" and the screen re-queries on reconnect.
+- **Loading** uses skeletons for lists and panels; long work shows the run indicator with the current step from the AG-UI stream, never a spinner without a step. If the stream drops, a banner says "Live updates paused, reconnecting"; on reconnect the stream starts with a state snapshot and the screen re-queries.
 - **Errors** use the error panel (R-53). API problem types map as: 401 → re-authenticate (S-01) and return; 403 `step_up_required` → MFA prompt in place, the dialog keeps its content; other 403 → "Your responsibility does not allow this" naming the one needed; 404 → not found in this workspace; 409 blocker → list of blockers with links; 412 stale version → "Changed since you opened it" with reload and compare; 422 validation → field-level messages naming scene and field; 5xx → retry with the request ID shown.
 - **Paused** states (budget, awaiting approval) are not errors: they show what is waiting and the one action that unblocks it.
 
@@ -150,7 +181,7 @@ Every prototype in 2c shows its empty, loading and error states. Shared rules fi
 | S-06 | No script yet | Script run | Unknown claim reference; demonstration domain error or mismatch; policy checklist failure blocks Gate B |
 | S-07 | No storyboard yet | Storyboard run; preview rendering with per-scene progress | Compiler errors per scene and field (unknown reference, frame out of range, continuity break, colour meaning, caption overlap, safe zone); capability gap; preview layout failure |
 | S-08 | No take yet | Take generating | TTS provider failure (retryable); take no longer fits (pacing change shown, never silent speed-up); free-plan take flagged "not publishable" |
-| S-09 | Nothing changed | Computing impact | Impact exceeds remaining allowance; change touches an approved version (shows which gates reopen) |
+| S-09 | Nothing changed | Computing scope; agent redrafting (step from the stream); computing impact | Impact exceeds remaining allowance; change touches an approved version (shows which gates reopen); redraft changed something outside the target (rejected, with what it tried to change); inputs changed during the redraft |
 | S-10 | Only one version exists | Loading both versions | One version deleted by retention (shown as retained metadata only) |
 | S-11 | No master yet | Master rendering; QA running | Failed media check; open material finding; rights blocker (incl. narration without commercial licence); audience setting unset; Gate D refused with blockers |
 | S-12 | Awaiting manual upload | — | Gate E not current for this package or account; recorded URL's package differs from approved (flag); verification PARTIAL needs a reason |
@@ -165,12 +196,12 @@ Standard per A-17: **WCAG 2.2 AA** for the Studio.
 
 - **Contrast:** text 4.5:1, large text and UI graphics 3:1, in both light and dark Studio themes (tokens in 2c are checked against these ratios).
 - **Not colour alone:** gate status, claim status, QA results and object colour meaning always pair colour with text, icon or shape (also R-20 AC2 for the video).
-- **Keyboard:** every action reachable by keyboard in a logical order; visible focus (2.4.7, 2.4.11 focus not obscured); dialogs trap and return focus; the player has keyboard play, pause, frame step and scene jump; scene cards and the timeline are navigable by arrow keys.
-- **Targets:** at least 24 × 24 px (2.5.8); drag on the timeline always has a non-drag alternative (2.5.7), e.g. frame number inputs.
+- **Keyboard:** every action reachable by keyboard in a logical order; visible focus (2.4.7, 2.4.11 focus not obscured); dialogs trap and return focus; the player has keyboard play, pause, frame step and scene jump; scene cards and the scene strip are reachable by keyboard.
+- **Targets:** at least 24 × 24 px (2.5.8); dragging the seek bar always has a non-drag alternative (2.5.7): frame step buttons and a frame number input.
 - **Motion and flashing:** Studio UI motion respects `prefers-reduced-motion`; nothing in the Studio flashes more than three times per second. Video content is checked separately by `media.qa` (≤ 3 flashes/s, NFR-08).
 - **Media review:** S-11 offers a muted-with-captions playback mode and a phone-size frame so the KPI-14 review is done the way viewers watch (PRD §2.2).
 - **Forms:** labels on every field, errors announced and linked to the field, no time limits on review screens except the signed media URL, which renews silently.
-- **Status messages:** run progress and SSE updates use polite live regions, not focus moves.
+- **Status messages:** run progress and stream updates use polite live regions, not focus moves.
 
 ## Devices and browsers
 
@@ -210,12 +241,12 @@ Every user-facing Must and Should requirement maps to at least one screen. Requi
 | R-18 | Must | S-07 | Compiler errors per scene and field |
 | R-19 | Must | S-07 | Family shown per scene; components are media layer |
 | R-20 | Must | S-07 | Object inspector: ID, colour, meaning, label |
-| R-21 | Must | S-07 | Action lanes on the timeline |
+| R-21 | Must | S-07 | Action list per scene and action inspector (op, targets, frames, easing, anchor); no multi-track timeline (PRD §13 defers it) |
 | R-22 | Must | S-07, S-09 | Continuity flags; inheriting scenes marked invalid |
 | R-23 | Must | S-07, S-11, S-15 | House style visible in previews; brand kit in S-15 |
 | R-25 | Must | S-08 | |
 | R-26 | Must | S-08, S-07 | Pacing change shown, never silent |
-| R-27 | Must | S-07, S-11 | Caption lane and overlay; QA result |
+| R-27 | Must | S-07, S-11 | Caption strip and overlay; QA result |
 | R-28 | Must | S-07 | |
 | R-29 | Must | S-11 | Media QA results |
 | R-30 | Must | S-11, S-13 | Manifest view |

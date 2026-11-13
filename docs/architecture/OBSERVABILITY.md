@@ -14,12 +14,12 @@ Status: **Draft for G2** (Stage 2b); a living doc after G2 for signals, and chan
 
 | Component | Traces (spans) | Metrics | Log events |
 |---|---|---|---|
-| **web** (browser + Next.js server) | Page load, route change, API calls (fetch instrumentation), SSE connect | `oos.web.sse.reconnects`, Web Vitals (LCP, INP) on Studio pages | `auth.callback_failed`, `sse.disconnected` |
+| **web** (browser + Next.js server) | Page load, route change, API calls (fetch instrumentation), AG-UI stream connect | `oos.web.sse.reconnects`, `oos.web.agui.events{type}`, `oos.web.agui.gaps` (cursor gaps that forced a reconnect), Web Vitals (LCP, INP) on Studio pages | `auth.callback_failed`, `sse.disconnected`, `agui.event_rejected` (fails the pinned schema) |
 | **api** | Every request (`http.server`), DB queries, approval checks, preflight, revision impact | HTTP rate, errors, duration by route; `oos.approval.refused{reason}`; `oos.preflight.gaps{kind}`; `oos.idempotency.replays` | `approval.recorded`, `approval.refused`, `stale_version` (412), `authz.denied`, `export.built` |
-| **worker: dispatcher + outbox relay** | `relay.deliver`, `workflow.start` | `oos.outbox.lag_seconds` (oldest undelivered), `oos.workflow_request.dispatch_seconds`, `oos.relay.delivered` | `workflow.duplicate_start_ignored`, `relay.retry` |
+| **worker: dispatcher + outbox relay** | `relay.deliver`, `workflow.start`, `relay.agui.emit` (carries the source event's trace) | `oos.outbox.lag_seconds` (oldest undelivered), `oos.workflow_request.dispatch_seconds`, `oos.relay.delivered`, `oos.agui.first_event_seconds` (command commit → first AG-UI event of its run) | `workflow.duplicate_start_ignored`, `relay.retry` |
 | **worker: workflows (DBOS)** | Workflow span with one child per step | `oos.run.duration_seconds{workflow_type,outcome}`, `oos.run.active`, `oos.run.stuck` (running > 2× expected), `oos.step.retries{step}`, `oos.queue.depth{queue}`, `oos.queue.wait_seconds{queue}` | `run.state_changed`, `run.paused_budget`, `run.takeover`, `run.cancelled`, `run.recovered_after_restart` |
 | **worker: budget** | `budget.reserve`, `budget.settle` | `oos.cost.estimated_minor`, `oos.cost.actual_minor{provider,stage}`, `oos.cost.retry_minor` (spend on retried attempts), `oos.budget.remaining_minor{project}`, `oos.budget.overrun` (must stay 0) | `budget.reserved`, `budget.exhausted`, `budget.released` |
-| **agent tasks** | `agent.<task>.run` → `call_model`, `tool.<name>` | Per task: `gen_ai` tokens, model latency, `oos.agent.tool_calls{tool}`, `oos.agent.failure{state}` (schema_invalid, citation_invalid, injection_detected, …), `oos.agent.budget_used_ratio` | `agent.output_rejected`, `agent.injection_detected`, `fetch.refused{reason}` |
+| **agent tasks** | `agent.<task>.run` → `call_model`, `tool.<name>` | Per task: `gen_ai` tokens, model latency, `oos.agent.tool_calls{tool}`, `oos.agent.failure{state}` (schema_invalid, stale_input, citation_invalid, injection_detected, …), `oos.agent.validation{stage,outcome}` (schema, policy_freshness, acceptance), `oos.agent.tool_denied{tool,reason}`, `oos.agent.budget_used_ratio` | `agent.output_rejected`, `agent.stale_result_rejected`, `agent.injection_detected`, `agent.tool_denied`, `fetch.refused{reason}`; each attempt's input bindings and validation stages are stored on `task_attempt` (ADR-021) |
 | **media.audio (TTS, alignment)** | `tts.synthesize`, `audio.align`, `captions.segment` | Characters, latency, provider errors, `oos.narration.duration_delta_seconds` (measured vs planned) | `tts.pacing_change`, `tts.non_commercial_take` |
 | **render service** | `render.job` → `compile`, `scene_clip`, `assemble`, `qa` (job span carries the trace from the worker) | `oos.render.duration_seconds{kind=preview|clip|master}`, `oos.render.cache_hit_ratio`, peak memory and CPU per job, `oos.render.limit_breach{limit}`, `oos.media_qa.failed{check}`, `oos.compiler.errors{code}` | `render.cache_hit`, `render.resource_limit`, `media_qa.failed` |
 | **PostgreSQL** | DB spans from SQLAlchemy and DBOS | Connections, transaction rate, slow queries (> 500 ms), lock waits on `budget`, database size | `pg.slow_query` |
@@ -27,6 +27,8 @@ Status: **Draft for G2** (Stage 2b); a living doc after G2 for signals, and chan
 | **Keycloak** | — | Login success and failure, MFA failures (Keycloak events) | Login and admin events (kept 1 year, A-30, SECURITY.md) |
 | **Retention job** | `retention.sweep` | Objects deleted, bytes freed, referenced objects skipped | `retention.report` |
 | **Backups** | `backup.run` | `oos.backup.age_seconds`, size, off-machine copy success | `backup.failed` |
+
+**AG-UI stream.** Each AG-UI run ID equals the execution run ID, so a run in the Studio links to its trace. Emitted events are logged (type, run ID, cursor, step) without payloads, so a session's stream can be reconstructed and replayed. Every blocked or waiting run can be explained from stored records: run state, pause reason, unblock action, the attempt's error class and validation stages (PROCESS.md, Agent architecture).
 
 Health: every container exposes `/healthz` (liveness) and `/readyz` (dependencies); Compose health checks use them.
 
@@ -38,7 +40,7 @@ All targets are **provisional — calibrate after R0** (A-15: no numeric perform
 |---|---|---|---|---|
 | SLO-01 Studio responsiveness | All Studio screens (J1, J6) | API requests answered without 5xx and within 1 s (commands) or 500 ms (queries) | 99% — calibrate after R0 | 1% of requests |
 | SLO-02 Dispatch | Any long action (J1) | Workflow requests started within 30 s of commit | 99% — calibrate after R0 | 1% |
-| SLO-03 Live progress | Run indicator (J1, J6) | Domain events reaching the Studio SSE stream within 5 s of commit | 99% — calibrate after R0 | 1% |
+| SLO-03 Live progress | Run indicator (J1, J6) | AG-UI events for committed domain events reaching the Studio stream within 5 s of commit; first event of a run within 5 s of its command (`oos.agui.first_event_seconds`) | 99% — calibrate after R0 | 1% |
 | SLO-04 Research | S-05 (J1) | Research runs reaching a reviewable ledger within 10 min without a platform failure | 90% — calibrate after R0 | 10% |
 | SLO-05 Draft preview | S-07 (J1, J6) | Previews of a 30–60 s storyboard ready within 5 min | 90% — calibrate after R0 | 10% |
 | SLO-06 Master render | S-11 (J1) | Masters rendered and QA-checked within 20 min | 90% — calibrate after R0 | 10% |
@@ -54,6 +56,7 @@ All targets are **provisional — calibrate after R0** (A-15: no numeric perform
 | Spend never exceeds reservation and allowance (NFR-07) | `oos.budget.overrun > 0` |
 | No effect executed under a stale or missing approval (R-41) | log event `authority.violation` from the step re-check |
 | No approval or public action by a service or agent identity (R-43) | `oos.approval.refused{reason="non_member"}` rising, any `authority.violation` |
+| No agent output accepted without all three validation stages, or from stale inputs (ADR-021) | any `agent.stale_result_accepted` or a stored draft whose attempt lacks a passed `policy_freshness` stage |
 | No secret pattern in logs (NFR-06) | Collector redaction counter `oos.redaction.secret_matches > 0` after redaction (should be 0 because redaction runs first; a match means a new pattern) |
 | Backups fresh (NFR-14) | `oos.backup.age_seconds > 36 h` |
 

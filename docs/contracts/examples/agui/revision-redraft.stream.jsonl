@@ -1,0 +1,15 @@
+{"seq": "310", "data": {"type": "STATE_SNAPSHOT", "snapshot": {"projectId": "00000000-0000-4000-8000-0000000000a1", "asOfSeq": 310, "productionState": "REVISION_REQUIRED", "activeRuns": [], "blockers": []}}}
+{"seq": "311", "data": {"type": "RUN_STARTED", "threadId": "00000000-0000-4000-8000-0000000000a1", "runId": "00000000-0000-4000-8000-0000000000c4"}}
+{"seq": "312", "data": {"type": "STEP_STARTED", "stepName": "budget.reserve"}}
+{"seq": "313", "data": {"type": "STEP_FINISHED", "stepName": "budget.reserve"}}
+{"seq": "314", "data": {"type": "STEP_STARTED", "stepName": "storyboard"}}
+{"seq": "314.1", "data": {"type": "TOOL_CALL_START", "toolCallId": "tc-1", "toolCallName": "validate_scene_spec", "parentMessageId": "att-storyboard-1"}}
+{"seq": "314.2", "data": {"type": "TOOL_CALL_ARGS", "toolCallId": "tc-1", "delta": "{\"tool\": \"validate_scene_spec\"}"}}
+{"seq": "314.3", "data": {"type": "TOOL_CALL_END", "toolCallId": "tc-1"}}
+{"seq": "314.4", "data": {"type": "TOOL_CALL_RESULT", "messageId": "tr-1", "toolCallId": "tc-1", "content": "{\"outcome\": \"ok\", \"count\": 0}"}}
+{"seq": "315", "data": {"type": "STEP_FINISHED", "stepName": "storyboard"}}
+{"seq": "316", "data": {"type": "STEP_STARTED", "stepName": "revision.impact"}}
+{"seq": "317", "data": {"type": "STEP_FINISHED", "stepName": "revision.impact"}}
+{"seq": "318", "data": {"type": "CUSTOM", "name": "opportunityos.storyboard.version_created", "value": {"$comment": "DomainEvent elided: storyboard v4, draft, scene.explain only"}}}
+{"seq": "319", "data": {"type": "CUSTOM", "name": "opportunityos.revision.redraft_ready", "value": {"$comment": "DomainEvent elided: full impact ready on S-09; Gate C reopens on apply"}}}
+{"seq": "320", "data": {"type": "RUN_FINISHED", "threadId": "00000000-0000-4000-8000-0000000000a1", "runId": "00000000-0000-4000-8000-0000000000c4"}}

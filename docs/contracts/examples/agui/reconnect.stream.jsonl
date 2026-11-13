@@ -1,0 +1,4 @@
+{"seq": "246", "data": {"type": "STATE_SNAPSHOT", "snapshot": {"projectId": "00000000-0000-4000-8000-0000000000a1", "asOfSeq": 246, "productionState": "PRODUCING", "activeRuns": [{"runId": "00000000-0000-4000-8000-0000000000b7", "workflowType": "preview", "status": "running", "currentStep": "render.clip.scene.payoff", "stepIndex": 4, "stepCount": 6}], "blockers": []}}}
+{"seq": "247", "data": {"type": "STEP_FINISHED", "stepName": "render.clip.scene.payoff"}}
+{"seq": "248", "data": {"type": "CUSTOM", "name": "opportunityos.budget.exhausted", "value": {"$comment": "DomainEvent elided in this fixture"}}}
+{"seq": "248.1", "data": {"type": "ACTIVITY_SNAPSHOT", "messageId": "act-pause-1", "activityType": "opportunityos.run_paused", "content": {"reason": "budget", "unblockAction": "raise_allowance"}}}

@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S-07 Storyboard and preview · OpportunityOS Studio prototype</title>
+<!--
+  S-07 Storyboard and preview: reference prototype (Stage 2c, step 1).
+  Requirements: R-16, R-18-R-23, R-27, R-28, R-15, R-26, R-40, R-41, R-53, Gate C.
+  Tokens: docs/design/tokens.md (ui.* Studio tokens; video house style brand kit v1).
+  Data: docs/contracts/examples/odd-squares.video-spec.json and odd-squares.demonstration.json,
+  embedded unchanged below. Captions, claim text, names and money are synthetic samples.
+  Self-contained: no network requests. Production rebuilds this with web/components and the
+  Remotion Player (ADR-005, ADR-018); never copy this HTML.
+-->
+<style>
+:root{
+  /* Studio UI tokens, light (tokens.md 1.1) */
+  --ui-color-bg:#EEF1F4; --ui-color-panel:#FFFFFF; --ui-color-sunken:#F6F8FA; --ui-color-stage:#070D1A;
+  --ui-color-line:#D5DBE3; --ui-color-line-strong:#7D8AA0;
+  --ui-color-ink:#172033; --ui-color-ink-muted:#4B5770; --ui-color-ink-subtle:#5F6B82;
+  --ui-color-primary:#101C33; --ui-color-on-primary:#F2F5FA; --ui-color-focus:#1F5FD6;
+  --ui-color-ok:#17663F; --ui-color-ok-bg:#E3F3EA; --ui-color-warn:#8A5300; --ui-color-warn-bg:#FFF2D9;
+  --ui-color-danger:#B3261E; --ui-color-danger-bg:#FCE8E6; --ui-color-info:#1F5FD6; --ui-color-info-bg:#E6EEFC;
+  --ui-font-sans:"Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ui-font-mono:"Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ui-radius-sm:4px; --ui-radius-md:8px; --ui-radius-lg:12px; --ui-radius-device:28px;
+  --ui-shadow-overlay:0 12px 32px rgb(7 13 26 / 0.28);
+  --ui-motion-fast:120ms cubic-bezier(0.2,0,0,1); --ui-motion-base:200ms cubic-bezier(0.2,0,0,1);
+  /* Video house style, brand kit v1 (tokens.md 2.1) */
+  --color-canvas:#101C33; --color-canvas-raised:#1B2A47; --color-chalk:#F2F5FA; --color-chalk-muted:#A7B3C9; --color-outline:#5C6E92;
+  --color-layer-1:#FFE04A; --color-layer-2:#94C8F5; --color-layer-3:#FF6A45; --color-layer-4:#3EF0B4; --color-layer-5:#B477FF;
+  color-scheme:light;
+}
+[data-theme="dark"]{
+  --ui-color-bg:#0D1526; --ui-color-panel:#141E33; --ui-color-sunken:#0F182B;
+  --ui-color-line:#26334D; --ui-color-line-strong:#62728F;
+  --ui-color-ink:#E8EDF5; --ui-color-ink-muted:#AAB5C8; --ui-color-ink-subtle:#8E9AB0;
+  --ui-color-primary:#E8EDF5; --ui-color-on-primary:#101C33; --ui-color-focus:#7FB2FF;
+  --ui-color-ok:#5DD39E; --ui-color-ok-bg:#12301F; --ui-color-warn:#F2B84B; --ui-color-warn-bg:#33260A;
+  --ui-color-danger:#FF8A80; --ui-color-danger-bg:#3A1614; --ui-color-info:#7FB2FF; --ui-color-info-bg:#132647;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font:400 14px/20px var(--ui-font-sans);color:var(--ui-color-ink);background:var(--ui-color-bg);min-width:320px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ui-color-focus);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--ui-font-mono);font-size:12px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.muted{color:var(--ui-color-ink-muted)} .subtle{color:var(--ui-color-ink-subtle)}
+a{color:var(--ui-color-focus)}
+svg.i{width:16px;height:16px;flex:none;vertical-align:-3px}
+
+/* Prototype controls: not part of the Studio */
+.proto{display:flex;gap:16px;align-items:center;padding:6px 16px;background:repeating-linear-gradient(135deg,#FFF2D9 0 10px,#FBE7BF 10px 20px);color:#5A3700;font-size:13px;border-bottom:1px solid #E2C68B}
+.proto label{display:flex;gap:6px;align-items:center}
+.proto select{padding:2px 6px;border:1px solid #8A5300;border-radius:var(--ui-radius-sm);background:#FFFDF7;color:#3A2400}
+.proto strong{font-weight:700}
+
+/* App shell */
+.shell{display:grid;grid-template-columns:76px 1fr;min-height:calc(100vh - 33px)}
+.rail{background:var(--ui-color-panel);border-right:1px solid var(--ui-color-line);display:flex;flex-direction:column;align-items:stretch;padding:12px 6px;gap:4px}
+.rail .mark{display:grid;place-items:center;height:44px;margin-bottom:8px}
+.rail a.nav{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:var(--ui-radius-md);color:var(--ui-color-ink-muted);text-decoration:none;font-size:12px;line-height:16px}
+.rail a.nav svg{width:20px;height:20px}
+.rail a.nav:hover{background:var(--ui-color-sunken);color:var(--ui-color-ink)}
+.rail a.nav[aria-current="page"]{background:var(--ui-color-sunken);color:var(--ui-color-ink);box-shadow:inset 3px 0 0 var(--ui-color-focus)}
+.rail .me{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;line-height:16px;text-align:center}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--ui-color-primary);color:var(--ui-color-on-primary);display:grid;place-items:center;font-weight:700;font-size:13px}
+.env{border:1px solid var(--ui-color-line-strong);border-radius:var(--ui-radius-sm);padding:0 6px;font-size:12px}
+.linkbtn{background:none;border:0;padding:2px;color:var(--ui-color-focus);text-decoration:underline;cursor:pointer;font-size:12px}
+
+.work{min-width:0;display:flex;flex-direction:column}
+.phead{display:flex;align-items:center;gap:16px;padding:10px 20px;background:var(--ui-color-panel);border-bottom:1px solid var(--ui-color-line);min-height:64px;flex-wrap:nowrap}
+.phead .crumb{font-size:13px;color:var(--ui-color-ink-muted)}
+.phead h1{font-size:20px;line-height:28px;font-weight:600;margin:0}
+.ptitle{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
+.phead h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--ui-color-ink-muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ui-color-line);border-radius:var(--ui-radius-sm);padding:1px 8px;font-size:13px;line-height:18px;background:var(--ui-color-sunken);color:var(--ui-color-ink)}
+.state{border-color:transparent;background:var(--ui-color-info-bg);color:var(--ui-color-info);font-weight:600}
+.state.ok{background:var(--ui-color-ok-bg);color:var(--ui-color-ok)}
+.state.danger{background:var(--ui-color-danger-bg);color:var(--ui-color-danger)}
+.spacer{flex:1}
+.meter{display:flex;flex-direction:column;gap:4px;min-width:230px;flex:none}
+.meter .mbar{height:8px;border-radius:4px;background:var(--ui-color-sunken);border:1px solid var(--ui-color-line-strong);overflow:hidden;display:flex}
+.meter .act{background:var(--ui-color-ink-muted)} .meter .res{background:repeating-linear-gradient(90deg,var(--ui-color-ink-subtle) 0 3px,transparent 3px 6px)}
+.meter .txt{font-size:12px;line-height:16px;color:var(--ui-color-ink-muted)}
+.meter .txt b{color:var(--ui-color-ink);font-weight:600}
+.runind{display:flex;align-items:center;gap:8px;font-size:13px;line-height:17px;padding:6px 10px;border:1px solid var(--ui-color-line);border-radius:var(--ui-radius-md);min-width:200px;max-width:260px;flex:none}
+.runind.active{border-color:var(--ui-color-info);background:var(--ui-color-info-bg);color:var(--ui-color-info)}
+
+.gates{display:flex;gap:0;background:var(--ui-color-panel);border-bottom:1px solid var(--ui-color-line);padding:0 20px;min-height:44px;align-items:stretch;overflow-x:auto}
+.gate{display:grid;grid-template-columns:16px auto;column-gap:8px;align-items:center;padding:5px 16px 5px 0;margin-right:16px;font-size:13px;line-height:17px;white-space:nowrap;border-right:1px solid var(--ui-color-line)}
+.gate .gi{grid-row:1 / span 2}
+.gate:last-child{border-right:0}
+.gate .gn{font-weight:700}
+.gate .gs{color:var(--ui-color-ink-muted);font-size:12px}
+.gate.ok .gi{color:var(--ui-color-ok)} .gate.warn .gi{color:var(--ui-color-warn)} .gate.none .gi{color:var(--ui-color-ink-subtle)} .gate.danger .gi{color:var(--ui-color-danger)}
+.gate.current{box-shadow:inset 0 -3px 0 var(--ui-color-focus)}
+
+.banner{display:flex;gap:10px;align-items:flex-start;margin:12px 20px 0;padding:10px 14px;border-radius:var(--ui-radius-md);border:1px solid;font-size:14px}
+.banner.warn{background:var(--ui-color-warn-bg);border-color:var(--ui-color-warn);color:var(--ui-color-warn)}
+.banner.danger{background:var(--ui-color-danger-bg);border-color:var(--ui-color-danger);color:var(--ui-color-danger)}
+.banner.info{background:var(--ui-color-info-bg);border-color:var(--ui-color-info);color:var(--ui-color-info)}
+.banner p{margin:0;color:var(--ui-color-ink)} .banner b{color:inherit}
+.narrow{display:none}
+
+.titlebar{display:flex;align-items:center;gap:12px;padding:14px 20px 10px;flex-wrap:wrap}
+.titlebar h2{font-size:20px;line-height:28px;margin:0;font-weight:600}
+.vchip{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--ui-color-line-strong);border-radius:var(--ui-radius-sm);padding:1px 4px 1px 8px;background:var(--ui-color-panel)}
+.vchip a{font-size:12px;padding:0 4px}
+.btn{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:5px 12px;border-radius:var(--ui-radius-md);border:1px solid var(--ui-color-line-strong);background:var(--ui-color-panel);color:var(--ui-color-ink);font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--ui-color-sunken)}
+.btn.primary{background:var(--ui-color-primary);color:var(--ui-color-on-primary);border-color:var(--ui-color-primary)}
+.btn.primary:hover{filter:brightness(1.15)}
+.btn.danger{color:var(--ui-color-danger);border-color:var(--ui-color-danger)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn.sm{min-height:28px;padding:3px 10px;font-size:13px}
+.btn.icon{padding:4px;min-width:32px;justify-content:center}
+
+.grid{display:grid;grid-template-columns:268px minmax(420px,1fr) 352px;gap:16px;padding:0 20px 16px;align-items:start}
+.panel{background:var(--ui-color-panel);border:1px solid var(--ui-color-line);border-radius:var(--ui-radius-lg);min-width:0}
+.panel>header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--ui-color-line)}
+.panel>header h3{font-size:16px;line-height:24px;font-weight:600;margin:0}
+
+/* Scene cards */
+.scenes{list-style:none;margin:0;padding:8px;display:flex;flex-direction:column;gap:6px;max-height:760px;overflow:auto}
+.scard{display:block;width:100%;text-align:left;border:1px solid var(--ui-color-line);border-radius:var(--ui-radius-md);background:var(--ui-color-panel);padding:10px 10px 10px 12px;cursor:pointer}
+.scard:hover{background:var(--ui-color-sunken)}
+.scard[aria-current="true"]{border-color:var(--ui-color-focus);box-shadow:inset 3px 0 0 var(--ui-color-focus)}
+.scard .top{display:flex;align-items:baseline;gap:8px}
+.scard .n{font-weight:700;font-size:13px;color:var(--ui-color-ink-muted)}
+.scard .name{font-weight:600;font-size:15px}
+.scard .t{margin-left:auto;font-size:12px;color:var(--ui-color-ink-muted)}
+.scard .narr{margin:6px 0;font-size:13px;line-height:18px;color:var(--ui-color-ink)}
+.scard .facts{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;line-height:16px;color:var(--ui-color-ink-muted)}
+.scard .status{display:flex;gap:10px;margin-top:6px;font-size:12px;line-height:16px;flex-wrap:wrap}
+.okc{color:var(--ui-color-ok)} .warnc{color:var(--ui-color-warn)} .dangerc{color:var(--ui-color-danger)} .infoc{color:var(--ui-color-info)}
+.label-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;border:1px dashed var(--ui-color-line-strong);border-radius:var(--ui-radius-sm);padding:0 6px;color:var(--ui-color-ink)}
+.swatch{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:var(--ui-radius-sm);background:var(--color-canvas);flex:none;vertical-align:-4px}
+.swatch i{display:block;width:10px;height:10px;border-radius:2px}
+
+/* Stage */
+.stagepanel{overflow:hidden}
+.stage{background:var(--ui-color-stage);display:flex;justify-content:center;align-items:flex-start;padding:20px 12px;position:relative;min-height:700px}
+.stage.full{overflow:auto;max-height:760px;justify-content:flex-start}
+.device{position:relative;border-radius:var(--ui-radius-device);padding:10px;background:#1B2438;box-shadow:0 0 0 1px #2E3A55}
+.screen{position:relative;width:360px;height:640px;border-radius:20px;overflow:hidden;background:var(--color-canvas)}
+.stage.full .device{padding:0;border-radius:0;background:none;box-shadow:none}
+.stage.full .screen{width:1080px;height:1920px;border-radius:0}
+.screen svg{display:block;width:100%;height:100%}
+.stagemsg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:28px;text-align:center;color:#E8EDF5;background:rgb(7 13 26 / .82);font-size:14px}
+.stagemsg h4{margin:0;font-size:16px;line-height:24px}
+.stagemsg p{margin:0;color:#C5CEDD}
+.stagemsg .btn{background:#E8EDF5;color:#101C33;border-color:#E8EDF5}
+.stagelabel{position:absolute;left:12px;top:10px;font-size:12px;color:#A7B3C9}
+.controls{padding:10px 14px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--ui-color-line)}
+.crow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tread{font-size:14px;margin:0 6px;min-width:150px}
+.frameinput{width:72px;padding:3px 6px;border:1px solid var(--ui-color-line-strong);border-radius:var(--ui-radius-sm);background:var(--ui-color-sunken)}
+.seg{display:inline-flex;border:1px solid var(--ui-color-line-strong);border-radius:var(--ui-radius-md);overflow:hidden}
+.seg button{border:0;background:var(--ui-color-panel);padding:4px 10px;min-height:28px;cursor:pointer;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--ui-color-primary);color:var(--ui-color-on-primary)}
+.toggle{display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;min-height:28px}
+.toggle input{width:16px;height:16px;accent-color:var(--ui-color-primary)}
+.hint{font-size:12px;color:var(--ui-color-ink-subtle)}
+.provisional{font-size:13px;display:flex;gap:6px;align-items:flex-start;color:var(--ui-color-warn)}
+.provisional span{color:var(--ui-color-ink)}
+
+/* Inspector */
+.tabs{display:flex;gap:2px;padding:0 10px;border-bottom:1px solid var(--ui-color-line)}
+.tabs button{border:0;background:none;padding:10px 10px 8px;cursor:pointer;color:var(--ui-color-ink-muted);border-bottom:3px solid transparent;font-weight:500;min-height:24px}
+.tabs button[aria-selected="true"]{color:var(--ui-color-ink);border-bottom-color:var(--ui-color-focus)}
+.tabs .count{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--ui-color-danger);color:#fff;font-size:12px;line-height:18px;margin-left:4px}
+[data-theme="dark"] .tabs .count{color:#101C33}
+.insp{padding:12px 14px;max-height:700px;overflow:auto}
+.insp h4{margin:14px 0 6px;font-size:14px;font-weight:600}
+.insp h4:first-child{margin-top:0}
+dl.kv{display:grid;grid-template-columns:104px 1fr;gap:6px 10px;margin:0;font-size:13px;line-height:18px}
+dl.kv dt{color:var(--ui-color-ink-muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.ilist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px}
+.ilist button{width:100%;text-align:left;display:flex;gap:8px;align-items:center;border:0;background:none;padding:4px 6px;border-radius:var(--ui-radius-sm);cursor:pointer;font-size:13px;min-height:24px}
+.ilist button:hover{background:var(--ui-color-sunken)}
+.ilist .r{margin-left:auto;color:var(--ui-color-ink-subtle);font-size:12px}
+.phr{font-size:13px;line-height:19px;margin:0 0 6px;padding-left:10px;border-left:3px solid var(--ui-color-line)}
+.phr .a{display:block;font-size:12px;color:var(--ui-color-ink-subtle)}
+.claim{border:1px solid var(--ui-color-line);border-radius:var(--ui-radius-md);padding:8px 10px;font-size:13px;line-height:18px}
+.claim .h{display:flex;gap:6px;align-items:center;margin-bottom:4px}
+.prob{border:1px solid var(--ui-color-danger);border-left-width:4px;border-radius:var(--ui-radius-md);padding:10px;margin-bottom:10px;font-size:13px;line-height:18px}
+.prob .code{font-weight:700;color:var(--ui-color-danger)}
+.prob p{margin:6px 0}
+.prob dl.kv{grid-template-columns:72px 1fr;margin:6px 0}
+.prob .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.prob.warn{border-color:var(--ui-color-warn)} .prob.warn .code{color:var(--ui-color-warn)}
+.empty{padding:28px 18px;text-align:center;color:var(--ui-color-ink-muted)}
+.empty h4{color:var(--ui-color-ink);font-size:16px;margin:0 0 6px}
+.progress{border:1px solid var(--ui-color-info);border-radius:var(--ui-radius-md);padding:10px 12px;margin-bottom:12px;background:var(--ui-color-info-bg)}
+.progress .h{display:flex;gap:8px;align-items:center;color:var(--ui-color-info);font-weight:600}
+.progress ol{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ui-color-ink)}
+.progress li{display:grid;grid-template-columns:1fr 90px 56px;gap:8px;align-items:center}
+.pbar{height:6px;border-radius:3px;background:var(--ui-color-panel);border:1px solid var(--ui-color-line-strong);overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--ui-color-info)}
+
+/* Skeleton */
+.sk{background:linear-gradient(90deg,var(--ui-color-sunken),var(--ui-color-line),var(--ui-color-sunken));background-size:200% 100%;animation:sk 1.4s linear infinite;border-radius:var(--ui-radius-sm)}
+@keyframes sk{to{background-position:-200% 0}}
+
+/* Timeline */
+.tlpanel{margin:0 20px 24px}
+.rbar{background:#0B1220;color:#E8EDF5;padding:6px 12px 8px;border-top:1px solid #1E2A42}
+.seek{width:100%;margin:0 0 4px;accent-color:#E8EDF5;height:16px;cursor:pointer}
+.seek:focus-visible{outline:2px solid #7FB2FF;outline-offset:2px}
+.rrow{display:flex;align-items:center;gap:2px}
+.rbtn{background:none;border:0;color:#E8EDF5;width:32px;height:32px;display:grid;place-items:center;border-radius:6px;cursor:pointer}
+.rbtn:hover{background:#1E2A42}
+.rbtn:focus-visible{outline:2px solid #7FB2FF;outline-offset:0}
+.rbtn[disabled]{color:#8E9AB0;cursor:not-allowed;background:none}
+.rtime{font-size:13px;margin:0 10px 0 4px;color:#E8EDF5}
+.rslot{display:inline-flex;gap:2px;padding-left:8px;margin-left:4px;border-left:1px solid #2E3A55}
+.protonote{margin:0;font-size:12px;line-height:16px;padding:6px 8px;border-radius:var(--ui-radius-sm);background:repeating-linear-gradient(135deg,#FFF2D9 0 10px,#FBE7BF 10px 20px);color:#5A3700}
+.sblock{border:0;border-left:1px solid var(--ui-color-line-strong);background:none;text-align:left;cursor:pointer;color:var(--ui-color-ink);font:inherit;font-size:12px;line-height:15px}
+.sblock:hover{background:var(--ui-color-sunken)}
+.cap{position:absolute;top:3px;height:20px;border:1px solid var(--ui-color-line-strong);background:var(--ui-color-panel);border-radius:3px;font-size:12px;line-height:18px;padding:0 5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--ui-color-ink)}
+.cap.on{border-color:var(--ui-color-focus);background:var(--ui-color-info-bg)}
+.tl{position:relative;padding:0 0 8px;user-select:none}
+.tlrow{display:grid;grid-template-columns:150px 1fr;align-items:center;min-height:22px}
+.tlrow .ln{font-size:12px;line-height:16px;padding:0 10px 0 14px;display:flex;align-items:center;gap:6px;color:var(--ui-color-ink-muted);white-space:nowrap;overflow:hidden}
+.tlrow .tr{position:relative;height:26px;border-bottom:1px dashed var(--ui-color-line);cursor:pointer}
+.ruler .tr{height:36px;border-bottom:1px solid var(--ui-color-line-strong)}
+.sblock{position:absolute;top:2px;bottom:2px;border-left:1px solid var(--ui-color-line-strong);padding:2px 6px;font-size:12px;line-height:15px;overflow:hidden;white-space:nowrap}
+.sblock b{font-weight:600}
+.sblock.cur{background:var(--ui-color-sunken)}
+.sblock.err{background:var(--ui-color-danger-bg);color:var(--ui-color-danger)}
+.tick{position:absolute;bottom:0;height:6px;border-left:1px solid var(--ui-color-line-strong)}
+.playhead{position:absolute;top:0;bottom:8px;width:2px;background:var(--ui-color-focus);pointer-events:none;margin-left:149px}
+.playhead::before{content:"";position:absolute;top:0;left:-5px;border:6px solid transparent;border-top:8px solid var(--ui-color-focus)}
+
+/* Dialog */
+dialog{border:0;border-radius:var(--ui-radius-lg);padding:0;width:min(640px,94vw);background:var(--ui-color-panel);color:var(--ui-color-ink);box-shadow:var(--ui-shadow-overlay)}
+dialog::backdrop{background:rgb(7 13 26 / .5)}
+.dlg header{padding:18px 22px 10px;border-bottom:1px solid var(--ui-color-line)}
+.dlg header h2{margin:0;font-size:20px;line-height:28px}
+.dlg .body{padding:14px 22px;max-height:64vh;overflow:auto}
+.dlg footer{display:flex;gap:8px;justify-content:flex-end;padding:12px 22px;border-top:1px solid var(--ui-color-line);flex-wrap:wrap}
+.dlg h3{font-size:14px;margin:14px 0 6px}
+.check{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:14px}
+.check input{width:18px;height:18px;margin-top:1px;accent-color:var(--ui-color-primary);flex:none}
+.check small{display:block;color:var(--ui-color-ink-muted);font-size:13px}
+.fld{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.fld textarea{min-height:64px;padding:8px;border:1px solid var(--ui-color-line-strong);border-radius:var(--ui-radius-sm);background:var(--ui-color-sunken)}
+.toast{position:fixed;right:20px;bottom:20px;max-width:440px;padding:12px 16px;border-radius:var(--ui-radius-md);background:var(--ui-color-primary);color:var(--ui-color-on-primary);box-shadow:var(--ui-shadow-overlay);display:none;gap:10px;font-size:14px}
+.toast.show{display:flex}
+
+@media (max-width:1279px){
+  .narrow{display:flex}
+  .grid{grid-template-columns:1fr}
+  .shell{grid-template-columns:1fr}
+  .rail{flex-direction:row;overflow-x:auto}
+  .rail .me{margin:0 0 0 auto;flex-direction:row}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<div class="proto" role="region" aria-label="Prototype controls">
+  <strong>Prototype controls (not part of the Studio)</strong>
+  <label>Screen state
+    <select id="protoState">
+      <option value="ready">Ready for Gate C review</option>
+      <option value="empty">Empty: no storyboard yet</option>
+      <option value="loading">Loading: storyboard run</option>
+      <option value="rendering">Loading: draft preview rendering</option>
+      <option value="errors">Error: compiler errors</option>
+      <option value="gap">Error: capability gap</option>
+      <option value="layout">Error: preview layout failure</option>
+      <option value="sse">Live updates paused</option>
+      <option value="stale">Gate C dialog: changed since opened (412)</option>
+    </select>
+  </label>
+  <label>Theme
+    <select id="protoTheme"><option value="light">Light</option><option value="dark">Dark</option></select>
+  </label>
+  <span>Data: odd-squares fixtures; captions, names and money are synthetic.</span>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-await" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"/></symbol>
+    <symbol id="i-ok" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M4.6 8.2l2.2 2.2 4.6-4.8" fill="none" stroke="var(--ui-color-panel)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-reopen" viewBox="0 0 16 16"><path d="M3.5 6.5A5 5 0 1 1 3 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2.5 2.8v4h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-block" viewBox="0 0 16 16"><path d="M5.2 1.5h5.6l3.7 3.7v5.6l-3.7 3.7H5.2l-3.7-3.7V5.2z" fill="currentColor"/><rect x="4.5" y="7" width="7" height="2" rx="1" fill="var(--ui-color-panel)"/></symbol>
+    <symbol id="i-run" viewBox="0 0 16 16"><path d="M8 2a6 6 0 0 1 5.2 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.6 9.5A6 6 0 0 1 9 13.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5.5 13.4A6 6 0 0 1 2.4 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-unavail" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.4 2.2"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 16 16"><path d="M8 1.8l6.6 11.6H1.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 6v3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="currentColor"/></symbol>
+    <symbol id="i-play" viewBox="0 0 16 16"><path d="M4.5 2.8v10.4L13 8z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 16 16"><rect x="3.5" y="2.8" width="3" height="10.4" rx="1" fill="currentColor"/><rect x="9.5" y="2.8" width="3" height="10.4" rx="1" fill="currentColor"/></symbol>
+    <symbol id="i-fprev" viewBox="0 0 16 16"><rect x="3" y="3" width="1.8" height="10" fill="currentColor"/><path d="M13 3v10L6.2 8z" fill="currentColor"/></symbol>
+    <symbol id="i-fnext" viewBox="0 0 16 16"><rect x="11.2" y="3" width="1.8" height="10" fill="currentColor"/><path d="M3 3v10l6.8-5z" fill="currentColor"/></symbol>
+    <symbol id="i-sprev" viewBox="0 0 16 16"><path d="M8 3v10L1.5 8zM14.5 3v10L8 8z" fill="currentColor"/></symbol>
+    <symbol id="i-snext" viewBox="0 0 16 16"><path d="M1.5 3v10L8 8zM8 3v10l6.5-5z" fill="currentColor"/></symbol>
+    <symbol id="i-vol" viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor"/><path d="M11.5 5.5a3.5 3.5 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-full" viewBox="0 0 16 16"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="n-projects" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="4" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="11" width="14" height="5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="n-slate" viewBox="0 0 20 20"><rect x="3" y="3" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="3" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="11" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="11" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="n-library" viewBox="0 0 20 20"><path d="M4 3.5h3v13H4zM9 3.5h3v13H9zM13.3 4.2l2.8-.8 3 12.4-2.8.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+    <symbol id="n-runs" viewBox="0 0 20 20"><path d="M2 10h3.5l2-5 4 10 2-5H18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="shell">
+  <nav class="rail" aria-label="Studio">
+    <div class="mark" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 30 30"><rect x="0" y="16" width="14" height="14" rx="3" fill="#FFE04A"/><rect x="16" y="16" width="14" height="14" rx="3" fill="#A7B3C9"/><rect x="16" y="0" width="14" height="14" rx="3" fill="#A7B3C9"/><rect x="0" y="0" width="14" height="14" rx="3" fill="#A7B3C9"/></svg>
+    </div>
+    <a class="nav" href="S-02-projects.html" aria-current="page"><svg><use href="#n-projects"/></svg>Projects</a>
+    <a class="nav" href="S-16-slate.html"><svg><use href="#n-slate"/></svg>Slate</a>
+    <a class="nav" href="S-15-library.html"><svg><use href="#n-library"/></svg>Library</a>
+    <a class="nav" href="S-13-runs.html"><svg><use href="#n-runs"/></svg>Runs</a>
+    <div class="me">
+      <span class="env" title="Environment">local</span>
+      <span class="avatar" aria-hidden="true">MI</span>
+      <span>Meera Iyer<br><span class="subtle">Owner · all 5 roles</span></span>
+      <button class="linkbtn" type="button">Sign out</button>
+    </div>
+  </nav>
+
+  <div class="work">
+    <header class="phead">
+      <div class="ptitle">
+        <span class="crumb"><a href="S-02-projects.html">Projects</a> /</span>
+        <h1>Why Odd Numbers Build Perfect Squares</h1>
+        <div class="pmeta">
+          <span class="chip">Solve This</span>
+          <span class="chip state" id="prodState">Storyboard review</span>
+          <span>Brief v2</span>
+          <span>YouTube · Signal Motion (manual upload) · IST</span>
+        </div>
+      </div>
+      <span class="spacer"></span>
+      <div class="meter" aria-label="Spend">
+        <div class="txt"><b class="num">₹618.40</b> spent · <span class="num" id="reserved">₹0.00</span> reserved · of <span class="num">₹2,500.00</span></div>
+        <div class="mbar" aria-hidden="true"><span class="act" style="width:24.7%"></span><span class="res" id="resbar" style="width:0%"></span></div>
+        <div class="txt">Provider share $5.92 at ₹95.00/USD</div>
+      </div>
+      <div class="runind" id="runind" aria-live="polite"><svg class="i"><use href="#i-none"/></svg><span>No active run · <a href="S-13-runs.html">Runs</a></span></div>
+    </header>
+
+    <div class="gates" role="list" aria-label="Review gates">
+      <div class="gate ok" role="listitem"><svg class="i gi"><use href="#i-ok"/></svg><span class="gn">A Brief</span><span class="gs">Approved v2 · <span class="mono">4c1e9a0</span></span></div>
+      <div class="gate ok" role="listitem"><svg class="i gi"><use href="#i-ok"/></svg><span class="gn">B Explanation and script</span><span class="gs">Approved v1 · <span class="mono">a59f4fa</span></span></div>
+      <div class="gate warn current" role="listitem" id="gateC"><svg class="i gi"><use href="#i-await"/></svg><span class="gn">C Storyboard</span><span class="gs" id="gateCtext">Awaiting review v1 · <span class="mono">e7d5d82</span></span></div>
+      <div class="gate none" role="listitem"><svg class="i gi"><use href="#i-none"/></svg><span class="gn">D Final package</span><span class="gs">Not started</span></div>
+      <div class="gate none" role="listitem"><svg class="i gi"><use href="#i-none"/></svg><span class="gn">E Public release</span><span class="gs">Not started (R2)</span></div>
+    </div>
+
+    <div class="banner warn narrow" role="note"><svg class="i"><use href="#i-warn"/></svg><p>The Studio is designed for windows 1280 px wide and above. This narrower layout works but is not designed for review.</p></div>
+    <div id="bannerSlot"></div>
+
+    <div class="titlebar">
+      <h2>Storyboard and preview</h2>
+      <span class="vchip" id="vchip">Storyboard v1 · <span class="mono">e7d5d82</span> <a href="S-10-compare.html">Compare</a><a href="#" id="historyLink">History</a></span>
+      <span class="spacer"></span>
+      <button class="btn sm" type="button" id="btnGenerate">Regenerate storyboard</button>
+      <a class="btn sm" href="S-09-revision.html" id="btnChange">Request a change</a>
+      <button class="btn primary" type="button" id="btnGate">Review Gate C</button>
+    </div>
+
+    <div class="grid" id="grid">
+      <section class="panel" aria-labelledby="scenesH">
+        <header><h3 id="scenesH">Scenes</h3><span class="spacer"></span><span class="subtle num" id="sceneTotals"></span></header>
+        <ol class="scenes" id="sceneList"></ol>
+      </section>
+
+      <section class="panel stagepanel" aria-labelledby="prevH">
+        <header><h3 id="prevH">Preview</h3><span class="spacer"></span><button class="btn sm" type="button" id="btnHook">Hook only</button><button class="btn sm" type="button" id="btnRender">Render draft preview</button></header>
+        <div class="stage" id="stage" tabindex="0" aria-label="Video preview. Space plays or pauses, left and right arrows step one frame, Shift with arrows steps ten, square brackets jump scenes.">
+          <div class="device"><div class="screen" id="screen">
+            <svg id="video" viewBox="0 0 1080 1920" role="img" aria-labelledby="videoDesc" xmlns="http://www.w3.org/2000/svg"><desc id="videoDesc">Preview frame</desc></svg>
+            <div id="stageMsg"></div>
+          </div></div>
+        </div>
+        <div class="rbar" role="group" aria-label="Player controls">
+          <input class="seek" id="seek" type="range" min="0" max="1349" step="1" value="0" aria-label="Seek">
+          <div class="rrow">
+            <button class="rbtn" type="button" id="bPlay" aria-label="Play"><svg class="i"><use href="#i-play"/></svg></button>
+            <button class="rbtn" type="button" id="bMute" aria-label="Volume: no narration audio yet" disabled><svg class="i"><use href="#i-vol"/></svg></button>
+            <span class="rtime num" id="tread">0:00 / 0:45</span>
+            <span class="rslot" role="group" aria-label="Frame and scene steps">
+              <button class="rbtn" type="button" id="bSprev" aria-label="Previous scene"><svg class="i"><use href="#i-sprev"/></svg></button>
+              <button class="rbtn" type="button" id="bFprev" aria-label="Back one frame"><svg class="i"><use href="#i-fprev"/></svg></button>
+              <button class="rbtn" type="button" id="bFnext" aria-label="Forward one frame"><svg class="i"><use href="#i-fnext"/></svg></button>
+              <button class="rbtn" type="button" id="bSnext" aria-label="Next scene"><svg class="i"><use href="#i-snext"/></svg></button>
+            </span>
+            <span class="spacer"></span>
+            <button class="rbtn" type="button" id="bFull" aria-label="Fullscreen"><svg class="i"><use href="#i-full"/></svg></button>
+          </div>
+        </div>
+        <div class="controls">
+          <div class="crow">
+            <label class="hint" for="frameIn">Frame</label>
+            <input class="frameinput num" id="frameIn" type="number" min="0" max="1349" value="0">
+            <span class="subtle num" id="sceneRead" style="font-size:13px"></span>
+            <span class="spacer"></span>
+            <div class="seg" role="group" aria-label="Preview size">
+              <button type="button" aria-pressed="true" id="szPhone">Phone 360×640</button>
+              <button type="button" aria-pressed="false" id="szFull">100%</button>
+            </div>
+          </div>
+          <div class="crow">
+            <label class="toggle"><input type="checkbox" id="tgCap" checked> Captions</label>
+            <label class="toggle"><input type="checkbox" id="tgSafe"> Safe zones</label>
+            <span class="spacer"></span>
+            <span class="subtle" id="playerSrc" style="font-size:13px">Player: live from storyboard v1 · brand kit v1</span>
+          </div>
+          <div class="provisional" id="provNote"><svg class="i"><use href="#i-warn"/></svg><span><b>Timing provisional.</b> No measured narration take yet, so scene lengths are the storyboard's plan. The master waits for a take from <a href="S-08-narration.html">Narration</a>.</span></div>
+          <p class="protonote"><b>Prototype note:</b> the dark bar stands for the Remotion Player's own controls (play, seek, volume, fullscreen). Frame and scene steps go in its custom-controls slot. Keys: Space play, ← → frame, Shift ← → ten frames, [ ] scene.</p>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Inspector">
+        <div class="tabs" role="tablist" aria-label="Inspector">
+          <button role="tab" id="tabScene" aria-selected="true" aria-controls="insp">Scene</button>
+          <button role="tab" id="tabObject" aria-selected="false" aria-controls="insp">Object</button>
+          <button role="tab" id="tabAction" aria-selected="false" aria-controls="insp">Action</button>
+          <button role="tab" id="tabProb" aria-selected="false" aria-controls="insp">Problems<span class="count" id="probCount" hidden>0</span></button>
+        </div>
+        <div class="insp" id="insp" role="tabpanel" tabindex="0"></div>
+      </section>
+    </div>
+
+    <section class="panel tlpanel" aria-labelledby="tlH">
+      <header><h3 id="tlH">Scenes and captions</h3><span class="subtle">Select a scene to jump to it. Each action's frames are in the inspector.</span></header>
+      <div class="tl" id="tl"></div>
+    </section>
+  </div>
+</div>
+
+<dialog id="gateDlg" aria-labelledby="gateTitle">
+  <form method="dialog" class="dlg">
+    <header>
+      <h2 id="gateTitle">Approve Gate C: storyboard</h2>
+      <div class="muted" style="font-size:13px">Do the visuals explain the idea accurately?</div>
+    </header>
+    <div class="body" id="gateBody"></div>
+    <footer>
+      <button class="btn" value="cancel" type="submit">Close</button>
+      <button class="btn danger" type="button" id="btnReturn">Return for revision</button>
+      <button class="btn primary" type="button" id="btnApprove">Approve storyboard v1</button>
+    </footer>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------- Fixtures (copied unchanged from docs/contracts/examples) ---------- */
+const SPEC = {"schemaVersion":"0.1.0","specId":"00000000-0000-4000-8000-000000000020","projectId":"00000000-0000-4000-8000-000000000010","storyboardVersion":{"id":"00000000-0000-4000-8000-000000000021","version":1,"sha256":"e7d5d8290e5e5b5b6c9568292fe50101b7c88baf2bac2241245fe49838b4f6d9"},"scriptVersion":{"id":"00000000-0000-4000-8000-000000000022","version":1,"sha256":"a59f4fad55c0f0ad46cf709f7923489b9d3a4adb4b7ebcc529b3f7c5c5c86419"},"format":{"width":1080,"height":1920,"fps":30},"brandKit":{"id":"00000000-0000-4000-8000-000000000023","version":1,"sha256":"3dbd5809561d3d4cfbedf44aa570485c30024ce60206b8c76d59b0572fce14b0"},"timing":{"status":"provisional"},"targetDurationFrames":1350,"demonstrations":[{"id":"00000000-0000-4000-8000-000000000030","version":1,"sha256":"7d39690ae8dad4bf7bf8933cc8136c751c4fdfb864e1ab989df634242ad3219a"}],"objects":[{"type":"TextBlock","id":"question","semanticRole":"opening question","role":"question","text":"Why do odd numbers build a square?","anchor":{"x":540,"y":200},"styleToken":"type.question"},{"type":"NumberSequence","id":"sum","semanticRole":"first five odd numbers","operator":"plus","anchor":{"x":540,"y":360},"claimRefs":["00000000-0000-4000-8000-000000000040"],"demonstrationRef":"00000000-0000-4000-8000-000000000030","terms":[{"id":"sum.t1","value":"1","colorToken":"color.layer.1","linkedObjectIds":["layer.1"],"valueRef":"results.layers[0].cellCount"},{"id":"sum.t2","value":"3","colorToken":"color.layer.2","linkedObjectIds":["layer.2"],"valueRef":"results.layers[1].cellCount"},{"id":"sum.t3","value":"5","colorToken":"color.layer.3","linkedObjectIds":["layer.3"],"valueRef":"results.layers[2].cellCount"},{"id":"sum.t4","value":"7","colorToken":"color.layer.4","linkedObjectIds":["layer.4"],"valueRef":"results.layers[3].cellCount"},{"id":"sum.t5","value":"9","colorToken":"color.layer.5","linkedObjectIds":["layer.5"],"valueRef":"results.layers[4].cellCount"}]},{"type":"NumberSequence","id":"total","semanticRole":"running total of cells","operator":"none","anchor":{"x":540,"y":1240},"label":"total","demonstrationRef":"00000000-0000-4000-8000-000000000030","terms":[{"id":"total.k1","value":"1","valueRef":"results.layers[0].cumulative"},{"id":"total.k2","value":"4","valueRef":"results.layers[1].cumulative"},{"id":"total.k3","value":"9","valueRef":"results.layers[2].cumulative"},{"id":"total.k4","value":"16","valueRef":"results.layers[3].cumulative"},{"id":"total.k5","value":"25","valueRef":"results.layers[4].cumulative"}]},{"type":"GeometricArrangement","id":"square","semanticRole":"square built from odd-number layers","layout":"grid","origin":{"x":240,"y":560},"unitPx":120,"groups":[{"id":"layer.1","colorToken":"color.layer.1","label":"1","valueRef":"results.layers[0].cellCount"},{"id":"layer.2","colorToken":"color.layer.2","label":"3","valueRef":"results.layers[1].cellCount"},{"id":"layer.3","colorToken":"color.layer.3","label":"5","valueRef":"results.layers[2].cellCount"},{"id":"layer.4","colorToken":"color.layer.4","label":"7","valueRef":"results.layers[3].cellCount"},{"id":"layer.5","colorToken":"color.layer.5","label":"9","valueRef":"results.layers[4].cellCount"}],"cells":[{"id":"cell.c0r0","col":0,"row":0,"groupId":"layer.1"},{"id":"cell.c1r0","col":1,"row":0,"groupId":"layer.2"},{"id":"cell.c2r0","col":2,"row":0,"groupId":"layer.3"},{"id":"cell.c3r0","col":3,"row":0,"groupId":"layer.4"},{"id":"cell.c4r0","col":4,"row":0,"groupId":"layer.5"},{"id":"cell.c0r1","col":0,"row":1,"groupId":"layer.2"},{"id":"cell.c1r1","col":1,"row":1,"groupId":"layer.2"},{"id":"cell.c2r1","col":2,"row":1,"groupId":"layer.3"},{"id":"cell.c3r1","col":3,"row":1,"groupId":"layer.4"},{"id":"cell.c4r1","col":4,"row":1,"groupId":"layer.5"},{"id":"cell.c0r2","col":0,"row":2,"groupId":"layer.3"},{"id":"cell.c1r2","col":1,"row":2,"groupId":"layer.3"},{"id":"cell.c2r2","col":2,"row":2,"groupId":"layer.3"},{"id":"cell.c3r2","col":3,"row":2,"groupId":"layer.4"},{"id":"cell.c4r2","col":4,"row":2,"groupId":"layer.5"},{"id":"cell.c0r3","col":0,"row":3,"groupId":"layer.4"},{"id":"cell.c1r3","col":1,"row":3,"groupId":"layer.4"},{"id":"cell.c2r3","col":2,"row":3,"groupId":"layer.4"},{"id":"cell.c3r3","col":3,"row":3,"groupId":"layer.4"},{"id":"cell.c4r3","col":4,"row":3,"groupId":"layer.5"},{"id":"cell.c0r4","col":0,"row":4,"groupId":"layer.5"},{"id":"cell.c1r4","col":1,"row":4,"groupId":"layer.5"},{"id":"cell.c2r4","col":2,"row":4,"groupId":"layer.5"},{"id":"cell.c3r4","col":3,"row":4,"groupId":"layer.5"},{"id":"cell.c4r4","col":4,"row":4,"groupId":"layer.5"}],"claimRefs":["00000000-0000-4000-8000-000000000040"],"demonstrationRef":"00000000-0000-4000-8000-000000000030"},{"type":"MathExpression","id":"formula","semanticRole":"general relationship","anchor":{"x":540,"y":480},"claimRefs":["00000000-0000-4000-8000-000000000040"],"terms":[{"id":"formula.lhs","tex":"1+3+5+\\cdots+(2n-1)"},{"id":"formula.rhs","tex":"=n^2"}]},{"type":"TextBlock","id":"takeaway","semanticRole":"closing insight","role":"takeaway","text":"Each odd number adds one L-shaped layer to the square.","anchor":{"x":540,"y":1340},"styleToken":"type.takeaway"},{"type":"TextBlock","id":"brand","semanticRole":"discreet brand cue","role":"brandCue","text":"Signal Motion","anchor":{"x":540,"y":110},"styleToken":"type.brandcue"}],"scenes":[{"id":"scene.hook","beat":"hook","durationFrames":120,"narration":{"beatId":"beat.hook","segmentIds":["seg.hook.1"]},"demonstrationKind":"example","claimRefs":["00000000-0000-4000-8000-000000000040"],"entryState":[{"targetId":"question","visible":false},{"targetId":"sum","visible":false},{"targetId":"total","visible":false},{"targetId":"square","visible":false},{"targetId":"formula","visible":false},{"targetId":"takeaway","visible":false},{"targetId":"brand","visible":false}],"actions":[{"id":"a.hook.q","family":"CaptionAndTakeaway","op":"showText","targets":["question"],"startFrame":0,"endFrame":15,"easing":"ease.standard","anchor":{"kind":"phrase","ref":"p.hook.1","edge":"start"}},{"id":"a.hook.sum","family":"FocusHighlight","op":"reveal","targets":["sum"],"startFrame":15,"endFrame":60,"easing":"ease.standard","stagger":6},{"id":"a.hook.total","family":"FocusHighlight","op":"reveal","targets":["total.k5"],"startFrame":60,"endFrame":75,"easing":"ease.standard"},{"id":"a.hook.outline","family":"FocusHighlight","op":"outline","targets":["square"],"startFrame":70,"endFrame":100,"easing":"ease.standard"},{"id":"a.hook.dim","family":"FocusHighlight","op":"dim","targets":["square"],"startFrame":70,"endFrame":100,"easing":"ease.standard"}]},{"id":"scene.setup","beat":"setup","durationFrames":180,"narration":{"beatId":"beat.setup","segmentIds":["seg.setup.1","seg.setup.2"]},"demonstrationKind":"generalConstruction","claimRefs":["00000000-0000-4000-8000-000000000040"],"entryState":[{"targetId":"question","visible":true},{"targetId":"sum","visible":true},{"targetId":"total","visible":true},{"targetId":"square","visible":true,"emphasis":"dimmed"},{"targetId":"formula","visible":false},{"targetId":"takeaway","visible":false},{"targetId":"brand","visible":false}],"actions":[{"id":"a.setup.clear","family":"FocusHighlight","op":"hide","targets":["total.k5"],"startFrame":0,"endFrame":10,"easing":"ease.standard"},{"id":"a.setup.undim","family":"FocusHighlight","op":"undim","targets":["square"],"startFrame":0,"endFrame":10,"easing":"ease.standard"},{"id":"a.setup.l1","family":"FocusHighlight","op":"reveal","targets":["cell.c0r0"],"startFrame":10,"endFrame":30,"easing":"ease.standard","anchor":{"kind":"phrase","ref":"p.setup.1","edge":"start"}},{"id":"a.setup.t1","family":"FocusHighlight","op":"highlight","targets":["sum.t1"],"startFrame":10,"endFrame":60,"easing":"ease.standard"},{"id":"a.setup.k1","family":"FocusHighlight","op":"reveal","targets":["total.k1"],"startFrame":30,"endFrame":45,"easing":"ease.standard"},{"id":"a.setup.l2","family":"FocusHighlight","op":"reveal","targets":["cell.c1r0","cell.c0r1","cell.c1r1"],"startFrame":90,"endFrame":130,"easing":"ease.standard","stagger":4,"anchor":{"kind":"phrase","ref":"p.setup.2","edge":"start"}},{"id":"a.setup.t2","family":"FocusHighlight","op":"highlight","targets":["sum.t2"],"startFrame":90,"endFrame":150,"easing":"ease.standard"},{"id":"a.setup.m2","family":"ObjectTransform","op":"mapTerms","targets":["total"],"startFrame":130,"endFrame":150,"easing":"ease.standard","mapping":[{"from":"total.k1","to":"total.k2"}]}]},{"id":"scene.demo","beat":"demonstration","durationFrames":360,"narration":{"beatId":"beat.demo","segmentIds":["seg.demo.1","seg.demo.2"]},"demonstrationKind":"generalConstruction","claimRefs":["00000000-0000-4000-8000-000000000040"],"entryState":[{"targetId":"question","visible":true},{"targetId":"sum","visible":true},{"targetId":"total","visible":true},{"targetId":"square","visible":true},{"targetId":"layer.1","visible":true},{"targetId":"layer.2","visible":true},{"targetId":"layer.3","visible":false},{"targetId":"layer.4","visible":false},{"targetId":"layer.5","visible":false},{"targetId":"total.k1","visible":false},{"targetId":"total.k2","visible":true},{"targetId":"total.k3","visible":false},{"targetId":"total.k4","visible":false},{"targetId":"total.k5","visible":false},{"targetId":"formula","visible":false},{"targetId":"takeaway","visible":false},{"targetId":"brand","visible":false}],"actions":[{"id":"a.demo.l3","family":"FocusHighlight","op":"reveal","targets":["cell.c2r0","cell.c2r1","cell.c0r2","cell.c1r2","cell.c2r2"],"startFrame":20,"endFrame":80,"easing":"ease.standard","stagger":6,"anchor":{"kind":"phrase","ref":"p.demo.1","edge":"start"}},{"id":"a.demo.t3","family":"FocusHighlight","op":"highlight","targets":["sum.t3"],"startFrame":20,"endFrame":120,"easing":"ease.standard"},{"id":"a.demo.m3","family":"ObjectTransform","op":"mapTerms","targets":["total"],"startFrame":90,"endFrame":110,"easing":"ease.standard","mapping":[{"from":"total.k2","to":"total.k3"}]},{"id":"a.demo.l4","family":"FocusHighlight","op":"reveal","targets":["cell.c3r0","cell.c3r1","cell.c3r2","cell.c0r3","cell.c1r3","cell.c2r3","cell.c3r3"],"startFrame":190,"endFrame":260,"easing":"ease.standard","stagger":6,"anchor":{"kind":"phrase","ref":"p.demo.2","edge":"start"}},{"id":"a.demo.t4","family":"FocusHighlight","op":"highlight","targets":["sum.t4"],"startFrame":190,"endFrame":300,"easing":"ease.standard"},{"id":"a.demo.m4","family":"ObjectTransform","op":"mapTerms","targets":["total"],"startFrame":270,"endFrame":290,"easing":"ease.standard","mapping":[{"from":"total.k3","to":"total.k4"}]}]},{"id":"scene.explain","beat":"explanation","durationFrames":330,"narration":{"beatId":"beat.explain","segmentIds":["seg.explain.1","seg.explain.2"]},"demonstrationKind":"generalConstruction","claimRefs":["00000000-0000-4000-8000-000000000040"],"entryState":[{"targetId":"question","visible":true},{"targetId":"sum","visible":true},{"targetId":"total","visible":true},{"targetId":"square","visible":true},{"targetId":"layer.1","visible":true},{"targetId":"layer.2","visible":true},{"targetId":"layer.3","visible":true},{"targetId":"layer.4","visible":true},{"targetId":"layer.5","visible":false},{"targetId":"total.k1","visible":false},{"targetId":"total.k2","visible":false},{"targetId":"total.k3","visible":false},{"targetId":"total.k4","visible":true},{"targetId":"total.k5","visible":false},{"targetId":"formula","visible":false},{"targetId":"takeaway","visible":false},{"targetId":"brand","visible":false}],"actions":[{"id":"a.ex.l5","family":"FocusHighlight","op":"reveal","targets":["cell.c4r0","cell.c4r1","cell.c4r2","cell.c4r3","cell.c0r4","cell.c1r4","cell.c2r4","cell.c3r4","cell.c4r4"],"startFrame":10,"endFrame":90,"easing":"ease.standard","stagger":6,"anchor":{"kind":"phrase","ref":"p.explain.1","edge":"start"}},{"id":"a.ex.t5","family":"FocusHighlight","op":"highlight","targets":["sum.t5"],"startFrame":10,"endFrame":120,"easing":"ease.standard"},{"id":"a.ex.dim","family":"FocusHighlight","op":"dim","targets":["layer.1","layer.2","layer.3","layer.4"],"startFrame":120,"endFrame":140,"easing":"ease.standard"},{"id":"a.ex.row","family":"FocusHighlight","op":"highlight","targets":["cell.c0r4","cell.c1r4","cell.c2r4","cell.c3r4","cell.c4r4"],"startFrame":140,"endFrame":300,"easing":"ease.standard","anchor":{"kind":"phrase","ref":"p.explain.2","edge":"start"}},{"id":"a.ex.col","family":"FocusHighlight","op":"outline","targets":["cell.c4r0","cell.c4r1","cell.c4r2","cell.c4r3","cell.c4r4"],"startFrame":180,"endFrame":300,"easing":"ease.standard"},{"id":"a.ex.corner","family":"FocusHighlight","op":"emphasize","targets":["cell.c4r4"],"startFrame":220,"endFrame":300,"easing":"ease.standard"},{"id":"a.ex.m5","family":"ObjectTransform","op":"mapTerms","targets":["total"],"startFrame":300,"endFrame":320,"easing":"ease.standard","mapping":[{"from":"total.k4","to":"total.k5"}]}]},{"id":"scene.payoff","beat":"payoff","durationFrames":240,"narration":{"beatId":"beat.payoff","segmentIds":["seg.payoff.1"]},"demonstrationKind":"generalConstruction","claimRefs":["00000000-0000-4000-8000-000000000040"],"entryState":[{"targetId":"question","visible":true},{"targetId":"sum","visible":true},{"targetId":"total","visible":true},{"targetId":"square","visible":true},{"targetId":"layer.1","visible":true},{"targetId":"layer.2","visible":true},{"targetId":"layer.3","visible":true},{"targetId":"layer.4","visible":true},{"targetId":"layer.5","visible":true},{"targetId":"total.k1","visible":false},{"targetId":"total.k2","visible":false},{"targetId":"total.k3","visible":false},{"targetId":"total.k4","visible":false},{"targetId":"total.k5","visible":true},{"targetId":"formula","visible":false},{"targetId":"takeaway","visible":false},{"targetId":"brand","visible":false}],"actions":[{"id":"a.pay.undim","family":"FocusHighlight","op":"undim","targets":["layer.1","layer.2","layer.3","layer.4"],"startFrame":0,"endFrame":15,"easing":"ease.standard"},{"id":"a.pay.q","family":"FocusHighlight","op":"hide","targets":["question"],"startFrame":0,"endFrame":15,"easing":"ease.standard"},{"id":"a.pay.f","family":"FocusHighlight","op":"reveal","targets":["formula.lhs","formula.rhs"],"startFrame":20,"endFrame":80,"easing":"ease.standard","stagger":20,"anchor":{"kind":"phrase","ref":"p.payoff.1","edge":"start"}},{"id":"a.pay.link","family":"FocusHighlight","op":"highlight","targets":["formula.rhs","square"],"startFrame":90,"endFrame":200,"easing":"ease.standard"}]},{"id":"scene.close","beat":"closure","durationFrames":120,"narration":{"beatId":"beat.close","segmentIds":["seg.close.1"]},"demonstrationKind":"none","entryState":[{"targetId":"question","visible":false},{"targetId":"sum","visible":true},{"targetId":"total","visible":true},{"targetId":"square","visible":true},{"targetId":"formula","visible":true},{"targetId":"layer.1","visible":true},{"targetId":"layer.2","visible":true},{"targetId":"layer.3","visible":true},{"targetId":"layer.4","visible":true},{"targetId":"layer.5","visible":true},{"targetId":"total.k1","visible":false},{"targetId":"total.k2","visible":false},{"targetId":"total.k3","visible":false},{"targetId":"total.k4","visible":false},{"targetId":"total.k5","visible":true},{"targetId":"takeaway","visible":false},{"targetId":"brand","visible":false}],"actions":[{"id":"a.close.take","family":"CaptionAndTakeaway","op":"showText","targets":["takeaway"],"startFrame":0,"endFrame":20,"easing":"ease.standard","anchor":{"kind":"phrase","ref":"p.close.1","edge":"start"}},{"id":"a.close.brand","family":"CaptionAndTakeaway","op":"showText","targets":["brand"],"startFrame":60,"endFrame":80,"easing":"ease.standard"}]}]};
+const DEMO = {"id":"00000000-0000-4000-8000-000000000030","version":1,"function":"odd_square_layers","functionVersion":"0.1.0","kind":"generalConstruction","domain":{"description":"n is a positive integer, 1 <= n <= 12","units":"unit cells"},"params":{"n":5},"arithmetic":{"mode":"exact","rounding":"none"},"results":{"layers":[{"k":1,"cellCount":1,"cumulative":1,"cells":[{"col":0,"row":0}]},{"k":2,"cellCount":3,"cumulative":4,"cells":[{"col":1,"row":0},{"col":0,"row":1},{"col":1,"row":1}]},{"k":3,"cellCount":5,"cumulative":9,"cells":[{"col":2,"row":0},{"col":2,"row":1},{"col":0,"row":2},{"col":1,"row":2},{"col":2,"row":2}]},{"k":4,"cellCount":7,"cumulative":16,"cells":[{"col":3,"row":0},{"col":3,"row":1},{"col":3,"row":2},{"col":0,"row":3},{"col":1,"row":3},{"col":2,"row":3},{"col":3,"row":3}]},{"k":5,"cellCount":9,"cumulative":25,"cells":[{"col":4,"row":0},{"col":4,"row":1},{"col":4,"row":2},{"col":4,"row":3},{"col":0,"row":4},{"col":1,"row":4},{"col":2,"row":4},{"col":3,"row":4},{"col":4,"row":4}]}],"total":25},"resultsSha256":"0199dfc789c6792bc2a0332e30a5c6db3d2caab2cf2ff9f409e41ab8f78d5dab","derivationRef":"00000000-0000-4000-8000-000000000040","reviewStatus":"approved"};
+
+/* ---------- Synthetic sample content (not fixtures) ---------- */
+const SCENE_NAMES = {hook:'Hook', setup:'Setup', demonstration:'Demonstration', explanation:'Explanation', payoff:'Payoff', closure:'Closure'};
+const KIND_LABEL = {example:'Example', generalConstruction:'General construction', none:'No demonstration'};
+/* Captions: synthetic narration phrases at the fixture's phrase anchors; absolute frames. */
+const CAPTIONS = [
+  {anchor:'p.hook.1',   from:0,    to:55,   text:'Add the first five odd numbers.'},
+  {anchor:null,         from:55,   to:118,  text:'Why do they make a square?'},
+  {anchor:'p.setup.1',  from:130,  to:200,  text:'Start with one block.'},
+  {anchor:'p.setup.2',  from:210,  to:298,  text:'Add three, and you have two by two.'},
+  {anchor:'p.demo.1',   from:320,  to:440,  text:'Five more make three by three.'},
+  {anchor:'p.demo.2',   from:490,  to:612,  text:'Seven more make four by four.'},
+  {anchor:null,         from:612,  to:659,  text:'Every total is a square.'},
+  {anchor:'p.explain.1',from:670,  to:790,  text:'The next layer adds nine.'},
+  {anchor:'p.explain.2',from:800,  to:890,  text:'A row of five and a column of five'},
+  {anchor:null,         from:890,  to:988,  text:'share one corner. Nine, not ten.'},
+  {anchor:'p.payoff.1', from:1010, to:1110, text:'Each odd number is one L-shaped layer.'},
+  {anchor:null,         from:1110, to:1228, text:'So n odd numbers fill an n-by-n square.'},
+  {anchor:'p.close.1',  from:1230, to:1330, text:'Small layers, one perfect square.'}
+];
+const CLAIM = {id:'00000000-0000-4000-8000-000000000040', short:'CL-01', text:'For every positive integer n, 1 + 3 + 5 + … + (2n − 1) = n².', status:'Approved', source:'Reviewed derivation D-1 (sample)'};
+
+/* ---------- Model ---------- */
+const FPS = SPEC.format.fps, TOTAL = SPEC.targetDurationFrames;
+const VAR = t => getComputedStyle(document.documentElement).getPropertyValue('--'+t.replace(/\./g,'-')).trim();
+let off = 0;
+const scenes = SPEC.scenes.map((s,i)=>{ const o={...s, idx:i, start:off, end:off+s.durationFrames}; off+=s.durationFrames; return o; });
+const objById = {}; SPEC.objects.forEach(o=>objById[o.id]=o);
+const sq = objById.square;
+const groupOf = {}; sq.cells.forEach(c=>groupOf[c.id]=c.groupId);
+const groupById = {}; sq.groups.forEach(g=>groupById[g.id]=g);
+const termOwner = {};
+['sum','total','formula'].forEach(id=>objById[id].terms.forEach(t=>termOwner[t.id]=id));
+const actions = [];
+scenes.forEach(s=>s.actions.forEach(a=>actions.push({...a, scene:s, absStart:s.start+a.startFrame, absEnd:s.start+a.endFrame})));
+actions.sort((a,b)=>a.absStart-b.absStart);
+const demoAt = path => { const m=path.match(/^results\.layers\[(\d+)\]\.(\w+)$/); return m ? DEMO.results.layers[+m[1]][m[2]] : null; };
+
+function laneOf(t){ if(groupOf[t]) return groupOf[t]; if(groupById[t]) return t; if(termOwner[t]) return termOwner[t]; return t; }
+
+/* ---------- Easing (tokens.md 2.5) ---------- */
+function bez(x1,y1,x2,y2){ return t=>{ if(t<=0) return 0; if(t>=1) return 1; let u=t; for(let i=0;i<8;i++){ const x=3*(1-u)*(1-u)*u*x1+3*(1-u)*u*u*x2+u*u*u-t; const dx=3*(1-u)*(1-u)*x1+6*(1-u)*u*(x2-x1)+3*u*u*(1-x2); if(Math.abs(dx)<1e-6) break; u-=x/dx; u=Math.min(1,Math.max(0,u)); } return 3*(1-u)*(1-u)*u*y1+3*(1-u)*u*u*y2+u*u*u; }; }
+const EASE = {'ease.standard':bez(.2,0,0,1),'ease.enter':bez(0,0,.2,1),'ease.exit':bez(.4,0,1,1),'ease.linear':t=>Math.min(1,Math.max(0,t))};
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- Frame state ---------- */
+function leaves(t){
+  if(t==='sum') return objById.sum.terms.map(x=>x.id);
+  if(t==='total') return objById.total.terms.map(x=>x.id);
+  if(t==='formula') return objById.formula.terms.map(x=>x.id);
+  if(groupById[t]) return sq.cells.filter(c=>c.groupId===t).map(c=>c.id);
+  return [t];
+}
+function stateAt(f){
+  const op={}, sc={}, dy={}, dim={square:1}, rings=[];
+  sq.groups.forEach(g=>dim[g.id]=1);
+  for(const a of actions){
+    if(a.absStart>f) break;
+    const e=EASE[a.easing]||EASE['ease.standard'];
+    const len=Math.max(1,a.absEnd-a.absStart);
+    const p=e((f-a.absStart)/len);
+    if(a.op==='reveal'||a.op==='showText'){
+      const ls=a.targets.flatMap(t=>t==='square'?[]:leaves(t)); const st=a.stagger||0;
+      const dur=Math.max(8,len-st*(ls.length-1));
+      ls.forEach((l,i)=>{ const q=e((f-a.absStart-i*st)/dur); op[l]=q; sc[l]=0.9+0.1*q; dy[l]=12*(1-q); });
+    } else if(a.op==='hide'||a.op==='hideText'){
+      a.targets.flatMap(leaves).forEach(l=>{ op[l]=lerp(op[l]??1,0,p); });
+    } else if(a.op==='dim'||a.op==='undim'){
+      a.targets.forEach(t=>{ dim[t]=lerp(dim[t]??1,a.op==='dim'?0.3:1,p); });
+    } else if(a.op==='mapTerms'){
+      a.mapping.forEach(m=>{ op[m.from]=lerp(op[m.from]??1,0,p); dy[m.from]=-16*p; op[m.to]=p; dy[m.to]=16*(1-p); sc[m.to]=1; });
+    } else if(['highlight','outline','emphasize'].includes(a.op)){
+      const inten = f<=a.absEnd ? clamp((f-a.absStart)/8) : clamp(1-(f-a.absEnd)/10);
+      if(inten>0) rings.push({a, inten});
+    }
+  }
+  return {op,sc,dy,dim,rings};
+}
+
+/* ---------- Video rendering (house style) ---------- */
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('video');
+const el=(tag,attrs={},parent)=>{ const n=document.createElementNS(NS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); if(parent) parent.appendChild(n); return n; };
+const nodes={}; let ringLayer, capLayer, safeLayer, selLayer, bbox={};
+function color(tok){ return VAR(tok); }
+function buildVideo(){
+  svg.querySelectorAll(':scope > :not(desc)').forEach(n=>n.remove());
+  el('rect',{x:0,y:0,width:1080,height:1920,fill:VAR('color.canvas')},svg);
+  const ff='Atkinson Hyperlegible Next, system-ui, -apple-system, Segoe UI, sans-serif';
+  // brand cue: mark + wordmark (tokens.md 2.8)
+  const b=el('g',{'data-id':'brand'},svg); nodes.brand=b;
+  const bx=540-120;
+  el('rect',{x:bx,y:110-15,width:14,height:14,rx:3,fill:VAR('color.chalk.muted')},b);
+  el('rect',{x:bx+16,y:110-15,width:14,height:14,rx:3,fill:VAR('color.chalk.muted')},b);
+  el('rect',{x:bx,y:110+1,width:14,height:14,rx:3,fill:VAR('color.layer.1')},b);
+  el('rect',{x:bx+16,y:110+1,width:14,height:14,rx:3,fill:VAR('color.chalk.muted')},b);
+  const bt=el('text',{x:bx+44,y:121,'font-family':ff,'font-size':30,'font-weight':600,'letter-spacing':1.2,fill:VAR('color.chalk.muted')},b); bt.textContent=objById.brand.text;
+  // question (type.question), wrapped to two lines
+  const q=el('text',{'data-id':'question',x:540,y:192,'text-anchor':'middle','font-family':ff,'font-size':64,'font-weight':700,fill:VAR('color.chalk')},svg); nodes.question=q;
+  const qw=objById.question.text.split(' '); const half=Math.ceil(qw.length/2);
+  el('tspan',{x:540,dy:0},q).textContent=qw.slice(0,half).join(' ');
+  el('tspan',{x:540,dy:76},q).textContent=qw.slice(half).join(' ');
+  // sum terms (type.term)
+  const terms=objById.sum.terms, step=136;
+  terms.forEach((t,i)=>{
+    const x=540+(i-(terms.length-1)/2)*step;
+    const g=el('g',{'data-id':t.id},svg); nodes[t.id]=g;
+    if(i>0){ const o=el('text',{x:x-step/2,y:392,'text-anchor':'middle','font-family':ff,'font-size':80,'font-weight':600,fill:VAR('color.chalk')},g); o.textContent='+'; }
+    const n=el('text',{x,y:394,'text-anchor':'middle','font-family':ff,'font-size':96,'font-weight':800,fill:color(t.colorToken),'font-variant-numeric':'tabular-nums'},g); n.textContent=t.value; n.setAttribute('data-term','1');
+  });
+  // formula (type.equation; KaTeX in production)
+  const fy=objById.formula.anchor.y+22;
+  const lhs=el('text',{'data-id':'formula.lhs',x:540,y:fy,'text-anchor':'end','font-family':'KaTeX_Main, Cambria Math, STIX Two Math, Times New Roman, serif','font-size':72,fill:VAR('color.chalk')},svg); nodes['formula.lhs']=lhs;
+  lhs.innerHTML='1 + 3 + 5 + ⋯ + (2<tspan font-style="italic">n</tspan> − 1)';
+  const rhs=el('text',{'data-id':'formula.rhs',x:556,y:fy,'text-anchor':'start','font-family':'KaTeX_Main, Cambria Math, STIX Two Math, Times New Roman, serif','font-size':72,fill:VAR('color.chalk')},svg); nodes['formula.rhs']=rhs;
+  rhs.innerHTML='= <tspan font-style="italic">n</tspan><tspan font-size="44" dy="-30">2</tspan>';
+  { const wl=lhs.getBBox().width, wr=rhs.getBBox().width, x0=540-(wl+18+wr)/2; lhs.setAttribute('x',x0+wl); rhs.setAttribute('x',x0+wl+18); }
+  // square: faint outline + cells (GeometricArrangement, unit 120, cell 108)
+  const u=sq.unitPx, ox=sq.origin.x, oy=sq.origin.y, n=DEMO.params.n;
+  nodes.squareOutline=el('rect',{x:ox+6,y:oy+6,width:n*u-12,height:n*u-12,rx:16,fill:'none',stroke:VAR('color.outline'),'stroke-width':6,'stroke-dasharray':'18 12',opacity:0},svg);
+  sq.cells.forEach(c=>{
+    const g=el('g',{'data-id':c.id,'data-group':c.groupId,style:'cursor:pointer'},svg); nodes[c.id]=g;
+    const x=ox+c.col*u+6, y=oy+c.row*u+6;
+    el('rect',{x,y,width:108,height:108,rx:14,fill:color(groupById[c.groupId].colorToken)},g);
+    const k=+c.groupId.split('.')[1];
+    if(c.col===k-1 && c.row===k-1){ const t=el('text',{x:x+54,y:y+70,'text-anchor':'middle','font-family':ff,'font-size':44,'font-weight':700,fill:VAR('color.canvas')},g); t.textContent=groupById[c.groupId].label; }
+    bbox[c.id]={x,y,w:108,h:108};
+  });
+  // total (type.total) with its label
+  objById.total.terms.forEach(t=>{
+    const g=el('g',{'data-id':t.id},svg); nodes[t.id]=g;
+    const lab=el('text',{x:500,y:1272,'text-anchor':'end','font-family':ff,'font-size':44,'font-weight':700,fill:VAR('color.chalk.muted')},g); lab.textContent=objById.total.label;
+    const v=el('text',{x:520,y:1276,'text-anchor':'start','font-family':ff,'font-size':104,'font-weight':800,fill:VAR('color.chalk'),'font-variant-numeric':'tabular-nums'},g); v.textContent=t.value;
+  });
+  // takeaway (type.takeaway), two lines
+  const tk=el('text',{'data-id':'takeaway',x:540,y:1346,'text-anchor':'middle','font-family':ff,'font-size':56,'font-weight':700,fill:VAR('color.chalk')},svg); nodes.takeaway=tk;
+  const tw=objById.takeaway.text.split(' '); const th=Math.ceil(tw.length/2);
+  el('tspan',{x:540,dy:0},tk).textContent=tw.slice(0,th).join(' ');
+  el('tspan',{x:540,dy:64},tk).textContent=tw.slice(th).join(' ');
+  ringLayer=el('g',{},svg); capLayer=el('g',{},svg); selLayer=el('g',{},svg); safeLayer=el('g',{},svg);
+  buildSafe();
+  // bounding boxes for rings
+  ['question','takeaway','formula.lhs','formula.rhs','brand'].concat(objById.sum.terms.map(t=>t.id)).forEach(id=>{ const bb=nodes[id].getBBox(); bbox[id]={x:bb.x,y:bb.y,w:bb.width,h:bb.height}; });
+  objById.sum.terms.forEach(t=>{ const bb=nodes[t.id].querySelector('[data-term]').getBBox(); bbox[t.id]={x:bb.x,y:bb.y,w:bb.width,h:bb.height}; });
+  objById.total.terms.forEach(t=>{ const bb=nodes[t.id].getBBox(); bbox[t.id]={x:bb.x,y:bb.y,w:bb.width,h:bb.height}; });
+  bbox.square={x:ox,y:oy,w:n*u,h:n*u};
+  bbox.formula=union(['formula.lhs','formula.rhs']);
+  sq.groups.forEach(g=>bbox[g.id]=union(sq.cells.filter(c=>c.groupId===g.id).map(c=>c.id)));
+  svg.querySelectorAll('[data-id]').forEach(n=>n.addEventListener('click',ev=>{ ev.stopPropagation(); selectObject(n.getAttribute('data-id')); }));
+}
+function union(ids){ const bs=ids.map(i=>bbox[i]).filter(Boolean); const x=Math.min(...bs.map(b=>b.x)), y=Math.min(...bs.map(b=>b.y)); return {x,y,w:Math.max(...bs.map(b=>b.x+b.w))-x,h:Math.max(...bs.map(b=>b.y+b.h))-y}; }
+function buildSafe(){
+  // tokens.md 2.3 zones
+  const hatch=el('pattern',{id:'hatch',width:16,height:16,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'},el('defs',{},safeLayer));
+  el('rect',{width:6,height:16,fill:'#7FB2FF',opacity:.45},hatch);
+  [[0,0,1080,96,'Platform UI'],[948,760,132,840,''],[0,1600,1080,320,'Platform UI']].forEach(z=>{ el('rect',{x:z[0],y:z[1],width:z[2],height:z[3],fill:'url(#hatch)'},safeLayer); if(z[4]){ const t=el('text',{x:z[0]+24,y:z[1]+(z[3]>200?60:66),'font-size':36,'font-family':'system-ui',fill:'#CFE0FF'},safeLayer); t.textContent=z[4]; } });
+  el('path',{d:'M72 140H1008V760H948V1600H72Z',fill:'none',stroke:'#7FB2FF','stroke-width':4,'stroke-dasharray':'20 14'},safeLayer);
+  el('rect',{x:132,y:1440,width:816,height:160,fill:'none',stroke:'#7FB2FF','stroke-width':3},safeLayer);
+  el('rect',{x:132,y:160,width:816,height:160,fill:'none',stroke:'#7FB2FF','stroke-width':3,'stroke-dasharray':'6 8'},safeLayer);
+  const t=el('text',{x:144,y:1432,'font-size':30,'font-family':'system-ui',fill:'#CFE0FF'},safeLayer); t.textContent='Caption band';
+  safeLayer.style.display='none';
+}
+let frame=0, playing=false, loopRange=null, showCaps=true, selected=null;
+function render(f){
+  const s=stateAt(f);
+  const setG=(id,o,scale=1,dy=0,box)=>{ const n=nodes[id]; if(!n) return; n.setAttribute('opacity',o.toFixed(3)); const b=box||bbox[id]; if(b){ const cx=b.x+b.w/2, cy=b.y+b.h/2; n.setAttribute('transform',`translate(0 ${dy.toFixed(1)}) translate(${cx} ${cy}) scale(${scale.toFixed(3)}) translate(${-cx} ${-cy})`);} };
+  setG('question',s.op.question??0,1,s.dy.question||0);
+  objById.sum.terms.forEach(t=>setG(t.id,s.op[t.id]??0,1,s.dy[t.id]||0));
+  objById.total.terms.forEach(t=>setG(t.id,s.op[t.id]??0,1,s.dy[t.id]||0));
+  ['formula.lhs','formula.rhs','takeaway','brand'].forEach(id=>setG(id,s.op[id]??0,1,s.dy[id]||0));
+  const emph=new Set(); s.rings.filter(r=>r.a.op==='emphasize').forEach(r=>r.a.targets.forEach(t=>emph.add(t)));
+  sq.cells.forEach(c=>{ let sc=s.sc[c.id]??0.9; if(emph.has(c.id)) sc*=1+0.08*s.rings.find(r=>r.a.op==='emphasize'&&r.a.targets.includes(c.id)).inten; setG(c.id,(s.op[c.id]??0)*s.dim.square*s.dim[c.groupId],sc,0); });
+  // rings
+  ringLayer.innerHTML='';
+  let outlineSq=0;
+  s.rings.forEach(r=>{
+    const a=r.a;
+    if(a.op==='outline' && a.targets.length===1 && a.targets[0]==='square'){ outlineSq=r.inten; return; }
+    const b = a.targets.length>1 ? union(a.targets.map(t=>t==='square'?'square':t)) : null;
+    const boxes = (a.op==='highlight' && a.targets.length>1 && a.targets.some(t=>!groupOf[t])) ? a.targets.map(t=>bbox[t]) : [b||bbox[a.targets[0]]];
+    boxes.forEach(bb=>{ if(!bb) return; const pad=a.op==='emphasize'?10:6;
+      el('rect',{x:bb.x-pad,y:bb.y-pad,width:bb.w+pad*2,height:bb.h+pad*2,rx:18,fill:'none',stroke:VAR('color.chalk'),'stroke-width':6,'stroke-dasharray':a.op==='outline'?'18 12':'none',opacity:r.inten.toFixed(3)},ringLayer); });
+  });
+  nodes.squareOutline.setAttribute('opacity',(outlineSq*s.dim.square).toFixed(3));
+  // captions (tokens.md 2.4)
+  capLayer.innerHTML='';
+  const cap=CAPTIONS.find(c=>f>=c.from&&f<c.to);
+  if(cap&&showCaps){
+    const lines=wrap(cap.text,28); const lh=64, h=lines.length*lh+32, y0=1600-h;
+    const g=el('g',{},capLayer);
+    const r=el('rect',{x:0,y:y0,width:10,height:h,rx:16,fill:VAR('color.canvas'),opacity:.88},g);
+    let maxw=0;
+    lines.forEach((ln,i)=>{ const t=el('text',{x:540,y:y0+16+50+i*lh,'text-anchor':'middle','font-family':'Atkinson Hyperlegible Next, system-ui, sans-serif','font-size':54,'font-weight':600,fill:VAR('color.chalk')},g); t.textContent=ln; maxw=Math.max(maxw,t.getComputedTextLength()); });
+    r.setAttribute('width',maxw+56); r.setAttribute('x',540-(maxw+56)/2);
+  }
+  drawSelection();
+  updateReadout(f);
+}
+function wrap(t,n){ const w=t.split(' '), out=[]; let cur=''; w.forEach(x=>{ if((cur+' '+x).trim().length>n){ out.push(cur); cur=x; } else cur=(cur+' '+x).trim(); }); if(cur) out.push(cur); return out; }
+function drawSelection(){
+  selLayer.innerHTML='';
+  if(!selected||selected.kind!=='object') return;
+  const b=bbox[selected.id]||bbox[laneOf(selected.id)]; if(!b) return;
+  el('rect',{x:b.x-16,y:b.y-16,width:b.w+32,height:b.h+32,rx:8,fill:'none',stroke:'#7FB2FF','stroke-width':4,'stroke-dasharray':'4 8'},selLayer);
+}
+
+/* ---------- Player ---------- */
+const sceneAt=f=>scenes.find(s=>f>=s.start&&f<s.end)||scenes[scenes.length-1];
+const fmt=f=>(f/FPS).toFixed(1)+' s · f'+f;
+function updateReadout(f){
+  const mmss=x=>{const t=Math.floor(x/FPS);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
+  document.getElementById('tread').textContent=`${mmss(f)} / ${mmss(TOTAL)}`;
+  const sk=document.getElementById('seek'); sk.value=f; sk.setAttribute('aria-valuetext',fmt(f));
+  { const c=sceneAt(f); document.getElementById('sceneRead').textContent=`${fmt(f)} · scene ${c.idx+1} ${SCENE_NAMES[c.beat]}`; }
+  const fi=document.getElementById('frameIn'); if(document.activeElement!==fi) fi.value=f;
+    const cur=sceneAt(f);
+  document.querySelectorAll('.scard').forEach(c=>c.setAttribute('aria-current', String(+c.dataset.idx===cur.idx)));
+  document.querySelectorAll('.sblock').forEach(b=>b.classList.toggle('cur', +b.dataset.idx===cur.idx));
+  if(curSceneShown!==cur.idx){ curSceneShown=cur.idx; if(activeTab==='scene') renderInspector(); }
+}
+let curSceneShown=-1;
+function seek(f){ frame=clamp(Math.round(f),0,TOTAL-1); render(frame); }
+let last=0;
+function tick(t){ if(!playing) return; if(!last) last=t; const df=Math.floor((t-last)/(1000/FPS)); if(df>0){ last+=df*1000/FPS; let nf=frame+df; const end=loopRange?loopRange[1]:TOTAL; if(nf>=end){ if(loopRange){ nf=loopRange[0]; } else { nf=TOTAL-1; setPlay(false); } } seek(nf); } requestAnimationFrame(tick); }
+function setPlay(p){ playing=p; last=0; const b=document.getElementById('bPlay'); b.setAttribute('aria-label',p?'Pause':'Play'); b.innerHTML=`<svg class="i"><use href="#i-${p?'pause':'play'}"/></svg>`; if(p) requestAnimationFrame(tick); }
+document.getElementById('seek').addEventListener('input',e=>{ setPlay(false); seek(+e.target.value); });
+document.getElementById('bFull').onclick=()=>{ const sc=document.getElementById('screen'); if(document.fullscreenElement) document.exitFullscreen(); else if(sc.requestFullscreen) sc.requestFullscreen(); };
+document.getElementById('bPlay').onclick=()=>{ if(!playing&&frame>=TOTAL-1) seek(0); setPlay(!playing); };
+document.getElementById('bFprev').onclick=()=>{ setPlay(false); seek(frame-1); };
+document.getElementById('bFnext').onclick=()=>{ setPlay(false); seek(frame+1); };
+document.getElementById('bSprev').onclick=()=>jumpScene(-1);
+document.getElementById('bSnext').onclick=()=>jumpScene(1);
+function jumpScene(d){ const c=sceneAt(frame); const i=clamp(c.idx+(d<0&&frame>c.start?0:d),0,scenes.length-1); seek(scenes[i].start); }
+document.getElementById('frameIn').addEventListener('change',e=>{ setPlay(false); seek(+e.target.value||0); });
+document.getElementById('stage').addEventListener('keydown',e=>{
+  const k=e.key;
+  if(k===' '){ e.preventDefault(); document.getElementById('bPlay').click(); }
+  else if(k==='ArrowLeft'){ e.preventDefault(); setPlay(false); seek(frame-(e.shiftKey?10:1)); }
+  else if(k==='ArrowRight'){ e.preventDefault(); setPlay(false); seek(frame+(e.shiftKey?10:1)); }
+  else if(k==='['){ jumpScene(-1); } else if(k===']'){ jumpScene(1); }
+  else if(k==='Home'){ seek(0); } else if(k==='End'){ seek(TOTAL-1); }
+});
+document.getElementById('tgCap').onchange=e=>{ showCaps=e.target.checked; render(frame); };
+document.getElementById('tgSafe').onchange=e=>{ safeLayer.style.display=e.target.checked?'':'none'; };
+document.getElementById('szPhone').onclick=()=>setSize(false);
+document.getElementById('szFull').onclick=()=>setSize(true);
+function setSize(full){ document.getElementById('stage').classList.toggle('full',full); document.getElementById('szPhone').setAttribute('aria-pressed',String(!full)); document.getElementById('szFull').setAttribute('aria-pressed',String(full)); }
+document.getElementById('btnHook').onclick=()=>{ loopRange=[scenes[0].start,scenes[0].end]; seek(0); setPlay(true); document.getElementById('playerSrc').textContent='Hook-only preview: scene 1, 4.0 s, looping'; toast('Playing the hook on its own. Press pause, or pick a scene, to stop looping.'); };
+
+/* ---------- Scene cards ---------- */
+let ERRORS=[];
+const errsFor=s=>ERRORS.filter(e=>e.scene===s.id);
+function objectsIn(s){ const set=new Set(); s.actions.forEach(a=>a.targets.forEach(t=>set.add(topObj(t)))); return [...set]; }
+function topObj(t){ if(objById[t]) return t; if(groupOf[t]||groupById[t]) return 'square'; if(termOwner[t]) return termOwner[t]; return t; }
+function narrationFor(s){ return CAPTIONS.filter(c=>c.from>=s.start&&c.from<s.end); }
+function renderScenes(){
+  const ol=document.getElementById('sceneList'); ol.innerHTML='';
+  document.getElementById('sceneTotals').textContent=`${scenes.length} scenes · ${(TOTAL/FPS).toFixed(0)} s`;
+  scenes.forEach(s=>{
+    const li=document.createElement('li'); const b=document.createElement('button'); b.className='scard'; b.type='button'; b.dataset.idx=s.idx;
+    const errs=errsFor(s), gap=errs.some(e=>e.code==='CAPABILITY_UNSUPPORTED');
+    const objs=objectsIn(s);
+    b.innerHTML=`<div class="top"><span class="n">${s.idx+1}</span><span class="name">${SCENE_NAMES[s.beat]}</span><span class="t num">${(s.start/FPS).toFixed(1)}–${(s.end/FPS).toFixed(1)} s</span></div>
+      <p class="narr">${narrationFor(s).map(c=>c.text).join(' ')}</p>
+      <div class="facts"><span class="label-badge">${KIND_LABEL[s.demonstrationKind]||s.demonstrationKind}</span><span class="num">f${s.start}–${s.end-1}</span><span>${objs.length} objects</span><span>${s.actions.length} actions</span><span>${(s.claimRefs||[]).length?'Claim '+CLAIM.short:'No claim'}</span></div>
+      <div class="status">${errs.length?`<span class="dangerc"><svg class="i"><use href="#i-block"/></svg> ${gap?'Capability gap':errs.length+(errs.length>1?' compiler errors':' compiler error')}</span>`:`<span class="okc"><svg class="i"><use href="#i-ok"/></svg> Compiles</span>`}
+      ${s.idx===0?'':(errs.some(e=>e.code==='CONTINUITY_BREAK')?`<span class="dangerc"><svg class="i"><use href="#i-block"/></svg> Continuity break at cut</span>`:`<span class="okc"><svg class="i"><use href="#i-ok"/></svg> Continuity at cut</span>`)}</div>`;
+    b.setAttribute('aria-label',`Scene ${s.idx+1}, ${SCENE_NAMES[s.beat]}, ${(s.start/FPS).toFixed(1)} to ${(s.end/FPS).toFixed(1)} seconds${errs.length?', '+errs.length+' problems':''}`);
+    b.onclick=()=>{ setPlay(false); loopRange=null; document.getElementById('playerSrc').textContent='Player: live from storyboard v1 · brand kit v1'; seek(s.start); setTab('scene'); };
+    li.appendChild(b); ol.appendChild(li);
+  });
+}
+
+/* ---------- Inspector ---------- */
+let activeTab='scene';
+function setTab(t){ activeTab=t; ['Scene','Object','Action','Prob'].forEach(n=>document.getElementById('tab'+n).setAttribute('aria-selected',String(t===n.toLowerCase()))); renderInspector(); }
+['Scene','Object','Action','Prob'].forEach(n=>document.getElementById('tab'+n).onclick=()=>setTab(n.toLowerCase()));
+document.querySelector('.tabs').addEventListener('keydown',e=>{ const order=['scene','object','action','prob']; let i=order.indexOf(activeTab); if(e.key==='ArrowRight') i=(i+1)%4; else if(e.key==='ArrowLeft') i=(i+3)%4; else return; setTab(order[i]); document.getElementById('tab'+['Scene','Object','Action','Prob'][i]).focus(); });
+const sw=tok=>`<span class="swatch" title="${tok} on color.canvas"><i style="background:var(--${tok.replace(/\./g,'-')})"></i></span>`;
+function describeObj(id){
+  if(objById[id]){ const o=objById[id]; return {id, type:o.type, role:o.semanticRole, color:o.colorToken, label:o.label||o.text||'', claims:o.claimRefs, demo:o.demonstrationRef, style:o.styleToken}; }
+  if(groupById[id]){ const g=groupById[id]; return {id, type:'Group in square', role:`odd-number layer ${id.split('.')[1]}`, color:g.colorToken, label:g.label, value:`${demoAt(g.valueRef)} cells`, valueRef:g.valueRef, claims:sq.claimRefs, demo:sq.demonstrationRef}; }
+  if(groupOf[id]){ const c=sq.cells.find(x=>x.id===id); const g=groupById[c.groupId]; return {id, type:'Cell in square', role:`cell of odd-number layer ${c.groupId.split('.')[1]}`, color:g.colorToken, label:`${g.label} (on the layer's corner cell)`, value:`column ${c.col}, row ${c.row}`, group:c.groupId, claims:sq.claimRefs, demo:sq.demonstrationRef}; }
+  if(termOwner[id]){ const o=objById[termOwner[id]]; const t=o.terms.find(x=>x.id===id); return {id, type:`Term of ${o.id}`, role:o.semanticRole, color:t.colorToken, label:t.value||t.tex, value:t.valueRef?`${demoAt(t.valueRef)}`:null, valueRef:t.valueRef, linked:t.linkedObjectIds, claims:o.claimRefs, demo:o.demonstrationRef}; }
+  return {id,type:'Unknown',role:'—'};
+}
+function actionsTouching(id){ const lane=laneOf(id); return actions.filter(a=>a.targets.some(t=>t===id||laneOf(t)===lane||topObj(t)===id)); }
+function renderInspector(){
+  const box=document.getElementById('insp');
+  if(UI.mode==='empty'){ box.innerHTML='<div class="empty"><h4>Nothing to inspect yet</h4><p>Scenes, objects and actions appear here once a storyboard exists.</p></div>'; return; }
+  if(UI.mode==='loading'){ box.innerHTML=`<div class="sk" style="height:18px;width:60%;margin-bottom:12px"></div>`+'<div class="sk" style="height:14px;margin:8px 0"></div>'.repeat(8); return; }
+  let h='';
+  if(UI.mode==='rendering') h+=renderProgressCard();
+  if(activeTab==='scene'){
+    const s=sceneAt(frame);
+    h+=`<h4>Scene ${s.idx+1}: ${SCENE_NAMES[s.beat]}</h4><dl class="kv">
+      <dt>ID</dt><dd class="mono">${s.id}</dd>
+      <dt>Time</dt><dd class="num">${(s.start/FPS).toFixed(1)}–${(s.end/FPS).toFixed(1)} s · f${s.start}–${s.end-1} (${s.durationFrames} frames)</dd>
+      <dt>Label</dt><dd><span class="label-badge">${KIND_LABEL[s.demonstrationKind]}</span></dd>
+      <dt>Demonstration</dt><dd>${s.demonstrationKind==='none'?'None':`${DEMO.function} ${DEMO.functionVersion} · n = ${DEMO.params.n} · ${DEMO.arithmetic.mode} arithmetic · ${DEMO.reviewStatus}`}</dd>
+      <dt>Continuity</dt><dd>${s.idx===0?'First scene: entry state is all hidden':(errsFor(s).some(e=>e.code==='CONTINUITY_BREAK')?'<span class="dangerc">Entry state differs from the previous exit</span>':'<span class="okc">Entry state equals scene '+s.idx+' exit</span>')}</dd>
+    </dl>
+    <h4>Narration it serves</h4>${narrationFor(s).map(c=>`<p class="phr">${c.text}<span class="a num">${c.anchor?c.anchor+' · ':''}f${c.from}–${c.to}</span></p>`).join('')||'<p class="muted">No narration.</p>'}
+    <h4>Claims</h4>${(s.claimRefs||[]).length?`<div class="claim"><div class="h"><svg class="i okc"><use href="#i-ok"/></svg><b>${CLAIM.short}</b><span class="okc">${CLAIM.status}</span></div>${CLAIM.text}<div class="subtle">${CLAIM.source} · <a href="S-05-evidence.html">Evidence</a></div></div>`:'<p class="muted">This scene makes no claim.</p>'}
+    <h4>Objects</h4><ul class="ilist">${objectsIn(s).map(id=>{ const d=describeObj(id); return `<li><button type="button" data-obj="${id}">${d.color?sw(d.color):''}<span class="mono">${id}</span><span class="r">${d.type}</span></button></li>`; }).join('')}</ul>
+    <h4>Actions</h4><ul class="ilist">${s.actions.map(a=>`<li><button type="button" data-act="${a.id}"><span>${a.op}</span><span class="mono">${a.targets.length>1?a.targets[0]+' +'+(a.targets.length-1):a.targets[0]}</span><span class="r num">f${a.startFrame}–${a.endFrame}</span></button></li>`).join('')}</ul>`;
+  } else if(activeTab==='object'){
+    if(!selected||selected.kind!=='object'){ h+='<div class="empty"><h4>No object selected</h4><p>Select an object in the preview or in the object list on the Scene tab.</p></div>'; }
+    else { const d=describeObj(selected.id); const acts=actionsTouching(selected.id);
+      h+=`<h4><span class="mono">${d.id}</span></h4><dl class="kv">
+        <dt>Type</dt><dd>${d.type}</dd><dt>Meaning</dt><dd>${d.role}</dd>
+        <dt>Colour</dt><dd>${d.color?`${sw(d.color)} <span class="mono">${d.color}</span> <span class="subtle">${VAR(d.color)}</span>`:'<span class="mono">color.chalk</span> (no colour meaning)'}</dd>
+        <dt>Label</dt><dd>${d.label||'—'}</dd>
+        ${d.value?`<dt>Value</dt><dd>${d.value}${d.valueRef?` <span class="subtle mono">${d.valueRef}</span>`:''}</dd>`:''}
+        ${d.group?`<dt>Group</dt><dd><button class="linkbtn" data-obj="${d.group}">${d.group}</button></dd>`:''}
+        ${d.linked?`<dt>Linked to</dt><dd>${d.linked.map(x=>`<button class="linkbtn" data-obj="${x}">${x}</button>`).join(' ')}</dd>`:''}
+        ${d.style?`<dt>Style</dt><dd class="mono">${d.style}</dd>`:''}
+        <dt>Claims</dt><dd>${(d.claims||[]).length?CLAIM.short+' · Approved':'None'}</dd>
+        ${d.demo?`<dt>Checked by</dt><dd>${DEMO.function} ${DEMO.functionVersion} (exact)</dd>`:''}
+      </dl><h4>Actions on this object (${acts.length})</h4><ul class="ilist">${acts.map(a=>`<li><button type="button" data-act="${a.id}"><span>${a.op}</span><span class="subtle">${SCENE_NAMES[a.scene.beat]}</span><span class="r num">f${a.absStart}–${a.absEnd}</span></button></li>`).join('')}</ul>`; }
+  } else if(activeTab==='action'){
+    const a=selected&&selected.kind==='action'?actions.find(x=>x.id===selected.id):null;
+    if(!a){ h+='<div class="empty"><h4>No action selected</h4><p>Select an action in the Scene tab, or in the action list on the Object tab.</p></div>'; }
+    else { const err=ERRORS.find(e=>e.action===a.id);
+      h+=`<h4><span class="mono">${a.id}</span></h4>${err?`<div class="prob"><span class="code">${err.code}</span><p>${err.message}</p></div>`:''}<dl class="kv">
+        <dt>Family</dt><dd>${a.family}</dd><dt>Operation</dt><dd>${a.op}</dd>
+        <dt>Targets</dt><dd>${a.targets.map(t=>`<button class="linkbtn mono" data-obj="${t}">${t}</button>`).join(' ')}</dd>
+        <dt>Scene</dt><dd>${a.scene.idx+1} ${SCENE_NAMES[a.scene.beat]}</dd>
+        <dt>In scene</dt><dd class="num">f${a.startFrame}–${a.endFrame} (${a.endFrame-a.startFrame} frames)</dd>
+        <dt>In video</dt><dd class="num">${(a.absStart/FPS).toFixed(2)}–${(a.absEnd/FPS).toFixed(2)} s · f${a.absStart}–${a.absEnd}</dd>
+        <dt>Easing</dt><dd class="mono">${a.easing}</dd>
+        ${a.stagger?`<dt>Stagger</dt><dd class="num">${a.stagger} frames per target</dd>`:''}
+        ${a.mapping?`<dt>Mapping</dt><dd class="mono">${a.mapping.map(m=>m.from+' → '+m.to).join(', ')}</dd>`:''}
+        <dt>Anchor</dt><dd>${a.anchor?`${a.anchor.kind} <span class="mono">${a.anchor.ref}</span>, ${a.anchor.edge}`:'None (fixed frames)'}</dd>
+      </dl><p class="hint" style="margin-top:12px">Frames are set by the storyboard. Change them through <a href="S-09-revision.html">Request a change</a>, which shows the cost and the gates that reopen.</p>`; }
+  } else {
+    h+=renderProblems();
+  }
+  box.innerHTML=h;
+  box.querySelectorAll('[data-obj]').forEach(b=>b.onclick=()=>selectObject(b.dataset.obj));
+  box.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>selectAction(b.dataset.act));
+  box.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{ const s=scenes.find(x=>x.id===b.dataset.goto); seek(s.start); setTab('scene'); });
+}
+function renderProblems(){
+  if(!ERRORS.length) return `<div class="empty"><h4>No problems</h4><p>The compiler accepted all ${scenes.length} scenes, ${SPEC.objects.length} objects and ${actions.length} actions: references, frames, continuity, colour meaning, captions and safe zones.</p></div>`;
+  return ERRORS.map(e=>`<div class="prob ${e.level==='warn'?'warn':''}"><span class="code">${e.code}</span> <span class="subtle">${e.cls||'Invalid content'}</span>
+    <p>${e.message}</p><dl class="kv"><dt>Scene</dt><dd>${(()=>{const s=scenes.find(x=>x.id===e.scene);return `${s.idx+1} ${SCENE_NAMES[s.beat]}`})()}</dd>
+    ${e.object?`<dt>Object</dt><dd class="mono">${e.object}</dd>`:''}<dt>Field</dt><dd class="mono">${e.field}</dd>
+    ${e.expected?`<dt>Expected</dt><dd>${e.expected}</dd>`:''}${e.actual?`<dt>Actual</dt><dd>${e.actual}</dd>`:''}</dl>
+    <div class="acts"><button class="btn sm" type="button" data-goto="${e.scene}">Show scene</button>${e.action?`<button class="btn sm" type="button" data-act="${e.action}">Show action</button>`:''}<a class="btn sm primary" href="S-09-revision.html">${e.fix}</a></div></div>`).join('');
+}
+function selectObject(id){ selected={kind:'object',id}; setTab('object'); drawSelection(); markBars(); }
+function selectAction(id){ selected={kind:'action',id}; const a=actions.find(x=>x.id===id); if(a&&(frame<a.absStart||frame>a.absEnd)) seek(a.absStart); setTab('action'); markBars(); }
+
+/* ---------- Scene and caption strip (replaces a multi-track timeline; PRD §13 defers one) ---------- */
+let phScale=1;
+function renderTimeline(){
+  const tl=document.getElementById('tl'); tl.innerHTML='';
+  if(UI.mode==='empty'){ tl.innerHTML='<div class="empty"><p>Scenes and captions appear here once a storyboard exists.</p></div>'; return; }
+  if(UI.mode==='loading'){ tl.innerHTML='<div style="padding:12px 14px">'+'<div class="sk" style="height:16px;margin:8px 0"></div>'.repeat(2)+'</div>'; return; }
+  const pct=f=>(f/TOTAL*100)+'%';
+  const ruler=document.createElement('div'); ruler.className='tlrow ruler'; ruler.innerHTML='<div class="ln">Scenes</div><div class="tr"></div>';
+  const rt=ruler.querySelector('.tr');
+  scenes.forEach(s=>{ const d=document.createElement('button'); d.type='button'; d.className='sblock'+(errsFor(s).length?' err':''); d.dataset.idx=s.idx; d.style.left=pct(s.start); d.style.width=pct(s.durationFrames);
+    d.innerHTML=`<b>${s.idx+1} ${SCENE_NAMES[s.beat]}</b><br><span class="num">${(s.start/FPS).toFixed(1)} s</span>`;
+    d.setAttribute('aria-label',`Jump to scene ${s.idx+1}, ${SCENE_NAMES[s.beat]}, ${(s.start/FPS).toFixed(1)} seconds${errsFor(s).length?', has problems':''}`);
+    d.onclick=e=>{ e.stopPropagation(); setPlay(false); loopRange=null; seek(s.start); setTab('scene'); }; rt.appendChild(d); });
+  tl.appendChild(ruler);
+  const row=document.createElement('div'); row.className='tlrow'; row.innerHTML='<div class="ln">Captions</div><div class="tr"></div>';
+  const tr=row.querySelector('.tr');
+  CAPTIONS.forEach(c=>{ const b=document.createElement('div'); b.className='cap'; b.dataset.from=c.from; b.style.left=pct(c.from); b.style.width=`calc(${pct(c.to-c.from)} - 2px)`; b.textContent=c.text; b.title=`${c.text} · f${c.from}–${c.to}${c.anchor?' · '+c.anchor:''}`; tr.appendChild(b); });
+  tl.appendChild(row);
+  [rt,tr].forEach(t=>t.addEventListener('click',e=>{ const r=t.getBoundingClientRect(); setPlay(false); seek((e.clientX-r.left)/r.width*TOTAL); }));
+  const ph=document.createElement('div'); ph.className='playhead'; ph.id='playhead'; tl.appendChild(ph);
+  const resize=()=>{ ph.style.marginLeft=rt.offsetLeft+'px'; ph.style.left='0'; phScale=rt.getBoundingClientRect().width; updatePH(); };
+  resize(); window.onresize=resize;
+}
+function updatePH(){ const ph=document.getElementById('playhead'); if(ph) ph.style.left=(frame/TOTAL*phScale)+'px';
+  document.querySelectorAll('#tl .cap').forEach(c=>{ const cap=CAPTIONS.find(x=>x.from===+c.dataset.from); c.classList.toggle('on',frame>=cap.from&&frame<cap.to); }); }
+const _ur=updateReadout; updateReadout=function(f){ _ur(f); updatePH(); };
+function markBars(){}
+
+/* ---------- Gate C dialog (R-40, R-41, R-05) ---------- */
+const dlg=document.getElementById('gateDlg');
+function gateBlockers(){ return ERRORS.map(e=>({text:`${e.code}: ${e.short||e.message}`, scene:e.scene})); }
+function openGate(stale){
+  const bl=gateBlockers();
+  const nCut=scenes.length-1, nAnch=new Set(actions.filter(a=>a.anchor).map(a=>a.anchor.ref)).size;
+  document.getElementById('gateBody').innerHTML=`
+    ${stale?`<div class="banner danger" style="margin:0 0 12px"><svg class="i"><use href="#i-reopen"/></svg><p><b>Changed since you opened it.</b> The storyboard is now v2 · <span class="mono">9f3e1b4</span> (saved 13 Nov 2026, 14:22 IST by the storyboard task). This approval was for v1 and was not recorded. <button class="linkbtn" type="button" id="reloadBtn">Reload v2</button> · <a href="S-10-compare.html">Compare v1 with v2</a></p></div>`:''}
+    <dl class="kv" style="grid-template-columns:132px 1fr">
+      <dt>Approves</dt><dd>Storyboard v1 · <span class="mono">e7d5d82</span> (VideoSpec 0.1.0)</dd>
+      <dt>Built from</dt><dd>Script v1 · <span class="mono">a59f4fa</span>, demonstration v1 · <span class="mono">7d39690</span>, brand kit v1 · <span class="mono">3dbd580</span></dd>
+      <dt>You approve as</dt><dd><label class="toggle"><input type="radio" name="resp" checked> Reviewer</label> <span class="subtle">(you also hold owner, editor, publisher and analyst)</span></dd>
+    </dl>
+    <h3>Evidence (PRD §8.1, Gate C)</h3>
+    <label class="check"><input type="checkbox" class="ev"> <span>Object and action plan<small>${scenes.length} scenes, ${SPEC.objects.length} objects, ${actions.length} actions; every value checked against ${DEMO.function} (exact).</small></span></label>
+    <label class="check"><input type="checkbox" class="ev"> <span>Continuity<small>${nCut} cuts checked; ${ERRORS.some(e=>e.code==='CONTINUITY_BREAK')?'1 break':'no breaks'}. Layer colours keep one meaning throughout.</small></span></label>
+    <label class="check"><input type="checkbox" class="ev"> <span>Compositions<small>Captions, labels and equations inside the safe zones at phone size; brand cue only in the closure.</small></span></label>
+    <label class="check"><input type="checkbox" class="ev"> <span>Narration mapping<small>${nAnch} phrase anchors resolve to script v1. Timing is provisional until a measured take exists; the master waits for it.</small></span></label>
+    <h3>Outstanding blockers</h3>
+    ${bl.length?`<ul style="margin:0;padding-left:0;list-style:none">${bl.map(b=>`<li class="dangerc" style="margin:4px 0"><svg class="i"><use href="#i-block"/></svg> ${b.text} <button class="linkbtn" type="button" data-gotoscene="${b.scene}">Show</button></li>`).join('')}</ul>`:'<p class="okc" style="margin:0"><svg class="i"><use href="#i-ok"/></svg> None</p>'}
+    <div class="fld" id="retFld" hidden><label for="retReason"><b>Reason for returning</b> (required; shown on the script and in history)</label><textarea id="retReason"></textarea></div>`;
+  const evs=[...dlg.querySelectorAll('.ev')]; const ap=document.getElementById('btnApprove');
+  const upd=()=>{ ap.disabled = stale || bl.length>0 || !evs.every(x=>x.checked); ap.title = bl.length?'Resolve the blockers first':(evs.every(x=>x.checked)?'':'Confirm each evidence item'); };
+  evs.forEach(x=>x.onchange=upd); upd();
+  dlg.querySelectorAll('[data-gotoscene]').forEach(b=>b.onclick=()=>{ dlg.close(); const s=scenes.find(x=>x.id===b.dataset.gotoscene); seek(s.start); setTab('prob'); });
+  const rl=document.getElementById('reloadBtn'); if(rl) rl.onclick=()=>{ dlg.close(); toast('Storyboard v2 loaded. Gate C review starts again for v2.'); };
+  document.getElementById('retFld').hidden=true;
+  dlg.showModal();
+}
+document.getElementById('btnGate').onclick=()=>openGate(UI.mode==='stale');
+document.getElementById('btnReturn').onclick=()=>{ const f=document.getElementById('retFld'); if(f.hidden){ f.hidden=false; document.getElementById('retReason').focus(); return; } const r=document.getElementById('retReason'); if(!r.value.trim()){ r.setAttribute('aria-invalid','true'); r.focus(); return; } dlg.close(); toast('Storyboard v1 returned for revision. Gate C reopened with your reason.'); setGateC('danger','i-reopen','Reopened: '+r.value.trim().slice(0,48)); };
+document.getElementById('btnApprove').onclick=()=>{ dlg.close(); setGateC('ok','i-ok','Approved v1 · <span class="mono">e7d5d82</span>'); const st=document.getElementById('prodState'); st.textContent='Producing'; toast('Gate C approved for storyboard v1 · e7d5d82 as Reviewer. The master render waits for a measured narration take.'); };
+function setGateC(cls,icon,text){ const g=document.getElementById('gateC'); g.className='gate current '+cls; g.querySelector('use').setAttribute('href','#'+icon); document.getElementById('gateCtext').innerHTML=text; }
+function toast(t){ const n=document.getElementById('toast'); n.innerHTML=`<svg class="i"><use href="#i-ok"/></svg><span>${t}</span>`; n.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>n.classList.remove('show'),6000); }
+
+/* ---------- Draft preview render (simulated) ---------- */
+let renderProg=null;
+function renderProgressCard(){
+  const p=renderProg||[100,100,62,0,0,0];
+  return `<div class="progress" aria-live="polite"><div class="h"><svg class="i"><use href="#i-run"/></svg>Draft preview rendering · scene ${Math.min(6,p.filter(x=>x===100).length+1)} of 6</div>
+  <ol>${scenes.map((s,i)=>`<li><span>${i+1} ${SCENE_NAMES[s.beat]}</span><span class="pbar"><i style="width:${p[i]}%"></i></span><span class="num subtle">${p[i]===100?'Done':p[i]?p[i]+'%':'Queued'}</span></li>`).join('')}</ol>
+  <div style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:13px"><span>Reserved ₹42.00 · spent so far ₹2.70</span><span class="spacer"></span><a class="btn sm" href="S-13-runs.html">Open run</a><button class="btn sm danger" type="button" onclick="cancelRender()">Cancel</button></div></div>`;
+}
+let renderTimer=null;
+function cancelRender(){ clearInterval(renderTimer); setMode('ready'); toast('Draft preview cancelled. Nothing further was dispatched; the reservation was released.'); }
+document.getElementById('btnRender').onclick=()=>{ setMode('rendering',true); };
+document.getElementById('btnGenerate').onclick=()=>{ toast('Regenerating creates storyboard v2 and needs a fresh Gate C review. Estimate ₹14.00. (Prototype: not started.)'); };
+
+/* ---------- Screen states ---------- */
+const UI={mode:'ready'};
+const ERR_SETS={
+  errors:[
+    {code:'DEMONSTRATION_MISMATCH',scene:'scene.explain',object:'square',field:'objects[square].cells (group layer.5)',action:'a.ex.l5',message:'Layer 5 has 10 cells, but the verified demonstration gives 9 (2k − 1 for k = 5).',short:'layer 5 has 10 cells, demonstration says 9',expected:'9 cells',actual:'10 cells',fix:'Correct the object'},
+    {code:'UNKNOWN_REFERENCE',scene:'scene.demo',object:'cell.c9r9',field:'scenes[scene.demo].actions[a.demo.l3].targets[0]',action:'a.demo.l3',message:'Action a.demo.l3 targets cell.c9r9, which is not an object in this storyboard.',short:'a.demo.l3 targets cell.c9r9, which does not exist',expected:'a cell of the 5 × 5 square, e.g. cell.c2r0',actual:'cell.c9r9',fix:'Fix the target'},
+    {code:'CONTINUITY_BREAK',scene:'scene.explain',object:'layer.4, total',field:'scenes[scene.explain].entryState',message:'Explanation starts with layer.4 hidden and the total showing 9, but Demonstration ends with layer.4 shown and the total at 16.',short:'Explanation entry state differs from Demonstration exit',expected:'layer.4 visible; total.k4 shown',actual:'layer.4 hidden; total.k3 shown',fix:'Repair entry state'},
+    {code:'COLOR_MEANING_CHANGED',scene:'scene.hook',object:'sum.t3',field:'objects[sum].terms[sum.t3].colorToken',action:'a.hook.sum',message:'Term 5 (sum.t3) uses color.layer.4 while it is linked to layer.3, which is color.layer.3.',short:'sum.t3 coloured as layer 4 but linked to layer 3',expected:'color.layer.3',actual:'color.layer.4',fix:'Restore the colour'}
+  ],
+  gap:[
+    {code:'CAPABILITY_UNSUPPORTED',scene:'scene.payoff',object:'sum, square',field:'scenes[scene.payoff].actions[a.pay.connect].op',message:'The storyboard asks to draw a connector from each sum term to its layer ("connect"). Catalogue 0.1.0 has no connector operation.',short:'"connect" is not in capability catalogue 0.1.0',expected:'an operation from capabilities.json, e.g. FocusHighlight.highlight on sum.tN with layer.N',actual:'connect',fix:'Use a supported operation',cls:'Capability gap'}
+  ],
+  layout:[
+    {code:'LABEL_OVERFLOW',scene:'scene.payoff',object:'formula',field:'objects[formula].terms[formula.lhs]',action:'a.pay.f',message:'At type.equation the equation is 949 px wide; the content zone is 936 px at this height. The draft preview stopped at f1010. ₹3.10 was spent and recorded.',short:'equation wider than the content zone at f1010',expected:'≤ 936 px wide',actual:'949 px',fix:'Change in revision',cls:'Deterministic render defect · request 7f3a9c21'}
+  ]
+};
+function setMode(m,live){
+  UI.mode=m; ERRORS=ERR_SETS[m]||[];
+  const pc=document.getElementById('probCount'); pc.hidden=!ERRORS.length; pc.textContent=ERRORS.length;
+  const slot=document.getElementById('bannerSlot'); slot.innerHTML='';
+  const run=document.getElementById('runind'); run.className='runind'; run.innerHTML='<svg class="i"><use href="#i-none"/></svg><span>No active run · <a href="S-13-runs.html">Runs</a></span>';
+  document.getElementById('reserved').textContent='₹0.00'; document.getElementById('resbar').style.width='0%';
+  const msg=document.getElementById('stageMsg'); msg.innerHTML='';
+  const dis=(ids,v)=>ids.forEach(i=>{ const n=document.getElementById(i); if(n.tagName==='A'){ n.toggleAttribute('aria-disabled',v); n.style.pointerEvents=v?'none':''; n.style.opacity=v?.55:''; } else n.disabled=v; });
+  dis(['btnGenerate','btnHook','btnRender','btnChange','btnGate'],false);
+  document.getElementById('btnGenerate').textContent='Regenerate storyboard';
+  document.getElementById('vchip').style.display='';
+  document.getElementById('provNote').style.display='';
+  clearInterval(renderTimer);
+  svg.style.visibility=(m==='empty'||m==='loading')?'hidden':'';
+  if(m==='empty'){
+    document.getElementById('vchip').style.display='none'; document.getElementById('provNote').style.display='none';
+    dis(['btnHook','btnRender','btnChange','btnGate'],true);
+    document.getElementById('btnGenerate').textContent='Generate storyboard';
+    setGateC('warn','i-none','Not started');
+    msg.innerHTML=`<div class="stagemsg"><h4>No storyboard yet</h4><p>Script v1 is approved (Gate B). Generate a storyboard to plan scenes, objects and actions from it.</p><button class="btn" type="button" onclick="setMode('loading')">Generate storyboard</button><p style="font-size:13px">Estimate ₹14.00 · one storyboard task, up to 3 attempts</p></div>`;
+  } else setGateC('warn','i-await','Awaiting review v1 · <span class="mono">e7d5d82</span>');
+  if(m==='loading'){
+    document.getElementById('vchip').style.display='none'; document.getElementById('provNote').style.display='none'; setGateC('warn','i-none','Not started');
+    dis(['btnGenerate','btnHook','btnRender','btnChange','btnGate'],true);
+    run.className='runind active'; run.innerHTML='<svg class="i"><use href="#i-run"/></svg><span>Storyboard run · step 3 of 4: validating with the compiler</span>';
+    document.getElementById('reserved').textContent='₹14.00'; document.getElementById('resbar').style.width='0.6%';
+    msg.innerHTML=`<div class="stagemsg" aria-live="polite"><h4>Storyboard run in progress</h4><p>1 Read script v1 and capabilities · done<br>2 Draft scenes, objects and actions · done<br>3 Validate with the compiler · running<br>4 Save storyboard v1 · waiting</p><a class="btn" href="S-13-runs.html">Open run</a></div>`;
+  }
+  if(m==='rendering'){
+    dis(['btnRender','btnGate'],true);
+    run.className='runind active'; run.innerHTML='<svg class="i"><use href="#i-run"/></svg><span>Draft preview · rendering scene 3 of 6</span>';
+    document.getElementById('reserved').textContent='₹42.00'; document.getElementById('resbar').style.width='1.7%';
+    if(live){ renderProg=[0,0,0,0,0,0]; renderTimer=setInterval(()=>{ const i=renderProg.findIndex(x=>x<100); if(i<0){ clearInterval(renderTimer); renderProg=null; setMode('ready'); document.getElementById('playerSrc').textContent='Draft preview v1 ready · 45.0 s · ₹4.20 · inputs recorded'; toast('Draft preview v1 is ready. Its exact inputs and spend (₹4.20) are recorded.'); return; } renderProg[i]=Math.min(100,renderProg[i]+25); const r=document.getElementById('runind'); if(r) r.querySelector('span').textContent=`Draft preview · rendering scene ${i+1} of 6`; renderInspector(); },450); }
+    else renderProg=null;
+  }
+  if(m==='errors'||m==='gap'){
+    dis(['btnRender'],true);
+    slot.innerHTML=`<div class="banner danger" role="alert"><svg class="i"><use href="#i-block"/></svg><p><b>${m==='gap'?'The storyboard needs an operation the scene library does not have.':'The compiler rejected '+new Set(ERRORS.map(e=>e.scene)).size+' scenes.'}</b> Gate C and the draft preview are blocked until ${ERRORS.length>1?'these are':'this is'} fixed. <button class="linkbtn" type="button" onclick="setTab('prob')">Show problems</button></p></div>`;
+    setGateC('danger','i-block',`Blocked (${ERRORS.length})`);
+  }
+  if(m==='layout'){
+    slot.innerHTML=`<div class="banner danger" role="alert"><svg class="i"><use href="#i-block"/></svg><p><b>Draft preview failed in Payoff at f1010: the equation is wider than the content zone.</b> Nothing else was rendered; ₹3.10 was spent and recorded. Request ID <span class="mono">7f3a9c21</span>. <button class="linkbtn" type="button" onclick="setTab('prob')">Show problem</button> · <a href="S-13-runs.html">Open run</a></p></div>`;
+  }
+  if(m==='sse'){
+    slot.innerHTML=`<div class="banner warn" role="status"><svg class="i"><use href="#i-warn"/></svg><p><b>Live updates paused, reconnecting.</b> Run progress may be out of date. The screen reloads its data when the connection returns.</p></div>`;
+  }
+  if(m==='stale'){ /* dialog opens with the 412 banner */ }
+  renderScenes(); renderTimeline(); renderInspector();
+  if(m==='loading'||m==='empty'){ document.querySelectorAll('.scard').forEach(c=>c.parentElement.remove()); const ol=document.getElementById('sceneList');
+    if(m==='loading') ol.innerHTML=Array.from({length:6},()=>'<li><div class="sk" style="height:96px;border-radius:8px"></div></li>').join('');
+    else ol.innerHTML='<li class="empty"><h4>No scenes yet</h4><p>Generate a storyboard from script v1.</p></li>';
+    document.getElementById('sceneTotals').textContent=''; }
+  if(m==='errors'||m==='gap'||m==='layout'){ const s=scenes.find(x=>x.id===ERRORS[0].scene); seek(s.start+40); setTab('prob'); }
+  else seek(frame);
+  drawSceneErrorOverlay();
+  if(m==='stale') openGate(true);
+}
+function drawSceneErrorOverlay(){
+  const msg=document.getElementById('stageMsg');
+  if(!(UI.mode==='errors'||UI.mode==='gap')) return;
+  const s=sceneAt(frame), errs=errsFor(s);
+  msg.innerHTML = errs.length ? `<div class="stagemsg"><h4>Scene ${s.idx+1} ${SCENE_NAMES[s.beat]} can't be previewed</h4><p>${errs.length} ${errs.length>1?'problems':'problem'}: ${errs.map(e=>e.code).join(', ')}.</p><button class="btn" type="button" onclick="setTab('prob')">Show problems</button></div>` : '';
+}
+const _ur2=updateReadout; updateReadout=function(f){ _ur2(f); drawSceneErrorOverlay(); };
+
+/* ---------- Boot ---------- */
+const themeSel=document.getElementById('protoTheme');
+function applyTheme(t){ document.documentElement.dataset.theme=t; themeSel.value=t; }
+applyTheme(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+themeSel.onchange=e=>{ applyTheme(e.target.value); buildVideo(); render(frame); };
+document.getElementById('protoState').onchange=e=>{ setPlay(false); loopRange=null; setMode(e.target.value); };
+buildVideo();
+const params=new URLSearchParams(location.search);
+if(params.get('theme')) applyTheme(params.get('theme'));
+const st=params.get('state')||'ready'; document.getElementById('protoState').value=st;
+setMode(st);
+seek(+(params.get('f')||330));
+</script>
+</body>
+</html>

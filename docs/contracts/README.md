@@ -1,14 +1,16 @@
 # Contracts
 
-Agreed in Stage 2a, before backend, web, agent and media work splits. Contract version **0.2.0** (draft until the M0 contracts spec regenerates these files from Pydantic, ADR-008; then 1.0.0). Never changed outside a spec. Architecture context: [ARCHITECTURE.md](../architecture/ARCHITECTURE.md).
+Agreed in Stage 2a, before backend, web, agent and media work splits. Contract version **0.4.0** (draft until the M0 contracts spec regenerates these files from Pydantic, ADR-008; then 1.0.0). Never changed outside a spec. Architecture context: [ARCHITECTURE.md](../architecture/ARCHITECTURE.md).
 
 | Contract | Files | Producer → consumer | Requirements |
 |---|---|---|---|
 | Studio API | [openapi.yaml](openapi.yaml) | api → web | R-01–R-63 (R1–R2 scope) |
 | Common types | [common.schema.json](common.schema.json) | all | NFR-19 |
-| Domain events | [events/domain-event.schema.json](events/domain-event.schema.json) | api, worker → relay, web (SSE), audit | R-41, R-44, R-50, NFR-09 |
+| Domain events | [events/domain-event.schema.json](events/domain-event.schema.json) | api, worker → relay, audit; to web inside AG-UI `CUSTOM` events | R-41, R-44, R-50, NFR-09 |
+| AG-UI project stream | [agui/stream.json](agui/stream.json), examples [examples/agui/](examples/agui/) | relay → web (SSE) | R-50, R-53, R-61, ADR-020 |
 | Workflow requests | [events/workflow-request.schema.json](events/workflow-request.schema.json) | api → worker dispatcher | NFR-01, ADR-003 |
 | Agent tasks | [agent-tools/tasks.json](agent-tools/tasks.json), [task-io.schema.json](agent-tools/task-io.schema.json) | worker ↔ agent | R-08, R-14, R-16, R-63 |
+| Agent execution contract | [agent-tools/execution.schema.json](agent-tools/execution.schema.json) (TaskContract, ContextEnvelope, AgentResult) | worker ↔ agent.runner | R-50, R-63, NFR-01, ADR-021 |
 | Agent tools | [agent-tools/tools.schema.json](agent-tools/tools.schema.json) | model → agent tool host (read-only) | R-43, NFR-05 |
 | Scene spec | [media/video-spec.schema.json](media/video-spec.schema.json) | agent, web → render | R-18–R-22, NFR-05 |
 | Capability catalogue | [media/capabilities.json](media/capabilities.json) | render, demonstrations → agent, api preflight | R-07, R-19 |
@@ -22,7 +24,7 @@ Agreed in Stage 2a, before backend, web, agent and media work splits. Contract v
 
 ## Mocking across layers
 
-- **web** mocks the API from `openapi.yaml` and drives the Remotion Player with `examples/odd-squares.video-spec.json`.
+- **web** mocks the API from `openapi.yaml`, drives the Remotion Player with `examples/odd-squares.video-spec.json`, and replays `examples/agui/*.stream.jsonl` as the event stream (one SSE frame per line: `seq` is the `id:`, `data` the event). AG-UI field names follow the pinned SDK and are checked by the M0 relay spec.
 - **agent** runs against fake `LlmProvider` responses and the tool schemas; `validate_scene_spec` can be stubbed with the invalid-fixture manifest.
 - **media** renders `examples/odd-squares.video-spec.json` with a synthetic timing file; needs no API.
 - **backend** fakes the render service with `RenderJobStatus` fixtures and the agent with stored task outputs.
@@ -46,6 +48,8 @@ Agreed in Stage 2a, before backend, web, agent and media work splits. Contract v
 
 3. **Authority** (API): version-bound approvals, blockers and responsibilities. Not expressible in schema; tested as QA-05 (Stage 3, TEST_STRATEGY.md).
 
+Agent results pass the same idea as three stages per attempt: schema → policy and freshness (bound inputs still current, not cancelled, reservation held) → acceptance (postconditions, compiler), recorded in `AgentResult.validation` (ADR-021).
+
 ## Versioning
 
 - Each schema has `$id` (a non-resolvable `opportunityos.invalid` URL) and `x-version`. VideoSpec and RenderManifest also carry the version in the document (`schemaVersion`, `manifestVersion`), because stored specs outlive code.
@@ -59,3 +63,5 @@ Agreed in Stage 2a, before backend, web, agent and media work splits. Contract v
 |---|---|---|
 | 0.1.0 | 2a | First agreed contracts. |
 | 0.2.0 | 2b | Additive. `DELETE /projects/{id}` (never-published projects only; published → 409 with `archive` option) and `archived` on projects (NFR-10 AC2). `GET/POST /kpi-baselines` and `app.kpi_baseline` (KPI-04, Q-13). `analytics` schema, `analytics.event` and `analytics/events.schema.json` (ADR-017). Domain events `project.archived`, `project.deletion_requested`, `project.deleted`, `kpi.baseline_recorded`; workflow type `project_deletion`. `fetch_source` limited to search results, operator URLs and one-hop links from fetched pages, with a new `links` output and `maxLinkHops` budget (SECURITY TH-14). Step-up sign-in rule documented in `openapi.yaml`. |
+| 0.3.0 | 2c | Agent architecture (PROCESS.md; [AGENT_ARCHITECTURE.md](../architecture/AGENT_ARCHITECTURE.md)). The project event stream carries AG-UI events (ADR-020): `agui/stream.json` (mapping, cursor, step names, activity types, tool-call summaries, `STATE_SNAPSHOT` with blockers on connect) and three example streams. `agent-tools/execution.schema.json`: per-attempt TaskContract, ContextEnvelope and AgentResult (ADR-021). `tasks.json`: `outputDisposition`, `reviewGate`, `maxChildren: 0`, failure state `stale_input` and a freshness postcondition. DDL: `outbox_event.seq` (stream cursor), `task_attempt.input_bindings` and `validation`. Breaking for the stream payload only (DomainEvents move inside `CUSTOM`); nothing consumes it yet. `openapi.yaml` 0.3.0 describes the stream. |
+| 0.4.0 | 2c | Owner decisions Q-34 and Q-35. Revisions go through the agent: `RevisionRequest.mode` (default `agent_redraft`) and `target.segmentId`; `RevisionImpact.stage` (scope, full) and `redraft`; `GET /revisions/{id}`, `POST /revisions/{id}/redraft`; workflow type `revision_redraft`; `RevisionScope` on script and storyboard inputs and the `TaskContract`; failure state `out_of_scope_change`; event `revision.redraft_ready`; `app.revision` mode, redraft run, draft and statuses. Approvals record `policyVersions` and, for scheduled Gate E, `lapsesAt`; invalidation reasons `policy_changed`, `release_time_lapsed`; `app.approval` columns. Additive except the new NOT NULL `policy_versions` column (no data yet). |

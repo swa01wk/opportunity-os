@@ -6,7 +6,7 @@ Running log of every open question and decision found in [PRD v2.0](../sources/P
 - Each question Q-n has one assumption A-n (same number). Work builds on A-n until the question is decided.
 - **Status:** Open (not yet reviewed) · Accepted (A-n confirmed as the decision) · Answered (decision differs from A-n) · Parked (deferred; the interim rule shown applies until it is decided).
 - Never delete a row. To change a decision, update its row, add a line to the change log and, after G1, follow change control.
-- New questions take the next number (Q-32 onward).
+- New questions take the next number (Q-33 onward).
 
 **Answerer key:** PO = product owner/client · TL = tech lead · SP = specialist reviewer (legal, privacy, copyright or subject) · PF = platform account preflight (PRD OOS-004). Today one person is PO and TL.
 
@@ -52,12 +52,17 @@ Running log of every open question and decision found in [PRD v2.0](../sources/P
 | Q-29 | Which web search API backs the research task's `search_sources` tool? | §14.1, R-08; found in Stage 2a | TL | Open | A-29: A search API behind a `SearchProvider` adapter (ADR-009), chosen by the M0 research spec on result quality, terms and cost. Model-provider built-in search is not used (ADR-014). Until then the operator supplies source URLs (`operatorSourceUrls`). | Decide in the M0 research spec. |
 | Q-30 | Does the 30-day log retention (Q-14) also cover access-audit records, given DPDP Rule 6 asks for logs of access to personal data to be kept for one year? | §20; found in Stage 2b | PO, SP (privacy) | Accepted | A-30: No. Operational logs, traces and delivered outbox events keep 30 days; access-audit records (`audit_log`, Keycloak login and admin events) are kept 1 year. | Accepted 2026-11-13 (owner delegated to the tech lead). Applied in SECURITY.md and OBSERVABILITY.md. |
 | Q-31 | Where is the video house style (R-23: palette, type scale, equation typography, caption placement, safe zones, transitions, brand cue) designed? | §5.2, §10; found in Stage 2b | PO | Accepted | A-31: In Stage 2c, as a separate "video house style" section of `docs/design/tokens.md` (brand kit v1), next to the Studio UI tokens, so S-07 and S-11 prototypes show original video frames. Motion and voice references (PRD OOS-003) follow in M0. | Accepted 2026-11-13 (owner delegated to the tech lead). Scope of Stage 2c. |
+| Q-32 | When may a moat hypothesis (PRD §1.1) be stated as earned, internally or externally? | §1.1, §19.3, §25; found in Stage 2c | PO | Open | A-32: All four stay hypotheses until their proof in PRD §1.1 is met at its release gate (R2 for moats 1–3, R3 for moat 4). No external claim of defensibility before R4 paid pilots show repeat use. | Review at the R2 gate. |
+| Q-33 | What agent maturity level (PROCESS.md L1–L5) does each workflow target at R1–R2 and later? | §6, §13, §14.1, §17.3; found in Stage 2c (agent architecture) | PO | Accepted | A-33: Brief and preflight L1 (form, A-28); research, script and storyboard L3, with L4 reviewer assistance on S-05; revision L4 (agent redraft per Q-34, targeted rework); publication L1 manual until R3, then L3; learning L5 only as R-75 after A-18. Table in AGENT_ARCHITECTURE.md. | Accepted 2026-11-14 (owner delegated the call to the tech lead). |
+| Q-34 | When a revision changes a claim, beat or scene, who rewrites it: a person, or the script or storyboard agent? | §9.3, §10.3, §13 (R-31, R-32); found in Stage 2c | PO | Answered | The agent. The owner states the change on S-09; the script agent (claim or beat target) or storyboard agent (scene or object target) redrafts only the targeted part as a new draft; impact is shown before any render; hand edits stay available. Timing-only changes still need the storyboard agent to change the hold, then code re-times. | Answered 2026-11-14 by the product owner. Applied as R-31 AC3, contracts 0.4.0, AGENT_ARCHITECTURE.md, S-09 on the canvas. |
+| Q-35 | Should a gate approval also record the policy revision it was given under, and expire? | §8.1 (R-41); found in Stage 2c against the reference architecture's approval binding | PO | Accepted | A-35 (revised): Approvals record the brand-kit, rubric and content-policy versions in force. A brand-kit change already changes the bound hash. A rubric or content-policy change reopens Gate D for unpublished packages. A Gate E approval for a scheduled release lapses if the approved time passes with no recorded publication. No other time expiry. | Accepted 2026-11-14 (owner delegated the call to the tech lead). Applied as R-41 AC3 and contracts 0.4.0. |
 
 ## Still to do
 
 - **Parked:** Q-05 budget limits; development runs on free credits with costs recorded. Real limits are set before the AWS move.
 - **Specialist checks:** none outstanding. Q-14, Q-20, Q-25 and the narrator licence rule (Q-06) were decided by the tech lead on 2026-11-13 at the owner's request; these are engineering decisions, not legal advice.
 - **Open, low cost:** Q-29 search API, decided in the M0 research spec.
+- **Open for G2:** Q-32 (moat claims).
 
 ## Change log
 
@@ -70,3 +75,6 @@ Running log of every open question and decision found in [PRD v2.0](../sources/P
 | 2026-11-13 | Q-05 interim rule: no limits in development, free credits, cost recorded. Q-21: AWS after the R2 gate. Q-14, Q-20, Q-25 answered and Q-06 narrator licence rule set by the tech lead at the owner's request. | Product owner, Claude |
 | 2026-11-13 | Stage 2b: Q-30 (access-audit retention vs DPDP Rule 6) and Q-31 (video house style in 2c) raised. Q-14 and Q-20 recorded in SECURITY.md. Requirements unchanged. | Claude |
 | 2026-11-13 | Q-30 and Q-31 accepted (owner delegated the calls to the tech lead). Contract gaps closed in contracts 0.2.0. | Product owner, Claude |
+| 2026-11-13 | Stage 2c: PRD revised in discovery (§1.1 value and defensibility, at the owner's request). Q-32 (when a moat may be claimed) raised. Requirements unchanged. | Product owner, Claude |
+| 2026-11-14 | Stage 2c: agent architecture applied from the reference architecture, guidebook and maturity framework (AGENT_ARCHITECTURE.md, ADR-020, ADR-021, contracts 0.3.0). Q-33 (maturity per workflow), Q-34 (revision redraft) and Q-35 (approval policy revision and expiry) raised. Requirements unchanged. | Claude |
+| 2026-11-14 | Q-34 answered (the agent redrafts revisions). Q-33 and Q-35 accepted (owner delegated to the tech lead; Q-35 refined). ADR-020 and ADR-021 confirmed. R-31 AC3 and R-41 AC3 added in discovery. | Product owner, Claude |

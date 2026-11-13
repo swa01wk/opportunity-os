@@ -243,7 +243,10 @@ CREATE TABLE app.revision (
   request text NOT NULL,                  -- operator instruction
   target jsonb NOT NULL,                  -- claim / scene / object refs
   impact jsonb NOT NULL,                  -- rebuild, reuse, cost estimate, timing shifts, reopened gates (R-31)
-  status text NOT NULL CHECK (status IN ('previewed','applied','discarded')),
+  mode text NOT NULL DEFAULT 'agent_redraft' CHECK (mode IN ('agent_redraft','manual_edit')),   -- Q-34
+  redraft_run_id uuid,                    -- execution_run of the scoped agent redraft
+  draft_ref jsonb,                        -- VersionRef of the redrafted script or storyboard
+  status text NOT NULL CHECK (status IN ('previewed','redrafting','redrafted','applied','discarded')),
   created_by uuid NOT NULL REFERENCES app.member(id),
   created_at timestamptz NOT NULL DEFAULT now()
 );
@@ -279,6 +282,8 @@ CREATE TABLE app.approval (               -- R-40, R-41; insert-only
   actor_member_id uuid NOT NULL REFERENCES app.member(id),   -- members only (R-43)
   responsibility text NOT NULL,
   evidence jsonb NOT NULL,                -- what was shown at the gate
+  policy_versions jsonb NOT NULL,         -- brand kit, rubric, content policy in force (R-41 AC3, Q-35)
+  lapses_at timestamptz,                  -- Gate E scheduled release only (Q-35)
   invalidated_at timestamptz, invalidated_reason text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
@@ -342,7 +347,7 @@ CREATE TABLE app.execution_run (          -- projection of a DBOS workflow
   id uuid PRIMARY KEY,                    -- = workflow_request.id = DBOS workflow id
   workspace_id uuid NOT NULL, project_id uuid NOT NULL,
   workflow_type text NOT NULL,
-  state text NOT NULL,                    -- pending, running, waiting_approval, paused_budget, succeeded, failed, cancelled
+  state text NOT NULL,                    -- pending, running, waiting_approval, paused_budget, succeeded, failed, cancelled (cancelling = cancel_requested_at set, not yet cancelled)
   cancel_requested_at timestamptz,
   code_repair_needed boolean NOT NULL DEFAULT false,   -- KPI-02
   created_at timestamptz NOT NULL DEFAULT now(), finished_at timestamptz
@@ -355,6 +360,8 @@ CREATE TABLE app.task_attempt (
   error_class text, error jsonb,
   provider text, model_or_voice text, prompt_sha256 char(64), tool_versions jsonb,
   input_sha256 char(64), output_ref jsonb,
+  input_bindings jsonb,                   -- ContextEnvelope inputs: role + VersionRef (agent-tools/execution.schema.json, ADR-021)
+  validation jsonb,                       -- AgentResult validation stages (schema, policy_freshness, acceptance)
   estimated_cost_minor bigint, actual_cost_minor bigint, currency char(3), fx_rate numeric,
   taken_over_by uuid REFERENCES app.member(id),        -- R-51 AC2
   started_at timestamptz NOT NULL, finished_at timestamptz,
@@ -413,6 +420,7 @@ CREATE TABLE app.asset (
 -- ---------- Events and audit (ADR-010) ----------
 CREATE TABLE app.outbox_event (
   id uuid PRIMARY KEY, workspace_id uuid NOT NULL,
+  seq bigserial NOT NULL UNIQUE,           -- AG-UI stream cursor (ADR-020); monotonic per database, so per workspace
   type text NOT NULL, body jsonb NOT NULL,             -- events/domain-event.schema.json
   created_at timestamptz NOT NULL DEFAULT now(), delivered_at timestamptz
 );

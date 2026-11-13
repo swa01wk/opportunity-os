@@ -10,6 +10,7 @@ Status: **Draft for G2** (Stage 2b). Living summary: the reason for every choice
 |---|---|---|---|
 | Python | 3.13 | api, worker, agent, media/audio | ADR-001 |
 | FastAPI + Uvicorn | FastAPI 0.1xx, Uvicorn 0.3x | REST API, SSE | ADR-004 |
+| ag-ui-protocol | 0.1.x, exact pin in M0 | AG-UI event types and SSE encoding in the outbox relay | ADR-020 |
 | Pydantic | 2.x | Canonical contracts; JSON Schema generation | ADR-008 |
 | SQLAlchemy + psycopg | SQLAlchemy 2.0, psycopg 3 | Data access, row locks | ADR-004, ADR-006 |
 | Alembic | 1.x | Migrations with tested downgrades | ADR-006 |
@@ -22,6 +23,7 @@ Status: **Draft for G2** (Stage 2b). Living summary: the reason for every choice
 
 | Tool | Version line | Use | ADR |
 |---|---|---|---|
+| Agent runtime | in-repo (`agent/runner`), no framework | `AgentRuntime` interface, per-attempt task contract and context envelope, three validation stages | ADR-021 |
 | OpenAI Python SDK | 2.x | `LlmProvider` adapter; structured outputs and function calling | ADR-014, ADR-009 |
 | Model | `gpt-5.4-mini-2026-03-17` | Research, script, storyboard tasks; reasoning effort per task in config | ADR-014 |
 | httpx | 0.2x | `SourceFetcher` (HTTPS only, SSRF-guarded, size-capped) | ADR-009 |
@@ -53,7 +55,8 @@ Status: **Draft for G2** (Stage 2b). Living summary: the reason for every choice
 | TypeScript | 5.x | web, media/scenes, contracts/ts | ADR-005, ADR-008 |
 | Tailwind CSS | 4.x | Styling from tokens.md | ADR-018 |
 | Radix UI primitives | current | Accessible dialogs, menus, tabs | ADR-018 |
-| TanStack Query | 5.x | Server state, SSE-driven invalidation | ADR-018 |
+| TanStack Query | 5.x | Server state, invalidated by AG-UI `CUSTOM` domain events | ADR-018, ADR-020 |
+| @ag-ui/core | current, exact pin in M0 | AG-UI event types and schemas for the project stream | ADR-020 |
 | openapi-typescript + openapi-fetch | current | Typed API client from `openapi.yaml` | ADR-018, ADR-004 |
 | React Hook Form | 7.x | Forms | ADR-018 |
 | Auth.js (generic OIDC) | 5.x | Sign-in with Keycloak / Cognito | ADR-012 |
@@ -102,6 +105,7 @@ Status: **Draft for G2** (Stage 2b). Living summary: the reason for every choice
 |---|---|---|
 | Remotion | Free for individuals and companies of up to three people; otherwise a company licence | Owner licenses as an individual (Q-07, ADR-002). Re-check on any change of ownership. |
 | DBOS Transact | MIT | Confirmed on PyPI, 2026-11-13 |
+| ag-ui-protocol, @ag-ui/core | MIT; pre-1.0, so event shapes may change | Re-check in the M0 licence check; upgrades are their own spec (ADR-020) |
 | MinIO CE (interim) | AGPL-3.0, no longer actively developed | Local only, replaced in M0 (ADR-015) |
 | ElevenLabs output | No commercial licence on the free plan; paid-plan output stays usable after cancelling | Gate D blocks free-plan takes (ADR-013) |
 | OpenAI API output | Owned by the customer under OpenAI's terms; data-use terms in SECURITY.md | Re-check at first real call |

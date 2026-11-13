@@ -1,6 +1,6 @@
 {
-  "$comment": "Task contracts for the three bounded model tasks (R-63, PRD §14.1). Budgets are ceilings per task run; actual money limits come from the project allowance (R-34, Q-05). Numbers are starting values, tuned from the R0 evaluation and changed only through a spec.",
-  "contractVersion": "0.2.0",
+  "$comment": "Task contracts for the three bounded model tasks (R-63, PRD §14.1). Budgets are ceilings per task run; actual money limits come from the project allowance (R-34, Q-05). Numbers are starting values, tuned from the R0 evaluation and changed only through a spec. Each task also names its output disposition and reviewing gate; per-attempt bindings are in execution.schema.json (ADR-021). Every task can also fail with stale_input or cancelled.",
+  "contractVersion": "0.4.0",
   "tasks": [
     {
       "taskType": "research",
@@ -16,12 +16,14 @@
         "maxToolCalls": 30,
         "maxInputTokens": 200000,
         "maxOutputTokens": 16000,
-        "maxLinkHops": 10
+        "maxLinkHops": 10,
+        "maxChildren": 0
       },
       "retryCeiling": 2,
       "timeoutSec": 600,
       "failureStates": [
         "schema_invalid",
+        "stale_input",
         "citation_invalid",
         "budget_exhausted",
         "timed_out",
@@ -32,9 +34,12 @@
         "every fetch_source URL came from search_sources results in this run, from operatorSourceUrls, or from links of a page fetched in this run (at most maxLinkHops such hops)",
         "every evidence.sourceId was returned by fetch_source in this run",
         "every excerpt is found in the fetched text and is under 25 words",
-        "claims with no supporting evidence are listed as gaps, not claims"
+        "claims with no supporting evidence are listed as gaps, not claims",
+        "every bound input version is still the head version when the result is stored (else stale_input)"
       ],
-      "evaluationFixtures": "agent/evals/research/"
+      "evaluationFixtures": "agent/evals/research/",
+      "outputDisposition": "draft_version",
+      "reviewGate": "claim_review"
     },
     {
       "taskType": "script",
@@ -45,23 +50,30 @@
         "maxModelCalls": 3,
         "maxToolCalls": 0,
         "maxInputTokens": 60000,
-        "maxOutputTokens": 8000
+        "maxOutputTokens": 8000,
+        "maxChildren": 0
       },
       "retryCeiling": 2,
       "timeoutSec": 300,
       "failureStates": [
         "schema_invalid",
+        "stale_input",
         "unknown_claim_reference",
         "budget_exhausted",
         "timed_out",
-        "provider_error"
+        "provider_error",
+        "out_of_scope_change"
       ],
       "postconditions": [
         "every claimId is one of the input claims",
         "beat kinds follow the series narrative structure (R-57)",
-        "estimated narration fits the target duration at the pinned pace"
+        "estimated narration fits the target duration at the pinned pace",
+        "every bound input version is still the head version when the result is stored (else stale_input)",
+        "with a revisionScope, every beat or scene outside targetIds equals the previous version (else out_of_scope_change)"
       ],
-      "evaluationFixtures": "agent/evals/script/"
+      "evaluationFixtures": "agent/evals/script/",
+      "outputDisposition": "draft_version",
+      "reviewGate": "B_explanation_script"
     },
     {
       "taskType": "storyboard",
@@ -76,24 +88,31 @@
         "maxModelCalls": 8,
         "maxToolCalls": 20,
         "maxInputTokens": 150000,
-        "maxOutputTokens": 32000
+        "maxOutputTokens": 32000,
+        "maxChildren": 0
       },
       "retryCeiling": 2,
       "timeoutSec": 600,
       "failureStates": [
         "schema_invalid",
+        "stale_input",
         "spec_invalid",
         "capability_gap",
         "budget_exhausted",
         "timed_out",
-        "provider_error"
+        "provider_error",
+        "out_of_scope_change"
       ],
       "postconditions": [
         "videoSpec passes validate_scene_spec, or every remaining error is listed under unsupportedNeeds",
         "every scene references script segments that exist",
-        "displayed values reference demonstration results (valueRef), never typed-in numbers"
+        "displayed values reference demonstration results (valueRef), never typed-in numbers",
+        "every bound input version is still the head version when the result is stored (else stale_input)",
+        "with a revisionScope, every beat or scene outside targetIds equals the previous version (else out_of_scope_change)"
       ],
-      "evaluationFixtures": "agent/evals/storyboard/"
+      "evaluationFixtures": "agent/evals/storyboard/",
+      "outputDisposition": "draft_version",
+      "reviewGate": "C_storyboard"
     }
   ]
 }

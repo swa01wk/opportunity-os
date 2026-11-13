@@ -1,0 +1,368 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opportunityos.invalid/contracts/agent-tools/execution.schema.json",
+  "x-version": "0.4.0",
+  "title": "Agent execution contract",
+  "description": "Per-attempt TaskContract, ContextEnvelope and AgentResult for the bounded agent tasks (ADR-021, docs/architecture/AGENT_ARCHITECTURE.md). The static part of each contract (tools, budgets, retries, failure states, postconditions) is in tasks.json; this file adds what binds one attempt to the exact inputs it read and what it returns. An AgentResult is never an approval: its output is a draft version reviewed at a gate.",
+  "$defs": {
+    "TaskType": {
+      "enum": [
+        "research",
+        "script",
+        "storyboard"
+      ]
+    },
+    "FailureState": {
+      "enum": [
+        "schema_invalid",
+        "stale_input",
+        "citation_invalid",
+        "unknown_claim_reference",
+        "spec_invalid",
+        "capability_gap",
+        "out_of_scope_change",
+        "budget_exhausted",
+        "timed_out",
+        "provider_error",
+        "injection_detected",
+        "cancelled"
+      ],
+      "description": "Union of the failure states in tasks.json plus stale_input and cancelled, which every task can reach."
+    },
+    "InputBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "ref"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "brief",
+            "claims",
+            "demonstration",
+            "script",
+            "storyboard",
+            "capabilities",
+            "brand_kit",
+            "revision_note"
+          ]
+        },
+        "ref": {
+          "$ref": "../common.schema.json#/$defs/VersionRef"
+        }
+      },
+      "description": "One immutable input version the attempt read. Before the result is stored, every bound head is re-read; a changed hash rejects the result with stale_input (C09)."
+    },
+    "Budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxModelCalls",
+        "maxToolCalls",
+        "maxInputTokens",
+        "maxOutputTokens",
+        "timeoutSec",
+        "retryCeiling",
+        "maxChildren",
+        "reserved"
+      ],
+      "properties": {
+        "maxModelCalls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxToolCalls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxInputTokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxOutputTokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timeoutSec": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "retryCeiling": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxChildren": {
+          "const": 0,
+          "description": "No delegation at R1-R2."
+        },
+        "reserved": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "description": "Money reserved for this attempt before dispatch (R-34)."
+        }
+      }
+    },
+    "TaskContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "taskType",
+        "workspaceId",
+        "projectId",
+        "runId",
+        "attemptId",
+        "attempt",
+        "idempotencyKey",
+        "objective",
+        "inputs",
+        "permittedTools",
+        "budget",
+        "dataClassification",
+        "outputDisposition",
+        "reviewGate"
+      ],
+      "properties": {
+        "contractVersion": {
+          "$ref": "../common.schema.json#/$defs/SemVer"
+        },
+        "taskType": {
+          "$ref": "#/$defs/TaskType"
+        },
+        "workspaceId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "projectId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "runId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "description": "= execution_run.id = DBOS workflow ID"
+        },
+        "attemptId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "idempotencyKey": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "runId:taskKey:attempt; results and reservations are keyed by it."
+        },
+        "objective": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "inputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/InputBinding"
+          }
+        },
+        "permittedTools": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "search_sources",
+              "fetch_source",
+              "compute_demonstration",
+              "list_capabilities",
+              "validate_scene_spec"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "budget": {
+          "$ref": "#/$defs/Budget"
+        },
+        "dataClassification": {
+          "enum": [
+            "internal",
+            "public_sources"
+          ],
+          "description": "SECURITY.md data classification of the inputs."
+        },
+        "outputDisposition": {
+          "const": "draft_version",
+          "description": "Output is always a new draft version, never an approval or publication (R-43)."
+        },
+        "reviewGate": {
+          "enum": [
+            "claim_review",
+            "B_explanation_script",
+            "C_storyboard"
+          ]
+        },
+        "promptSha256": {
+          "$ref": "../common.schema.json#/$defs/Sha256"
+        },
+        "revisionScope": {
+          "$ref": "task-io.schema.json#/$defs/RevisionScope"
+        }
+      }
+    },
+    "ContextEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attemptId",
+        "assembledAt",
+        "inputs",
+        "taskInputSha256",
+        "remainingBudget"
+      ],
+      "properties": {
+        "attemptId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "assembledAt": {
+          "$ref": "../common.schema.json#/$defs/Timestamp"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/InputBinding"
+          }
+        },
+        "taskInputSha256": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "description": "Hash of the task-io input built only from the bound inputs."
+        },
+        "remainingBudget": {
+          "$ref": "../common.schema.json#/$defs/Money"
+        },
+        "untrustedSources": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of fetched pages in context; their text is data, never instructions (TH-12)."
+        }
+      }
+    },
+    "ValidationStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage",
+        "passed"
+      ],
+      "properties": {
+        "stage": {
+          "enum": [
+            "schema",
+            "policy_freshness",
+            "acceptance"
+          ]
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "failure": {
+          "$ref": "#/$defs/FailureState"
+        },
+        "detail": {
+          "type": "string",
+          "maxLength": 300
+        }
+      }
+    },
+    "AgentResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "attemptId",
+        "status",
+        "validation",
+        "consumed",
+        "proposedActions",
+        "proposedGraphChanges"
+      ],
+      "properties": {
+        "contractVersion": {
+          "$ref": "../common.schema.json#/$defs/SemVer"
+        },
+        "attemptId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "status": {
+          "enum": [
+            "verified",
+            "failed",
+            "cancelled"
+          ],
+          "description": "verified = passed all three stages and stored as a draft; acceptance happens later at the gate."
+        },
+        "output": {
+          "$ref": "../common.schema.json#/$defs/VersionRef",
+          "description": "The new draft version (claims set, script or storyboard). Absent unless verified."
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "description": "Source and evidence record IDs (research) or validation manifest IDs (storyboard)."
+        },
+        "validation": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/ValidationStage"
+          }
+        },
+        "failure": {
+          "$ref": "#/$defs/FailureState"
+        },
+        "errorClass": {
+          "$ref": "../common.schema.json#/$defs/ErrorClass"
+        },
+        "consumed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "modelCalls",
+            "toolCalls",
+            "inputTokens",
+            "outputTokens"
+          ],
+          "properties": {
+            "modelCalls": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "toolCalls": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "inputTokens": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "outputTokens": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "actualCost": {
+              "$ref": "../common.schema.json#/$defs/Money"
+            }
+          }
+        },
+        "proposedActions": {
+          "type": "array",
+          "maxItems": 0,
+          "description": "Always empty at R1-R2: agents propose drafts, not actions."
+        },
+        "proposedGraphChanges": {
+          "type": "array",
+          "maxItems": 0,
+          "description": "Always empty at R1-R2: the workflow graph is fixed in code."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{"seq": "240", "data": {"type": "STATE_SNAPSHOT", "snapshot": {"projectId": "00000000-0000-4000-8000-0000000000a1", "asOfSeq": 240, "productionState": "PRODUCING", "activeRuns": [], "blockers": []}}}
+{"seq": "241", "data": {"type": "RUN_STARTED", "threadId": "00000000-0000-4000-8000-0000000000a1", "runId": "00000000-0000-4000-8000-0000000000b7"}}
+{"seq": "242", "data": {"type": "STEP_STARTED", "stepName": "budget.reserve"}}
+{"seq": "243", "data": {"type": "STEP_FINISHED", "stepName": "budget.reserve"}}
+{"seq": "244", "data": {"type": "STEP_STARTED", "stepName": "compile"}}
+{"seq": "245", "data": {"type": "STEP_FINISHED", "stepName": "compile"}}
+{"seq": "245.1", "data": {"type": "ACTIVITY_SNAPSHOT", "messageId": "act-render-1", "activityType": "opportunityos.render_progress", "content": {"scenes": [{"sceneId": "scene.hook", "status": "reused"}, {"sceneId": "scene.setup", "status": "reused"}, {"sceneId": "scene.demo", "status": "rendering", "percent": 40}, {"sceneId": "scene.explain", "status": "queued"}, {"sceneId": "scene.payoff", "status": "queued"}, {"sceneId": "scene.close", "status": "queued"}]}}}
+{"seq": "246", "data": {"type": "STEP_STARTED", "stepName": "render.clip.scene.payoff"}}
+{"seq": "247", "data": {"type": "STEP_FINISHED", "stepName": "render.clip.scene.payoff"}}
+{"seq": "248", "data": {"type": "CUSTOM", "name": "opportunityos.budget.settled", "value": {"$comment": "DomainEvent elided in this fixture"}}}
+{"seq": "249", "data": {"type": "RUN_ERROR", "message": "Payoff: equation wider than the content zone at f1010.", "code": "render_defect"}}

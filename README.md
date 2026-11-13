@@ -4,4 +4,5 @@ OpportunityOS: an internal studio that turns a viewer question into an original,
 
 - Where things stand: [plans/STATUS.md](plans/STATUS.md)
 - How we deliver: [docs/PROCESS.md](docs/PROCESS.md)
-- Product requirements (source, unchanged): [docs/sources/PRD-v2.0.md](docs/sources/PRD-v2.0.md)
+- Product requirements (source, revised only by the product owner): [docs/sources/PRD-v2.0.md](docs/sources/PRD-v2.0.md)
+- How it's built: [architecture](docs/architecture/ARCHITECTURE.md), [agent architecture and AG-UI](docs/architecture/AGENT_ARCHITECTURE.md), [contracts](docs/contracts/README.md)
