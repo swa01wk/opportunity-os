@@ -85,7 +85,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 ## Open questions and risks
 
 - [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-35 (DEC-01–12 are Q-01–Q-12).
-- Open for you at G2: Q-32 (moat claims).
+- No open questions. Q-32 (moat claims) accepted 2026-11-14.
 - Parked: Q-05 budget limits. Development uses free credits with costs recorded; real limits are set from measured per-video cost before the AWS move.
 - Before the first real provider call: opt out of ElevenLabs model training on every account; OpenAI calls use `store: false` (SECURITY.md).
 - Specialist checks: none outstanding. Q-14, Q-20, Q-25 and the narrator licence rule were decided by the tech lead at your request (engineering decisions, not legal advice).
@@ -98,6 +98,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Recent decisions
 
+- 2026-11-14: Q-32 accepted: the four moats stay hypotheses until their PRD §1.1 proof is met (moats 1–3 at the R2 gate, moat 4 at R3); no external defensibility claim before R4 pilots show repeat use.
 - 2026-11-14: Product owner: revisions go through the agent (Q-34): the script or storyboard agent redrafts only the targeted beat or scene, impact is shown before any render, hand edits stay available (R-31 AC3). Q-33 maturity targets and Q-35 approval policy versions accepted (delegated to the tech lead; approvals record brand-kit, rubric and content-policy versions; a rubric or policy change reopens Gate D for unpublished packages; scheduled Gate E approvals lapse at their time; R-41 AC3). ADR-020 and ADR-021 confirmed. Contracts 0.4.0. S-09 updated on the canvas.
 - 2026-11-14: Agent architecture redone from the Agentic Application Reference Architecture v1.2, its Engineering Practices Guidebook v1.0 and the Agent Capability Maturity Framework (the 2026-11-13 version, built from the wrong source, was reverted). PROCESS.md: generic "Agent architecture" section (golden rules, maturity per workflow, planes, execution contract, harness, validation stages, tools and effects, approvals, AG-UI, conformance C01–C14, ten agent ADRs) wired through stages 1–7. OpportunityOS: AGENT_ARCHITECTURE.md; ADR-020 (AG-UI on the project stream, observe mode, outbox `seq` cursor) and ADR-021 (thin agent runtime, per-attempt contract and context envelope, stale results rejected) accepted by the tech lead, owner confirms at G2; contracts 0.3.0; TH-31–TH-33; Q-33–Q-35 raised. No requirement changed.
 - 2026-11-13: Product owner: the PRD may be revised in place during discovery (until G3), with a dated revision note; PRD §1.1 "What the product solves and defensibility" added (problems solved, four moat hypotheses, proof checkpoints). Q-32 raised. PROCESS.md: Stage 1 starts with product framing (personas, journeys, stories, value and moat hypotheses); Stage 2 screens go UI_DESIGN.md → Claude Design canvas by journey → client review on the canvas → HTML in the repo. Figma not used.
