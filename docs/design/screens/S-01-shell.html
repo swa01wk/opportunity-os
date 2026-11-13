@@ -11,7 +11,7 @@
   Production code rebuilds this screen with the Studio's components and tokens; never copy this HTML.
 -->
 <style>
-body{margin:0;background:#EEF1F4;font-family:'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', sans-serif;color:#172033;font-size:14px;line-height:20px}
+html{overflow-x:auto}body{min-width:1180px;margin:0;background:#EEF1F4;font-family:'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', sans-serif;color:#172033;font-size:14px;line-height:20px}
 a{color:#1F5FD6}a:hover{color:#163F96}
 :focus-visible{outline:2px solid #1F5FD6;outline-offset:2px}
 [hidden]{display:none!important}
@@ -52,10 +52,10 @@ code{font-family:'Atkinson Hyperlegible Mono',ui-monospace,Menlo,monospace;font-
 const sel = document.getElementById('protoState');
 function show(v){
   document.querySelectorAll('[data-state]').forEach(el => { el.hidden = !(el.dataset.state === v || (el.dataset.state === 'ready' && el.dataset.keep && el.dataset.keep.split(' ').includes(v))); });
-  const q = new URLSearchParams(location.search); q.set('state', v); history.replaceState(null, '', '?' + q.toString());
+  try { const q = new URLSearchParams(location.search); q.set('state', v); history.replaceState(null, '', '?' + q.toString()); } catch (e) { /* sandboxed previews block history; the menu still works */ }
 }
 sel.addEventListener('change', () => show(sel.value));
-const start = new URLSearchParams(location.search).get('state');
+let start = null; try { start = new URLSearchParams(location.search).get('state'); } catch (e) {}
 if (start && [...sel.options].some(o => o.value === start)) sel.value = start;
 show(sel.value);
 </script>
