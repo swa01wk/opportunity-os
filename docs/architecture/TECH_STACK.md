@@ -85,8 +85,10 @@ Status: **Draft for G2** (Stage 2b). Living summary: the reason for every choice
 | GitHub Actions | — | PR, main, nightly pipelines calling make targets | ADR-019 |
 | uv, pnpm | current | Python and TS package management | ADR-019 |
 | Ruff, mypy, ESLint (jsx-a11y), Prettier | current | Lint, types, format | ADR-019 |
-| pytest, Testcontainers, Hypothesis, Vitest, Testing Library, Playwright, axe-core | current | Tests (levels in TEST_STRATEGY.md, Stage 3) | ADR-019 |
+| pytest, Testcontainers, Hypothesis, Vitest, Testing Library, Playwright, axe-core | current | Tests (levels in [TEST_STRATEGY.md](../../plans/TEST_STRATEGY.md)) | ADR-019 |
 | gitleaks, pip-audit, pnpm audit, Semgrep OSS, Trivy, licence check | current | CI security scans | ADR-019 |
+| k6, OWASP ZAP (baseline scan), diff-cover | current | Load tests, DAST and changed-code coverage (TEST_STRATEGY.md) | ADR-019 (amendment) |
+| Release host scripts (`make release`, `deploy`, `promote`) | in-repo | Build once, promote by digest to local staging and production | ADR-022 |
 | Renovate | — | Dependency updates via PRs | ADR-019 |
 | Terraform; ECS Fargate, RDS, S3, Secrets Manager, Cognito | — | AWS Mumbai after the R2 gate | ADR-011 |
 

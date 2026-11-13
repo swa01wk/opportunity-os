@@ -1,0 +1,72 @@
+---
+description: Studio (Next.js) components, state, AG-UI stream, approved screens as the visual reference, honest states, accessibility, formats, tests
+globs: web/**
+alwaysApply: false
+---
+
+# Frontend rules
+
+Applies to `web/`. Decisions: ADR-005 (Next.js, Remotion Player), ADR-018 (Tailwind, Radix, TanStack Query, generated client), ADR-020 (AG-UI stream), ADR-012 (Auth.js OIDC). Screens and states: `docs/product/UI_DESIGN.md`. Visual reference: `docs/design/screens/S-xx-<name>.html`. Tokens: `docs/design/tokens.md` section 1.
+
+## Approved screens are the reference, not the code
+
+- Match the screen's layout, copy, hierarchy and every state in its UI_DESIGN row (sample, empty, loading, error or blocked, paused).
+- **Rebuild it with our components and tokens. Never copy the prototype's HTML, CSS or inline scripts.**
+- If the screen and the spec disagree, stop and report; screens change only through change control.
+
+## Components and styling
+
+- Reuse components in `web/components/` (Radix primitives, shadcn pattern, copied in-repo). Add a new shared component only when none fits, and put it there.
+- Tailwind with tokens as CSS variables. No literal colours, font sizes, spacing or radii outside the token set. Both Studio themes must work.
+- Shared frame elements (app shell, project header, gate strip, spend meter, run indicator, approval dialog, error panel, version chip) are built once in M2 and reused; never fork them per screen.
+
+## Data and commands
+
+- API types come from `openapi-typescript`; calls go through the `openapi-fetch` client. Never hand-write a request or response type.
+- Server state lives in TanStack Query. The UI never derives authority or a guard from cached state.
+- **Commands are REST calls** with `If-Match` (row version) and, for approvals, the exact version hash shown in the dialog. Creates send an `Idempotency-Key`.
+- After a command or a relevant event, re-query what the screen shows.
+
+## AG-UI stream (ADR-020)
+
+- One `EventSource` per open project on `/projects/{id}/events`; use `@ag-ui/core` types (pinned).
+- Observe only: events never trigger a command or count as authority.
+- On connect and reconnect apply `STATE_SNAPSHOT`, then events after the cursor. Drop events whose `seq` is at or below the last applied one; on a gap, reconnect (C10). Reconnect with the refreshed token and `Last-Event-ID` when the token expires.
+- `CUSTOM` `opportunityos.<type>` events invalidate the matching queries.
+- If the stream drops, show "Live updates paused, reconnecting"; never a spinner without a step.
+- Render only fixed components. No HTML or UI from an agent or an event.
+
+## Honest states
+
+- Unavailable is its own state with a reason, never blank, zero or a dash (R-61 AC2, R-72 AC2). Empty means truly no items and offers the next action.
+- "Exported" is never shown as "published" (R-46). Paused (budget, awaiting approval) is not an error: show what waits and the one action that unblocks it.
+- Map problem responses as UI_DESIGN.md says: 401 re-authenticate and return; 403 `step_up_required` prompts MFA in place keeping the dialog content; 409 lists blockers with links; 412 "Changed since you opened it" with reload and compare; 422 field-level messages naming scene and field; 5xx retry with the request ID.
+- Every approval dialog shows gate, target, version and short hash, responsibility used, the evidence checklist and outstanding blockers (R-40, R-41).
+
+## Security
+
+- No `dangerouslySetInnerHTML`. Claim text, excerpts and model output render as text. KaTeX output comes only from our renderer.
+- Tokens stay in Auth.js; never store them in localStorage. No secrets in client code.
+
+## Accessibility (WCAG 2.2 AA, A-17)
+
+- Status is never colour alone: pair it with text or an icon.
+- Every action is keyboard-reachable in a logical order with visible focus; dialogs trap and return focus; targets ≥ 24 × 24 px; dragging always has a non-drag alternative (frame step buttons and a frame input).
+- Labels on every field; errors announced and linked to the field; run progress in polite live regions.
+- Respect `prefers-reduced-motion`.
+
+## Formats and language
+
+- English only; all user-facing strings in one module (`web/lib/strings.ts`).
+- Times stored UTC, shown in the destination timezone with the zone (`13 Nov 2026, 14:05 IST`). Money in INR with en-IN grouping, provider USD with the recorded rate. Frames shown as seconds and frames at 30 fps (`12.4 s · f372`).
+- Desktop at 1280 px and wider; below that show the notice and the single-column fallback.
+
+## Preview
+
+The Remotion Player uses `media/scenes` components directly so previews match renders. Do not re-implement scene drawing in `web/`.
+
+## Tests
+
+- Vitest and Testing Library in `web/tests/` for components, hooks and the stream client (dedupe, gap, snapshot).
+- The screen's Playwright test lives in `e2e/screens/` named with its T-xx (T-15 = S-01 … T-30 = S-16): every state, copy, keyboard path, axe, visual baseline. Live progress comes from `docs/contracts/examples/agui/*.stream.jsonl`.
+- Query by role and accessible name, not CSS selectors.
