@@ -11,7 +11,7 @@ All gates are signed by the product owner / tech lead (same person).
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
-| 2 Design | G2 Design review and screens | 2a Done (merged 2026-11-12); 2b Done (merged 2026-11-12); 2c step 1 in client review (tokens + S-07) | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5 |
+| 2 Design | G2 Design review and screens | 2a Done (merged 2026-11-12); 2b Done (merged 2026-11-12); 2c: tokens and S-07 HTML in review; S-01–S-16 designed on the Claude Design canvas, in client review | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5 |
 | 3 Plan | G3 Milestone scope and dates | Not started | | |
 
 | Milestone | Scope | Status | Exit date |
@@ -23,24 +23,26 @@ All gates are signed by the product owner / tech lead (same person).
 |---|---|---|---|---|---|
 
 ## Screens
+Designed by journey on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS) (journey map, what it solves, J1, J6, J3). HTML prototypes follow once the canvas is approved (PROCESS.md, Stage 2 screens).
+
 | Screen | Requirements | Specs | Status |
 |---|---|---|---|
-| S-01 Sign-in and app shell | R-01, R-05 | — | Draft (prototype in 2c) |
-| S-02 Projects | R-01, R-44 | — | Draft (prototype in 2c) |
-| S-03 Brief and preflight | R-06, R-07, R-57, Gate A | — | Draft (prototype in 2c) |
-| S-04 Project settings and data | R-02–R-04, R-34, R-56, R-60 | — | Draft (prototype in 2c) |
-| S-05 Evidence | R-08–R-10 | — | Draft (prototype in 2c) |
-| S-06 Script and demonstration | R-11–R-15, R-59, Gate B | — | Draft (prototype in 2c) |
-| S-07 Storyboard and preview | R-16, R-18–R-23, R-27, R-28, Gate C | — | Client review: reference prototype for look and feel ([S-07-storyboard.html](../docs/design/screens/S-07-storyboard.html)) |
-| S-08 Narration | R-25, R-26 | — | Draft (prototype in 2c) |
-| S-09 Revision impact | R-31, R-32, R-42 | — | Draft (prototype in 2c) |
-| S-10 Compare versions | R-33 | — | Draft (prototype in 2c) |
-| S-11 Final review and package | R-29, R-30, R-37, R-38, R-45, R-54, R-55, R-60, Gate D | — | Draft (prototype in 2c) |
-| S-12 Publication record (R2) | R-46–R-49, R-72 (manual), Gate E | — | Draft (prototype in 2c) |
-| S-13 Runs and recovery | R-50–R-53 | — | Draft (prototype in 2c) |
-| S-14 Cost and effort | R-34–R-36 | — | Draft (prototype in 2c) |
-| S-15 Library | R-02, R-55, R-62 | — | Draft (prototype in 2c) |
-| S-16 Series slate (R2) | R-39, R-58 | — | Draft (prototype in 2c) |
+| S-01 Sign-in and app shell | R-01, R-05 | — | Client review (canvas) |
+| S-02 Projects | R-01, R-44 | — | Client review (canvas) |
+| S-03 Brief and preflight | R-06, R-07, R-57, Gate A | — | Client review (canvas) |
+| S-04 Project settings and data | R-02–R-04, R-34, R-56, R-60 | — | Client review (canvas) |
+| S-05 Evidence | R-08–R-10 | — | Client review (canvas) |
+| S-06 Script and demonstration | R-11–R-15, R-59, Gate B | — | Client review (canvas) |
+| S-07 Storyboard and preview | R-16, R-18–R-23, R-27, R-28, Gate C | — | Client review (canvas; HTML reference prototype [S-07-storyboard.html](../docs/design/screens/S-07-storyboard.html)) |
+| S-08 Narration | R-25, R-26 | — | Client review (canvas) |
+| S-09 Revision impact | R-31, R-32, R-42 | — | Client review (canvas) |
+| S-10 Compare versions | R-33 | — | Client review (canvas) |
+| S-11 Final review and package | R-29, R-30, R-37, R-38, R-45, R-54, R-55, R-60, Gate D | — | Client review (canvas) |
+| S-12 Publication record (R2) | R-46–R-49, R-72 (manual), Gate E | — | Client review (canvas) |
+| S-13 Runs and recovery | R-50–R-53 | — | Client review (canvas) |
+| S-14 Cost and effort | R-34–R-36 | — | Client review (canvas) |
+| S-15 Library | R-02, R-55, R-62 | — | Client review (canvas) |
+| S-16 Series slate (R2) | R-39, R-58 | — | Client review (canvas) |
 | S-17 Connections (R3) | R-66, R-67 | — | Planned (prototype after A-18) |
 | S-18 Publishing calendar (R3) | R-68–R-71 | — | Planned (prototype after A-18) |
 | S-19 Opportunity Lab (R3) | R-73 | — | Planned (prototype after A-18) |
@@ -93,6 +95,8 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Recent decisions
 
+- 2026-11-13: Product owner: the PRD may be revised in place during discovery (until G3), with a dated revision note; PRD §1.1 "What the product solves and defensibility" added (problems solved, four moat hypotheses, proof checkpoints). Q-32 raised. PROCESS.md: Stage 1 starts with product framing (personas, journeys, stories, value and moat hypotheses); Stage 2 screens go UI_DESIGN.md → Claude Design canvas by journey → client review on the canvas → HTML in the repo. Figma not used.
+- 2026-11-13: S-01–S-16 designed on the Claude Design canvas, one page per journey (J1, J6, J3), plus a journey map and a "What it solves" page.
 - 2026-11-13: S-07 slimmed at your request: the Remotion Player's own controls (frame and scene steps in its custom-controls slot), a scene and caption strip instead of a multi-track timeline (PRD §13 defers one); action timing lives in the inspector.
 - 2026-11-13: Stage 2c step 1 (tech lead decisions, in your review): Studio typeface and video typeface Atkinson Hyperlegible Next and Mono (SIL OFL 1.1), equations in KaTeX fonts (OFL); five layer colours chosen for colour-blind separation; safe zones as the union of Shorts and Reels overlays, provisional; brand cue is the "Signal Motion" wordmark with a 2 × 2 mark, closure only. Font files go into the rights ledger before first use (R-55).
 - 2026-11-13: G2 review items decided (owner delegated to the tech lead): threat model and accepted risks accepted; Q-30 (access audit kept 1 year) and Q-31 (video house style in 2c) accepted; contract gaps closed in contracts 0.2.0 (project delete/archive, KPI baselines, analytics schema, `fetch_source` limited to search results, operator URLs and one-hop links); sessions 12 h idle / 7 days absolute with step-up MFA for Gate E, budget raise, deletion and export; backups 30 dailies plus a pre-migration snapshot; estimates at ₹95/USD, actuals at the recorded rate; breach notices follow DPDP Rule 7.

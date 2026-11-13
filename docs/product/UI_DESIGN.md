@@ -1,6 +1,6 @@
 # UI design
 
-Status: **Draft for G2** (Stage 2b; Stage 2c in progress). Screens are listed here; HTML prototypes are built in Stage 2c (`docs/design/screens/S-xx-<name>.html`) and are approved by you at G2. S-07 is the reference prototype for the look and feel; the other screens follow it after your review. Baselined at G2; after that this doc and the approved screens change only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)).
+Status: **Draft for G2** (Stage 2b; Stage 2c in progress). Screens are listed here, designed by journey on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS) and reviewed there by you; approved screens are then built as HTML prototypes (`docs/design/screens/S-xx-<name>.html`) and approved at G2 (PROCESS.md, Stage 2 screens). S-07 already has an HTML reference prototype. Baselined at G2; after that this doc and the approved screens change only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)).
 
 Owners of related facts: requirements [REQUIREMENTS.md](REQUIREMENTS.md) · assumptions [QUESTIONS.md](QUESTIONS.md) · components and states [ARCHITECTURE.md](../architecture/ARCHITECTURE.md) · API [openapi.yaml](../contracts/openapi.yaml) · who may do what [SECURITY.md](../architecture/SECURITY.md#authentication-and-roles) · Studio UI tokens and video house style [tokens.md](../design/tokens.md).
 
@@ -12,6 +12,31 @@ Owners of related facts: requirements [REQUIREMENTS.md](REQUIREMENTS.md) · assu
 - **Honest states.** Unavailable is never shown as empty or zero; "exported" is never shown as "published" (R-46, R-61 AC2, R-72 AC2).
 - **Original look.** No reference screenshots exist. The Studio UI style (tokens.md, 2c) and the video house style shown in previews are derived only from PRD §5.2 and the §10 storyboard. Sample data in prototypes is synthetic, using the odd-squares fixture.
 - **R3 screens are listed, not prototyped,** until you promote R3 (A-18). They are here so every Should requirement has a home.
+
+## Journeys, stories and what each screen solves
+
+Personas, journeys, stories and the value and moat hypotheses are owned by the PRD (§2.1, §6, §1.1). In scope here: J1 Idea to video, J6 Revision and recovery, J3 Branded series. J2 and J4 (R3) get screens S-17–S-20 after A-18; J5, J7 and J8 are out of scope. The [canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS) shows each journey as a page of linked screens, plus a "What it solves" page.
+
+Moats (PRD §1.1): 1 typed scene library and compiler · 2 trust · 3 cheap targeted revision · 4 learning loop.
+
+| Screen | Journey step | Stories | Problem it solves | Builds moat |
+|---|---|---|---|---|
+| S-01 | J1 step 1 | US-01 | Only accountable, signed-in people can act | 2 |
+| S-02 | J1 step 2 | US-01, US-10 | One view of every video's state, gates and spend | 2, 3 |
+| S-04 | J1 step 3 | US-01, US-10, US-26 | Consistent brand and voice, bounded spend, data you can take away | 2 |
+| S-03 | J1 step 4 · Gate A | US-02, US-10 | Not paying for a video that can't be made; hypothesis recorded up front | 1, 4 |
+| S-05 | J1 step 5 | US-03 | Scattered, unchecked facts | 2 |
+| S-06 | J1 step 6 · Gate B | US-04, US-05 | Plausible-looking but wrong numbers | 1, 2 |
+| S-07 | J1 step 7 · Gate C | US-06, US-08 | Animation that looks right but teaches something wrong | 1 |
+| S-08 | J1 step 8 | US-07 | Speech and animation drifting apart; speech never sped up | 1 |
+| S-11 | J1 step 9 · Gate D | US-11, US-12 | Approving something other than what ships | 2 |
+| S-12 | J1 step 10 · Gate E (R2) | US-13, US-19 | “Uploaded” mistaken for “published”; result set against the hypothesis | 2, 4 |
+| S-09 | J6 step 1 | US-09, US-10 | A small change meaning a full redo, with surprise costs | 3 |
+| S-10 | J6 step 2 | US-11 | Re-reviewing everything after a change | 3, 2 |
+| S-13 | J6 step 3 | US-14 | Failures that restart everything or repeat a public action | 3 |
+| S-14 | J6 step 4 | US-10 | Unknown cost and effort per video | 3 |
+| S-16 | J3 step 1 (R2) | US-21 | A series that keeps repeating itself | 1, 4 |
+| S-15 | J3 step 2 | US-01, US-21 | Rights doubts; a brand change breaking published videos | 2 |
 
 ## Studio frame (shared on every screen)
 

@@ -1,6 +1,6 @@
 # Requirements
 
-Baseline derived from [PRD v2.0](../sources/PRD-v2.0.md) (stored unchanged). Status: **Draft for G1**. Baselined at G1; after that it changes only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)). Open gaps and the assumptions we build on live in [QUESTIONS.md](QUESTIONS.md).
+Baseline derived from [PRD v2.0](../sources/PRD-v2.0.md) (revised in discovery on 13 Nov 2026: §1.1 added). Status: **Draft for G1**. Baselined at G1; after that it changes only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)). Open gaps and the assumptions we build on live in [QUESTIONS.md](QUESTIONS.md).
 
 ## Summary
 
@@ -16,6 +16,15 @@ Counts: 82 functional requirements (R-01–R-82), 19 non-functional (NFR-01–NF
 - **Trace line.** Each requirement lists its PRD sections, the FR/CR it comes from, the user stories it serves and the PRD QA checks that verify it. QA-xx become T-xx in `TEST_STRATEGY.md` (Stage 3).
 - **Roles, not personas.** Actions are authorised by responsibility (owner, editor, reviewer, publisher, analyst; PRD §2.3). In R1 one authenticated owner holds all of them. Agents never approve anything.
 - **Acceptance criteria** use Given / When / Then. Every Must has at least one; Won't items record the PRD's acceptance evidence for later.
+
+## Product framing
+
+The PRD owns these; this baseline traces to them (PROCESS.md, Stage 1 product framing).
+
+- **Personas:** P01–P06 ([PRD §2.1](../sources/PRD-v2.0.md#21-persona-definitions)). R1–R2 build for P01 and P02 only.
+- **User journeys:** J1–J8 ([PRD §6.2–6.10](../sources/PRD-v2.0.md#62-journey-map)). In scope: J1, J6 and J3; J2 and J4 are R3 (Should); J5, J7 and J8 are Won't.
+- **User stories:** US-01–US-26 ([PRD §6.1](../sources/PRD-v2.0.md#61-user-story-catalogue)). Each R-xx lists the stories it serves.
+- **Value and defensibility:** problems solved and moat hypotheses 1–4 ([PRD §1.1](../sources/PRD-v2.0.md#11-what-the-product-solves-and-defensibility)). The KPIs that test each hypothesis are in [KPIs and the moat hypotheses](#kpis-and-the-moat-hypotheses).
 
 ## Features (F-xx)
 
@@ -644,6 +653,17 @@ Analytics events for each KPI are defined in `OBSERVABILITY.md` (Stage 2). A tar
 | KPI-13 | Growth study reach | Stretch: 1,000,000 cumulative platform-reported organic views across experiment uploads in the defined window; not unique people | R-77; summed per upload | R3, conditional | §18 |
 | KPI-14 | Comprehension and readability | Muted-with-captions review passes for every approved video; viewer comprehension method: Q-19 | Rubric item (R-38); feedback where available | R2 | §2.2, §10.3, §19.1 |
 
+### KPIs and the moat hypotheses
+
+The moat hypotheses are owned by PRD §1.1; this table says which KPIs test each. None is claimed before its proof is met.
+
+| Moat hypothesis (PRD §1.1) | Earned at | Tested by |
+|---|---|---|
+| 1 Typed scene library and compiler | R0–R1 | KPI-03 editorial quality and KPI-02 production reliability across the slate (KPI-01) |
+| 2 Trust | R1–R2 | KPI-03 (no material errors or rights blockers); repeat use by R4 pilots (out of scope here) |
+| 3 Cheap targeted revision | R1 | KPI-04 human effort and KPI-05 cost per approved output, revisions included |
+| 4 Learning loop | R3 onward | KPI-12 recommendation usefulness; KPI-06 records the first hypotheses from R2 |
+
 R4 commercial measures (paid conversion, weekly active workspaces, margin, retention; PRD §21.2) are out of scope.
 
 ## Out of scope
@@ -673,6 +693,7 @@ From PRD §3 non-goals, R4/R5 scope and the project's hard limits:
 | PRD section | Covered by |
 |---|---|
 | §1 Product summary | R-06, R-61; four layers mapped to F-06 (engine), F-17 (Studio), F-20 (audience), F-21 (business, Won't) |
+| §1.1 What it solves and defensibility | No new R-xx: strategy, not behaviour. Tested by KPI-01–KPI-06, KPI-12, KPI-14 ([KPIs and the moat hypotheses](#kpis-and-the-moat-hypotheses)); Q-32 |
 | §2 Problem and users | R-01, R-05; out of scope: generic unlimited video users |
 | §2.1 Personas P01–P06 | P01/P02 → F-01–F-17; P03/P04 → R-78, R-80; P05 → R-81; P06 → R-82 |
 | §2.2 Viewer profile | NFR-08, KPI-14, R-27 |

@@ -1,7 +1,7 @@
 # OpportunityOS Product Requirements Document
 
 **Version:** 2.0  
-**Revision:** Persona and user story expansion on 12 November 2026  
+**Revision:** Persona and user story expansion on 12 November 2026; value and defensibility (Section 1.1) added on 13 November 2026 during discovery  
 **Date:** 12 November 2026  
 **Status:** Final consolidated draft for product and engineering planning  
 **Product:** Audience intelligence and original animated video production  
@@ -60,6 +60,32 @@ The product has four layers:
 The central record is the **Content Opportunity Contract**. Earlier drafts also called this the Audience Opportunity Contract; they refer to the same concept. The contract connects the audience need, hypothesis, evidence, creative plan, budget and approvals to the final artifact, publication and observed outcome.
 
 The business hypothesis is that established creators and studios will pay for repeatable original production with less effort and clearer learning than their current workflow. Own-channel reach can validate content interest; it does not establish customer willingness to pay or a defensible competitive advantage.
+
+### 1.1 What the product solves and defensibility
+
+OpportunityOS solves one problem first: turning a viewer's question into an accurate animated explanation with far less effort than producing it by hand, without losing control of facts, cost or brand. Section 2 describes the fragmented workflow it replaces. The Studio answers each part of that problem with a specific capability whose effect is measured, not assumed.
+
+| Problem today | Product response | Evidence that it is solved |
+|---|---|---|
+| Animation looks plausible but teaches something incorrect | Verified demonstration models and a typed scene specification compiled against reviewed components; colour and object meaning persist | Section 19.1 rubric with no unresolved material error (FR-19, FR-20, CR-03) |
+| Facts are scattered and unchecked | Claim ledger with sources and review state; open claims block approval | No unresolved material claim or rights blocker in approved work (FR-03, FR-10) |
+| A small change means rebuilding everything | Revision impact before regeneration; unchanged work is reused | Section 19.3 production reliability threshold without code-level repair (FR-07) |
+| Cost is unknown until afterwards | Budget reservation before dispatch; every attempt costed, failures included | Variable cost per approved output within the Section 21.1 allowance (FR-08, FR-30) |
+| Too much human time per video | Agents draft between human review gates | Active human minutes below a documented manual baseline (FR-30, Section 19.3 R2) |
+| Submission is mistaken for publication | Publication records with the actual account, link and verification result | Verified records for the validation slate (FR-24, FR-27) |
+| A new channel cannot tell what works | Each contract records a hypothesis; results return after the observation window | Section 17.3 experiments against a stated baseline or cold-start status |
+| Explanations are hard to follow on a phone | House style, safe zones, captions and muted review | Muted-with-captions comprehension check in the Section 19.1 rubric |
+
+Defensibility is a set of hypotheses to earn in order, not a current claim. Generic model drafting, synthetic voices, captioning, rendering with established tools and own-channel reach are available to competitors and do not create an advantage by themselves (Section 25, incumbent replication).
+
+| Moat hypothesis | What it is | Earned at | Proof required |
+|---|---|---|---|
+| 1 Typed scene library and compiler | Models never write animation code; they select reviewed components through a typed specification, and displayed values come from verified calculations. Each added family raises the quality bar for a copy | R0–R1 | Editorial quality and production reliability met across the twelve-video slate; families added without code-level repair |
+| 2 Trust | Claim ledgers, version-bound approvals and honest publication records make the product usable where an error is costly; the retained history raises switching cost | R1–R2 | No material errors or rights blockers in approved work; repeat use by R4 pilots |
+| 3 Cheap targeted revision | Reuse of every artifact a change does not affect makes later videos and corrections inexpensive compared with freelancers or hand-built animation | R1 | Effort and cost per approved output below the manual baseline, revisions included |
+| 4 Learning loop | Each video links its hypothesis to its observed result; with volume this becomes a proprietary record of which explanations work | R3 onward | Recommendations repeatedly better than a simple editorial baseline (Section 19.3 R3) |
+
+Proof checkpoints follow the release gates: R2 shows the workflow advantage (moats 1–3 for the internal channel), R3 shows the learning loop has started (moat 4), and R4 shows that someone else will pay for it (Section 21.2). Until then the product is a wedge, accurate mathematical and scientific explainers that generic prompt-to-video tools cannot make reliably, and no external claim of defensibility is made.
 
 ## 2 Problem target users and personas
 
@@ -823,7 +849,7 @@ For coding-agent handoff, provide one bounded card, current baseline, relevant c
 | Rights/credential exposure | Unusable assets or compromised accounts | Rights ledger, restricted credentials and revocation/deletion controls |
 | Creator churn or weak demand | Subscription model fails | Qualified paid pilots, repeat-use evidence and cancellation learning |
 | Heavy review/support | Low operational efficiency | Measure human work, improve repairs and constrain scope |
-| Incumbent replication | Weak differentiation | Distinctive outputs, reliable revision and validated customer utility |
+| Incumbent replication | Weak differentiation | Distinctive outputs, reliable revision and validated customer utility; earn the Section 1.1 moat hypotheses in order and claim none before its proof |
 
 ## 26 Open decisions and change control
 
@@ -860,6 +886,8 @@ Changes affecting requirements, release scope, review authority or acceptance th
 Earlier drafts variously used 10 concepts, twelve briefs, a generic six-component spike and an AI-only first-channel example. This baseline uses twelve discovery briefs, six visual-storytelling families, one mathematical feasibility story and the broader channel promise. It retains the twelve-video/four-series validation before the conditional growth study. The first production/export milestone is distinct from full distribution automation and paid SaaS.
 
 The persona/story expansion adds six design personas, a viewer profile, role boundaries, US-01–26 and eight expanded journeys. These derive from the product scope and are not claims of completed interviews. Existing FR/CR identifiers, release gates and development cards retain their authority and scope.
+
+The 13 November 2026 discovery revision adds Section 1.1, what the product solves and four defensibility hypotheses with their proof checkpoints. It adds no FR/CR requirement and changes no release gate.
 
 ### 27.2 Public implementation references
 

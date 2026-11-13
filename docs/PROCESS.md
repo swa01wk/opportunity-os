@@ -6,7 +6,7 @@ Nov 12, 2026 · @Swaroop Shivakumar
 
 This process takes a client or product-team PRD to a released product one milestone at a time. Cursor implements the code, CI and Claude review it, and a human approves every merge. It fits products with a backend, a frontend and, optionally, an AI agent.
 
-1. **The PRD is input, not owned.** Store it unchanged; derive your own `REQUIREMENTS.md` from it.
+1. **The PRD is input, owned by the product owner.** Store it in `docs/sources/` and derive your own `REQUIREMENTS.md` from it. It changes only when the product owner decides: during discovery (until G3) it may be revised in place with a dated revision note; after that, through change control.
 2. **One owner per fact.** Each requirement, decision or threshold lives in one doc; other docs link to it.
 3. **Traceable IDs end to end.** PRD section → `R-xx` → component, screen S-xx and `ADR-xxx` → `SPEC-xx` → `T-xx`.
 4. **Decisions are recorded when made**, as ADRs, not as a later stage.
@@ -22,8 +22,8 @@ There are seven stages, each closed by a gate. Stages 1–3 run once per product
 
 | # | Stage | Question it answers | Owning docs | Gate |
 | --- | --- | --- | --- | --- |
-| 1 | Intake | What exactly must we build? | `REQUIREMENTS.md`, `QUESTIONS.md`, `DISCOVERY.md` | G1 Requirements baseline signed off |
-| 2 | Design | How will it work? | `ARCHITECTURE.md`, ADRs, contracts, screens (docs/design/), `UI_DESIGN.md`, `TECH_STACK.md`, `SECURITY.md`, `OBSERVABILITY.md` | G2 Design review passed, screens approved |
+| 1 | Intake | Who is it for, what does it solve, and what exactly must we build? | Product framing in the PRD or `REQUIREMENTS.md`, `REQUIREMENTS.md`, `QUESTIONS.md`, `DISCOVERY.md` | G1 Requirements baseline signed off |
+| 2 | Design | How will it work? | `ARCHITECTURE.md`, ADRs, contracts, `UI_DESIGN.md`, Claude Design canvas, screens (docs/design/), `TECH_STACK.md`, `SECURITY.md`, `OBSERVABILITY.md` | G2 Design review passed, screens approved |
 | 3 | Plan | In what order, and how do we prove it? | `DEVELOPMENT_PLAN.md`, `TEST_STRATEGY.md`, `DELIVERY_PLAN.md` | G3 Milestone scope and dates agreed |
 | 4 | Build | What is being built now? | `plans/Mx/specs/`, PRs, `STATUS.md` | Each spec meets its Definition of Done |
 | 5 | Verify | Does the milestone meet the requirements? | E2E and eval reports, UAT notes | G4 Milestone exit checklist met |
@@ -42,7 +42,14 @@ There are seven stages, each closed by a gate. Stages 1–3 run once per product
 
 The first output is your own requirements baseline, derived from the PRD and confirmed by the client before any design starts.
 
-**Inputs:** the PRD (kept unchanged and versioned in `docs/sources/`), any client designs, and access to existing systems.
+**Inputs:** the PRD (versioned in `docs/sources/`, revised only by the product owner), any client designs, and access to existing systems.
+
+**Product framing first.** Before writing requirements, make sure the product concepts below exist, because requirements, screens and tests all trace back to them. Keep the PRD's own IDs where it has them; where it lacks one, propose it in `REQUIREMENTS.md` and raise a `Q-xx`.
+
+- **Personas** (`P-xx` or the PRD's IDs): who uses the product, their job, difficulties and what success means. Personas are not roles.
+- **User journeys** (`J-xx`): trigger, sequence of steps, branches and outcome, each with its release.
+- **User stories** (`US-xx`): "As <persona>, I want <capability> so that <outcome>", with release, journey and acceptance.
+- **Value and defensibility**: the problems the product solves, how each is solved and the evidence that proves it; and the moat hypotheses, in the order they would be earned, each with its proof checkpoint. These are hypotheses, never claims, until their proof is met.
 
 1. Break the PRD into atomic requirements:
    - functional `R-xx`;
@@ -57,6 +64,8 @@ The first output is your own requirements baseline, derived from the PRD and con
 
 **Gate G1:**
 
+- personas, journeys, stories and the value and defensibility hypotheses exist and the client has confirmed them;
+- every user-facing Must `R-xx` traces to a user story and its journey;
 - every PRD section maps to at least one `R-xx` or is listed as out of scope;
 - every Must has acceptance criteria;
 - the client has answered the questions or accepted the assumptions.
@@ -70,26 +79,35 @@ Design produces the architecture and its decisions together. Then come the contr
 | 1 | `ARCHITECTURE.md` | Context, containers and components (C4 levels 1–3), data model, write path, migration of any existing data, quality scenarios for each NFR | Every `R-xx` maps to a component |
 | 1 | `docs/adr/ADR-xxx.md` | One ADR per significant choice, written when the choice is made | No open choice blocks M0 |
 | 2 | `docs/contracts/` | OpenAPI spec, event schemas, agent tool schemas, DB schema draft | Backend, frontend and agent can each mock the others |
-| 3 | `UI_DESIGN.md` | Screens, flows, empty / loading / error states, accessibility, languages | Every user-facing `R-xx` maps to a screen |
+| 3 | `UI_DESIGN.md` | Journeys in scope and their steps, the stories and problem each screen serves, screens, flows, empty / loading / error states, accessibility, languages | Every user-facing `R-xx` and every in-scope journey step maps to a screen |
 | 3 | `TECH_STACK.md` | Tools and versions per layer, each linked to its ADR; a monthly cost estimate for infrastructure and model usage | Every layer has a chosen tool |
 | 4 | `SECURITY.md` | Threat model (STRIDE), auth and roles, data classification, secrets, personal-data handling and retention under the applicable law (for example India's DPDP Act or GDPR); for agents, prompt injection and excessive agency | Threats have mitigations or accepted risks |
 | 4 | `OBSERVABILITY.md` | Signals per component, SLOs, alerts, retention, PII redaction, product analytics events for each KPI-xx | Every key journey has an SLO |
 
-**Screens (step 5, after `UI_DESIGN.md`).** Screens are built in Claude as HTML prototypes and committed to the repo. Cursor later rebuilds them as production code, so they are the visual source of truth for every frontend spec.
+**Screens (step 5, after `UI_DESIGN.md`).** Screens are designed by journey in Claude Design, reviewed there by the client, then committed to the repo as HTML prototypes. Cursor later rebuilds them as production code, so the approved screens are the visual source of truth for every frontend spec.
 
-- Each screen gets an ID `S-xx`, listed in `UI_DESIGN.md` with its `R-xx` and file path (`docs/design/screens/S-xx-<name>.html`).
+1. **Design in Claude Design.** One canvas per screens version, using `docs/design/tokens.md`:
+   - a page mapping journeys → steps → stories → screens, and what is out of scope;
+   - a page on what the product solves: problems → screens → `KPI-xx`, and the moat hypotheses with their proof checkpoints;
+   - one page per journey, screens in step order, joined by links so the client can click through each journey in Play;
+   - under each screen, a note naming its journey step, stories, gate, `R-xx`, the problem it solves, the moat it builds and the states still to come.
+2. **Client review on the canvas.** The client comments on the canvas; screens are revised there until approved. `STATUS.md` links the canvas.
+3. **HTML in the repo.** Each approved screen is built as a self-contained HTML prototype that matches the canvas, with realistic synthetic data and its empty, loading and error states.
+
+- Each screen gets an ID `S-xx`, listed in `UI_DESIGN.md` with its journey step, stories, `R-xx` and file path (`docs/design/screens/S-xx-<name>.html`).
 - Each prototype shows realistic sample data and its empty, loading and error states.
 - Shared colours, type and spacing go in `docs/design/tokens.md`, so every screen and every Cursor run uses the same values.
 - Screens go through the normal loop: a `design/screens-<version>` branch, a PR, client review, then merge.
 - `STATUS.md` tracks each screen: Draft → Client review → Approved → Built. Once approved, a screen changes only through change control.
 
-The trace for UI work is `R-xx` → `S-xx` → frontend `SPEC-xx` → Playwright `T-xx`.
+The trace for UI work is `J-xx` / `US-xx` → `R-xx` → `S-xx` → frontend `SPEC-xx` → Playwright `T-xx`.
 
 **Gate G2 (design review):**
 
 - traceability is complete;
 - contracts are versioned;
-- the threat model is reviewed and the client has approved the screens;
+- the threat model is reviewed and the client has approved the screens on the canvas, journey by journey;
+- the HTML prototypes match the approved canvas;
 - nothing is designed that no requirement asks for.
 
 ## Stage 3 — Plan
@@ -314,7 +332,7 @@ CLAUDE.md         Claude review checklist, points to AGENTS.md
 .cursor/rules/    000-core.mdc, backend.mdc, frontend.mdc, agent.mdc, ...
 docs/
   PROCESS.md      this process, exported as Markdown
-  sources/        PRD and client inputs, unchanged and versioned
+  sources/        PRD and client inputs, versioned; revised only by the product owner
   product/        REQUIREMENTS.md, QUESTIONS.md, UI_DESIGN.md
   design/         tokens.md, screens/S-01-<name>.html, ...
   discovery/      DISCOVERY.md (only if an existing system is involved)
@@ -493,8 +511,8 @@ Built from the client PRD using the process in PROCESS.md.
 Where things are
 - Process: PROCESS.md (project file). It defines the stages, gates, docs,
   IDs and templates. Follow it.
-- PRD: <PRD file name> (project file), copied unchanged into docs/sources/.
-  Never edit it.
+- PRD: <PRD file name> (project file), copied into docs/sources/. Edit it only
+  when I say so, with a dated revision note, in both places.
 - Repo: github.com/<owner>/<repo> (attached). The repo is the source of truth
   for every generated doc. Start every session from plans/STATUS.md.
 
@@ -533,6 +551,9 @@ Stage 3. Branch chore/bootstrap, open a PR, and summarise.
 
 ```text
 Run Stage 1 on docs/sources/<PRD file>.
+- Product framing: confirm the PRD's personas, user journeys, user stories,
+  and value and defensibility hypotheses; propose any that are missing in
+  REQUIREMENTS.md and raise a Q-xx for each.
 - docs/product/REQUIREMENTS.md: R-xx and NFR-xx, each with its PRD section,
   MoSCoW priority and Given/When/Then acceptance criteria; grouped into F-xx;
   an out-of-scope list; a coverage table (every PRD section -> R-xx or out
@@ -558,8 +579,8 @@ Run Stage 2 from docs/product/REQUIREMENTS.md, in the order PROCESS.md gives:
 ARCHITECTURE.md (C4 levels 1-3 as Mermaid, data model, write path, a quality
 scenario per NFR, an R-xx -> component table); an ADR for each significant
 choice, written as you make it; docs/contracts/ (OpenAPI, event schemas,
-agent tool schemas); UI_DESIGN.md (screens, flows, states, an R-xx -> screen
-table); TECH_STACK.md (each tool linked to its ADR); SECURITY.md (STRIDE,
+agent tool schemas); UI_DESIGN.md (journeys and stories in scope, screens,
+flows, states, an R-xx -> screen table); TECH_STACK.md (each tool linked to its ADR); SECURITY.md (STRIDE,
 roles, data classification, agent risks); OBSERVABILITY.md (signals, SLO per
 key journey). Check Gate G2 (screen approval comes in 2c) and list the gaps. Branch docs/stage-2-design,
 PR, update STATUS.md.
@@ -568,20 +589,31 @@ PR, update STATUS.md.
 **2c. Screens**
 
 ```text
-Run the Screens step of Stage 2 from docs/product/UI_DESIGN.md. Give each
-screen an ID S-xx and build it as a self-contained HTML prototype with
-realistic sample data and its empty, loading and error states. Put the shared
-colours, type and spacing in docs/design/tokens.md. Commit the screens as
-docs/design/screens/S-xx-<name>.html, link each from UI_DESIGN.md with its
-R-xx, and add the screen table to STATUS.md with status Client review.
+Run the Screens step of Stage 2 from docs/product/UI_DESIGN.md. Put the shared
+colours, type and spacing in docs/design/tokens.md. In Claude Design, make one
+canvas: a journeys -> stories -> screens map, a "what it solves" page
+(problems -> screens -> KPI-xx, moat hypotheses), and one page per journey
+with its screens in step order, linked for click-through, each with a note
+naming its journey step, stories, gate, R-xx, problem solved, moat built and
+states to come. Give each screen an ID S-xx. Link the canvas from STATUS.md,
+set the screens to Client review, and stop for my review on the canvas.
 Branch design/screens-v1, PR.
 ```
 
 After client feedback, in the same thread:
 
 ```text
-Feedback: <S-xx: change, ...>. Update those screens on the same branch, and
-set the approved ones to Approved in STATUS.md. Re-check Gate G2.
+Feedback: <S-xx: change, ...>. Update those screens on the canvas, and set the
+approved ones to Approved in STATUS.md. Re-check Gate G2.
+```
+
+Once the canvas is approved, in the same thread:
+
+```text
+Build each approved screen as a self-contained HTML prototype matching the
+canvas, with realistic synthetic data and its empty, loading and error states,
+in docs/design/screens/S-xx-<name>.html. Link each from UI_DESIGN.md with its
+journey step, stories and R-xx. Re-check Gate G2 on the same branch and PR.
 ```
 
 **3. Plan and agent rules**
@@ -660,6 +692,6 @@ Follow these eight steps to take a new PRD through the process for the first tim
 5. Paste the project instructions from the previous section, and fill in the product name, summary, PRD file name and repo.
 6. In a new thread, run prompt 0 to bootstrap the repo, then merge its PR.
 7. In another new thread, run prompt 1 for requirements intake. Review the requirements list and the open questions, get the questions answered, and send the follow-up prompt.
-8. Run stage 2, then the screens prompt (2c), then stage 3, one thread each. Merge each PR before starting the next stage. Cursor starts only at stage 4, once the specs and rules exist.
+8. Run stage 2, then the screens prompts (2c: canvas, your review, then HTML), then stage 3, one thread each. Merge each PR before starting the next stage. Cursor starts only at stage 4, once the specs and rules exist.
 
 On a first run, stages 1–3 show where the process or prompts need adjusting. Note those changes and fold them back into this doc after M0.
