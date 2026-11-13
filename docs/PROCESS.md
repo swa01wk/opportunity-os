@@ -589,9 +589,7 @@ Observability is built in M0 and extended by every spec, so each new flow ships 
   - budget reserved and settled, retries and their failure class;
   - every authorisation decision and approval wait.
 
-  An operator can explain every blocked or waiting run from these records.
-
-  Eval scores are kept over time.
+  Eval scores are kept over time, and an operator can explain every blocked or waiting run from these records.
 - **SLOs.** Availability and latency targets per key journey, with alerts on error-budget burn rather than raw thresholds.
 - **Per-spec rule.** A spec that adds a flow also adds its spans, log events and dashboard panel. This is part of the Definition of Done.
 
