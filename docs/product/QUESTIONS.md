@@ -72,4 +72,3 @@ Running log of every open question and decision found in [PRD v2.0](../sources/P
 | 2026-11-13 | Stage 2b: Q-30 (access-audit retention vs DPDP Rule 6) and Q-31 (video house style in 2c) raised. Q-14 and Q-20 recorded in SECURITY.md. Requirements unchanged. | Claude |
 | 2026-11-13 | Q-30 and Q-31 accepted (owner delegated the calls to the tech lead). Contract gaps closed in contracts 0.2.0. | Product owner, Claude |
 | 2026-11-13 | Stage 2c: PRD revised in discovery (§1.1 value and defensibility, at the owner's request). Q-32 (when a moat may be claimed) raised. Requirements unchanged. | Product owner, Claude |
-| 2026-11-13 | Stage 2c: AGENT_ARCHITECTURE.md and ADR-020 (AG-UI event stream). No new question; R-64 (chat drafting) remains Could under A-28, and would use the AG-UI run request if promoted. Requirements unchanged. | Claude |

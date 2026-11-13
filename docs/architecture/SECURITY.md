@@ -85,15 +85,13 @@ S spoofing · T tampering · R repudiation · I information disclosure · D deni
 | TH-28 | publication | T / R | Exported file is changed before manual upload, or the wrong file is uploaded | Package hash in the bundle; S-12 records the URL and flags a mismatch with the approved package (R-47 AC2) | QA-09 |
 | TH-29 | R3 credentials (planned) | I / E | OAuth refresh token stolen, or analytics scope used to publish | Tokens encrypted with an application key (KMS on AWS); stored scopes checked per action; revocation deletes tokens (R-66, NFR-06) | QA-10 (R3) |
 | TH-30 | R3 publishing (planned) | T | Lost acknowledgement causes a duplicate public post | `PUBLICATION_UNKNOWN` and reconcile before any new write (R-69) | QA-07 (R3) |
-| TH-31 | AG-UI stream | I | Tool-call or activity events leak page text, prompts, model output, secrets or signed URLs to the browser or its logs | Tool calls are sent as summaries only (`ToolCallArgsSummary`, `ToolCallResultSummary` in `agui/stream.json`: tool, host, counts, outcome); the relay builds events from an allowlist of fields; redaction as for logs (ADR-020) | QA-08, QA-10 |
-| TH-32 | AG-UI stream | S / E | A forged, replayed or cross-project event makes the Studio show a false state, or is treated as authority | Stream authorised per workspace and project like any route; events are display-only and every command re-checks `If-Match` and the version hash in the API; the Studio re-queries after events; reconnect starts with `STATE_SNAPSHOT` and never replays actions (ADR-020) | QA-05, QA-10 |
 
 ## Authentication and roles
 
 **Authentication** (ADR-012): OIDC authorization-code flow with PKCE; Keycloak locally with TOTP MFA required, Cognito when hosted. No local password store.
 
 **Sessions** (decided 2026-11-13; the aim is that a long review or render never loses work):
-- Access token 10 minutes, refreshed silently with a rotating refresh token; the AG-UI SSE stream reconnects with the new token and resumes from `Last-Event-ID`.
+- Access token 10 minutes, refreshed silently with a rotating refresh token; the SSE stream reconnects with the new token.
 - Idle timeout 12 hours (a full working day of review); absolute session lifetime 7 days, then sign in again with MFA.
 - **Step-up** for the actions that cannot be undone or that spend: Gate E release, raising a budget allowance, deleting a project, exporting project data. They need a sign-in with MFA in the last 15 minutes (`auth_time`), otherwise the API returns `step_up_required` and the Studio re-prompts in place, keeping the dialog's content (openapi.yaml 0.2.0).
 - Expiry never discards saved work: every edit is a saved version before the token matters.

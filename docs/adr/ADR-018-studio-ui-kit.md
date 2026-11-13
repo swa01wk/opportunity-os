@@ -7,7 +7,7 @@ The Studio (ADR-005) needs accessible dialogs, menus, tabs and focus handling to
 ## Decision
 - **Styling:** Tailwind CSS with the tokens from `docs/design/tokens.md` as CSS variables; no second styling system.
 - **Primitives:** Radix UI primitives (unstyled, accessible) for dialog, popover, menu, tabs, tooltip, toggle; our own components on top in `web/components/`. Components are copied in-repo (shadcn/ui pattern), not a runtime theme dependency.
-- **Data:** `openapi-typescript` generates types from `docs/contracts/openapi.yaml`; `openapi-fetch` is the client; TanStack Query caches queries and is invalidated by SSE events (ADR-005); since ADR-020 these arrive as AG-UI `CUSTOM` events.
+- **Data:** `openapi-typescript` generates types from `docs/contracts/openapi.yaml`; `openapi-fetch` is the client; TanStack Query caches queries and is invalidated by SSE events (ADR-005).
 - **Forms:** React Hook Form with validators generated from the same JSON Schema where possible (ADR-008).
 - **Auth:** Auth.js generic OIDC provider (ADR-012).
 - **Player:** `@remotion/player` with `media/scenes` (ADR-002, ADR-005).

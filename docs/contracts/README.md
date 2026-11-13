@@ -1,13 +1,12 @@
 # Contracts
 
-Agreed in Stage 2a, before backend, web, agent and media work splits. Contract version **0.3.0** (draft until the M0 contracts spec regenerates these files from Pydantic, ADR-008; then 1.0.0). Never changed outside a spec. Architecture context: [ARCHITECTURE.md](../architecture/ARCHITECTURE.md).
+Agreed in Stage 2a, before backend, web, agent and media work splits. Contract version **0.2.0** (draft until the M0 contracts spec regenerates these files from Pydantic, ADR-008; then 1.0.0). Never changed outside a spec. Architecture context: [ARCHITECTURE.md](../architecture/ARCHITECTURE.md).
 
 | Contract | Files | Producer → consumer | Requirements |
 |---|---|---|---|
 | Studio API | [openapi.yaml](openapi.yaml) | api → web | R-01–R-63 (R1–R2 scope) |
 | Common types | [common.schema.json](common.schema.json) | all | NFR-19 |
-| Domain events | [events/domain-event.schema.json](events/domain-event.schema.json) | api, worker → relay, audit; to web inside AG-UI `CUSTOM` events | R-41, R-44, R-50, NFR-09 |
-| AG-UI project stream | [agui/stream.json](agui/stream.json), example [examples/agui/](examples/agui/preview-run.stream.jsonl) | relay → web (SSE) | R-50, R-53, R-61, ADR-020 |
+| Domain events | [events/domain-event.schema.json](events/domain-event.schema.json) | api, worker → relay, web (SSE), audit | R-41, R-44, R-50, NFR-09 |
 | Workflow requests | [events/workflow-request.schema.json](events/workflow-request.schema.json) | api → worker dispatcher | NFR-01, ADR-003 |
 | Agent tasks | [agent-tools/tasks.json](agent-tools/tasks.json), [task-io.schema.json](agent-tools/task-io.schema.json) | worker ↔ agent | R-08, R-14, R-16, R-63 |
 | Agent tools | [agent-tools/tools.schema.json](agent-tools/tools.schema.json) | model → agent tool host (read-only) | R-43, NFR-05 |
@@ -23,7 +22,7 @@ Agreed in Stage 2a, before backend, web, agent and media work splits. Contract v
 
 ## Mocking across layers
 
-- **web** mocks the API from `openapi.yaml`, drives the Remotion Player with `examples/odd-squares.video-spec.json`, and replays `examples/agui/*.stream.jsonl` as the event stream. Event field names follow the pinned AG-UI SDK and are checked by the M0 relay spec.
+- **web** mocks the API from `openapi.yaml` and drives the Remotion Player with `examples/odd-squares.video-spec.json`.
 - **agent** runs against fake `LlmProvider` responses and the tool schemas; `validate_scene_spec` can be stubbed with the invalid-fixture manifest.
 - **media** renders `examples/odd-squares.video-spec.json` with a synthetic timing file; needs no API.
 - **backend** fakes the render service with `RenderJobStatus` fixtures and the agent with stored task outputs.
@@ -60,4 +59,3 @@ Agreed in Stage 2a, before backend, web, agent and media work splits. Contract v
 |---|---|---|
 | 0.1.0 | 2a | First agreed contracts. |
 | 0.2.0 | 2b | Additive. `DELETE /projects/{id}` (never-published projects only; published → 409 with `archive` option) and `archived` on projects (NFR-10 AC2). `GET/POST /kpi-baselines` and `app.kpi_baseline` (KPI-04, Q-13). `analytics` schema, `analytics.event` and `analytics/events.schema.json` (ADR-017). Domain events `project.archived`, `project.deletion_requested`, `project.deleted`, `kpi.baseline_recorded`; workflow type `project_deletion`. `fetch_source` limited to search results, operator URLs and one-hop links from fetched pages, with a new `links` output and `maxLinkHops` budget (SECURITY TH-14). Step-up sign-in rule documented in `openapi.yaml`. |
-| 0.3.0 | 2c | The project event stream carries AG-UI events (ADR-020): `agui/stream.json` (mapping, step names, activity types, tool-call summaries, `STATE_SNAPSHOT` on connect) and `examples/agui/preview-run.stream.jsonl`. Breaking for the stream payload only (DomainEvents move inside `CUSTOM`); nothing consumes it yet. `openapi.yaml` 0.3.0 describes the stream. |

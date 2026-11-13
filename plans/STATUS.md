@@ -66,16 +66,16 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 |---|---|---|
 | 2a | [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md), [ADR-001–014](../docs/adr/README.md) (all accepted), [contracts 0.1.0](../docs/contracts/README.md) | Done (PR #3, merged 2026-11-12) |
 | 2b | [UI_DESIGN.md](../docs/product/UI_DESIGN.md), [TECH_STACK.md](../docs/architecture/TECH_STACK.md), [SECURITY.md](../docs/architecture/SECURITY.md), [OBSERVABILITY.md](../docs/architecture/OBSERVABILITY.md), ADR-015–019, [contracts 0.2.0](../docs/contracts/README.md#change-log) | Done (PR #4, merged 2026-11-12); decisions taken 2026-11-13 |
-| 2c | [tokens.md](../docs/design/tokens.md) (Studio UI tokens, video house style brand kit v1 per A-31), the S-07 reference prototype, S-01–S-16 on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS); addendum [AGENT_ARCHITECTURE.md](../docs/architecture/AGENT_ARCHITECTURE.md), [ADR-020](../docs/adr/ADR-020-ag-ui-event-stream.md) (AG-UI), [contracts 0.3.0](../docs/contracts/README.md#change-log) | Step 1 in client review (PR #5) |
+| 2c | Step 1: [tokens.md](../docs/design/tokens.md) (Studio UI tokens, video house style brand kit v1 per A-31) and the S-07 reference prototype. Step 2 after your look-and-feel approval: S-01–S-16 | Step 1 in client review (PR #5) |
 
 | G2 check (2a + 2b scope) | Result |
 |---|---|
 | Traceability: every R-xx maps to a component and every user-facing R-xx to a screen | Pass: all Must and Should R-xx → component (2a) and → screen S-01–S-20 (2b, checked by script: 0 unmapped); R3 screens S-17–S-20 listed, prototyped after A-18; Could and Won't not designed. Every KPI-01–14 has an analytics event. |
-| Contracts versioned | Pass: 0.3.0 (AG-UI stream, ADR-020; 0.2.0 additive before it; change log in contracts README). Re-checked 2026-11-13: 11 schemas pass the 2020-12 metaschema; 5 valid fixtures pass; 6 schema-level invalid fixtures rejected; all OpenAPI `$ref`s resolve; DDL applies to PostgreSQL 16 (44 tables). |
+| Contracts versioned | Pass: 0.2.0 (additive, change log in contracts README). Re-checked 2026-11-13: 11 schemas pass the 2020-12 metaschema; 5 valid fixtures pass; 6 schema-level invalid fixtures rejected; all OpenAPI `$ref`s resolve; DDL applies to PostgreSQL 16 (44 tables). |
 | Each layer can mock the others | Pass: mocking guide in contracts README; synthetic odd-squares fixtures |
 | No open choice blocks M0 | Pass: ADR-011–014 accepted; Remotion free individual licence; development runs on free credits (Q-05). |
 | Nothing designed that no requirement asks for | Pass: R3 planned only; R-64, R-65, R-78–R-82 not designed |
-| Threat model reviewed | Pass for TH-01–TH-30, agent risks and accepted risks (accepted 2026-11-13, owner delegated to the tech lead). TH-31–TH-32 (AG-UI stream) added 2026-11-13, to review at G2 |
+| Threat model reviewed | Pass: STRIDE TH-01–TH-30, agent risks and accepted risks reviewed and accepted 2026-11-13 (owner delegated to the tech lead) |
 | Screens approved | Not yet: tokens and S-07 in client review; S-01–S-16 follow (Stage 2c step 2) |
 | Every key journey has an SLO | Pass: SLO-01–SLO-10, provisional, calibrate after R0 (A-15) |
 | Every layer has a chosen tool | Pass: TECH_STACK.md; exact pins in M0 lockfiles. Q-29 search API still open (does not block M0). |
@@ -95,7 +95,6 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Recent decisions
 
-- 2026-11-13: Agent architecture applied to OpportunityOS (PROCESS.md): [AGENT_ARCHITECTURE.md](../docs/architecture/AGENT_ARCHITECTURE.md) written; ADR-020 accepted by the tech lead (owner confirms at G2): the project event stream carries AG-UI events, runs are observed not held, approvals stay REST commands; contracts 0.3.0; TH-31, TH-32; TECH_STACK, OBSERVABILITY, UI_DESIGN and ARCHITECTURE updated. No new requirement; R-64 chat stays Could.
 - 2026-11-13: Product owner: the PRD may be revised in place during discovery (until G3), with a dated revision note; PRD §1.1 "What the product solves and defensibility" added (problems solved, four moat hypotheses, proof checkpoints). Q-32 raised. PROCESS.md: Stage 1 starts with product framing (personas, journeys, stories, value and moat hypotheses); Stage 2 screens go UI_DESIGN.md → Claude Design canvas by journey → client review on the canvas → HTML in the repo. Figma not used.
 - 2026-11-13: S-01–S-16 designed on the Claude Design canvas, one page per journey (J1, J6, J3), plus a journey map and a "What it solves" page.
 - 2026-11-13: S-07 slimmed at your request: the Remotion Player's own controls (frame and scene steps in its custom-controls slot), a scene and caption strip instead of a multi-track timeline (PRD §13 defers one); action timing lives in the inspector.

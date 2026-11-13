@@ -46,7 +46,7 @@ Moats (PRD §1.1): 1 typed scene library and compiler · 2 trust · 3 cheap targ
 | Project header | Title, series, production state badge (R-44 states), brief version, destination label and timezone | R-44, R-04 |
 | Gate strip | Gates A–E, each: not started · awaiting review · approved (version + hash) · reopened (reason) · blocked (count). Status is text plus icon, never colour alone | R-40, R-41, R-42 |
 | Spend meter | Allowance, reserved, actual (INR, provider USD at recorded rate), paused-for-budget state | R-34, R-35, R-61 AC2 |
-| Run indicator | Active run, current step, progress from the AG-UI stream (`RUN_*`, `STEP_*`, `ACTIVITY_*`; ADR-020); link to S-13 | R-50 |
+| Run indicator | Active run, current step, progress from SSE; link to S-13 | R-50 |
 | Approval dialog | Gate, target and version hash, responsibility used, evidence checklist, outstanding blockers (each linking to its fix), approve / return with reason | R-40, R-41, R-43, R-09, R-37, R-55, R-59 |
 | Error panel | Error class (retryable provider failure, invalid content, deterministic render defect, uncertain public action), the named scene / object / claim / account, and the matching repair button | R-53 |
 | Version chip | `v3 · a1b2c3d` with "compare" (S-10) and "history" | R-33, R-41 |
@@ -161,7 +161,7 @@ Every prototype in 2c shows its empty, loading and error states. Shared rules fi
 **Shared rules**
 - **Empty** explains why and offers the next action ("No claims yet. Run research or add a claim."). Empty is used only when the data truly has no items.
 - **Unavailable** is a distinct state with a reason ("Average % viewed: not entered yet", "Not supported by this platform"), never a blank, dash or zero (R-61 AC2, R-72 AC2).
-- **Loading** uses skeletons for lists and panels; long work shows the run indicator with the current step from the AG-UI stream, never a spinner without a step. If the stream drops, a banner says "Live updates paused, reconnecting"; on reconnect the stream starts with a state snapshot and the screen re-queries.
+- **Loading** uses skeletons for lists and panels; long work shows the run indicator with the current step from SSE, never a spinner without a step. If SSE drops, a banner says "Live updates paused, reconnecting" and the screen re-queries on reconnect.
 - **Errors** use the error panel (R-53). API problem types map as: 401 → re-authenticate (S-01) and return; 403 `step_up_required` → MFA prompt in place, the dialog keeps its content; other 403 → "Your responsibility does not allow this" naming the one needed; 404 → not found in this workspace; 409 blocker → list of blockers with links; 412 stale version → "Changed since you opened it" with reload and compare; 422 validation → field-level messages naming scene and field; 5xx → retry with the request ID shown.
 - **Paused** states (budget, awaiting approval) are not errors: they show what is waiting and the one action that unblocks it.
 
@@ -195,7 +195,7 @@ Standard per A-17: **WCAG 2.2 AA** for the Studio.
 - **Motion and flashing:** Studio UI motion respects `prefers-reduced-motion`; nothing in the Studio flashes more than three times per second. Video content is checked separately by `media.qa` (≤ 3 flashes/s, NFR-08).
 - **Media review:** S-11 offers a muted-with-captions playback mode and a phone-size frame so the KPI-14 review is done the way viewers watch (PRD §2.2).
 - **Forms:** labels on every field, errors announced and linked to the field, no time limits on review screens except the signed media URL, which renews silently.
-- **Status messages:** run progress and stream updates use polite live regions, not focus moves.
+- **Status messages:** run progress and SSE updates use polite live regions, not focus moves.
 
 ## Devices and browsers
 

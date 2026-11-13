@@ -6,7 +6,6 @@ Status: **Draft for G2** (Stage 2b); a living doc after G2 for signals, and chan
 
 - **One trace per user request.** The browser starts the trace; `traceparent` goes web → api → outbox event (`DomainEvent.traceparent`) → worker workflow → agent task / TTS / render job. A workflow started from an outbox row links to the request span; its long-running steps are child spans.
 - **Correlation attributes** on every span, log and metric where they apply: `oos.workspace_id`, `oos.project_id`, `oos.run_id`, `oos.task_attempt_id`, `oos.workflow_type`, `oos.task_type`, `oos.gate`, `oos.artifact_sha256`, `oos.render_job_id`. These make NFR-09's "run → attempts → inputs → artifacts in one hop" possible.
-- **AG-UI stream.** The relay span `relay.agui.emit` carries the trace of the event's source; each AG-UI run ID equals the execution run ID, so a run in the Studio links to its trace. Emitted events are logged (type, run ID, step) without payloads, so a session's stream can be reconstructed and replayed (ADR-020).
 - **Names.** Spans `component.operation` (e.g. `api.approvals.record`, `agent.research.call_model`, `render.scene_clip`). Custom metrics prefixed `oos.` and follow OpenTelemetry semantic conventions for HTTP, DB and GenAI attributes (`gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`).
 - **Logs** are structured JSON (structlog in Python, pino in Node) with `trace_id`, `span_id`, `request_id` and the correlation attributes. Log events are named (`approval.refused`, `budget.paused`), not free text.
 - **Money** in metrics is minor units of the reporting currency (INR) after conversion at the recorded rate (Q-05); the raw provider currency stays on the attempt record.
@@ -15,7 +14,7 @@ Status: **Draft for G2** (Stage 2b); a living doc after G2 for signals, and chan
 
 | Component | Traces (spans) | Metrics | Log events |
 |---|---|---|---|
-| **web** (browser + Next.js server) | Page load, route change, API calls (fetch instrumentation), AG-UI stream connect | `oos.web.sse.reconnects`, `oos.web.agui.events{type}`, Web Vitals (LCP, INP) on Studio pages | `auth.callback_failed`, `sse.disconnected`, `agui.event_rejected` (fails the pinned schema) |
+| **web** (browser + Next.js server) | Page load, route change, API calls (fetch instrumentation), SSE connect | `oos.web.sse.reconnects`, Web Vitals (LCP, INP) on Studio pages | `auth.callback_failed`, `sse.disconnected` |
 | **api** | Every request (`http.server`), DB queries, approval checks, preflight, revision impact | HTTP rate, errors, duration by route; `oos.approval.refused{reason}`; `oos.preflight.gaps{kind}`; `oos.idempotency.replays` | `approval.recorded`, `approval.refused`, `stale_version` (412), `authz.denied`, `export.built` |
 | **worker: dispatcher + outbox relay** | `relay.deliver`, `workflow.start` | `oos.outbox.lag_seconds` (oldest undelivered), `oos.workflow_request.dispatch_seconds`, `oos.relay.delivered` | `workflow.duplicate_start_ignored`, `relay.retry` |
 | **worker: workflows (DBOS)** | Workflow span with one child per step | `oos.run.duration_seconds{workflow_type,outcome}`, `oos.run.active`, `oos.run.stuck` (running > 2× expected), `oos.step.retries{step}`, `oos.queue.depth{queue}`, `oos.queue.wait_seconds{queue}` | `run.state_changed`, `run.paused_budget`, `run.takeover`, `run.cancelled`, `run.recovered_after_restart` |
@@ -39,7 +38,7 @@ All targets are **provisional — calibrate after R0** (A-15: no numeric perform
 |---|---|---|---|---|
 | SLO-01 Studio responsiveness | All Studio screens (J1, J6) | API requests answered without 5xx and within 1 s (commands) or 500 ms (queries) | 99% — calibrate after R0 | 1% of requests |
 | SLO-02 Dispatch | Any long action (J1) | Workflow requests started within 30 s of commit | 99% — calibrate after R0 | 1% |
-| SLO-03 Live progress | Run indicator (J1, J6) | AG-UI events for committed domain events reaching the Studio stream within 5 s of commit | 99% — calibrate after R0 | 1% |
+| SLO-03 Live progress | Run indicator (J1, J6) | Domain events reaching the Studio SSE stream within 5 s of commit | 99% — calibrate after R0 | 1% |
 | SLO-04 Research | S-05 (J1) | Research runs reaching a reviewable ledger within 10 min without a platform failure | 90% — calibrate after R0 | 10% |
 | SLO-05 Draft preview | S-07 (J1, J6) | Previews of a 30–60 s storyboard ready within 5 min | 90% — calibrate after R0 | 10% |
 | SLO-06 Master render | S-11 (J1) | Masters rendered and QA-checked within 20 min | 90% — calibrate after R0 | 10% |
