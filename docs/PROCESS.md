@@ -4,13 +4,13 @@ Nov 12, 2026 · @Swaroop Shivakumar
 
 ## Purpose and principles
 
-This process takes a client or product-team PRD to a released product one milestone at a time. Cursor implements the code, CI and Claude review it, and a human approves every merge. It fits products with a backend, a frontend and, optionally, an AI agent.
+This process takes a client or product-team PRD to a released product one milestone at a time. Cursor implements the code, CI and Claude review it, and a human approves every merge. It fits products with a backend, a frontend and, usually, one or more AI agents (see Agent architecture).
 
 1. **The PRD is input, owned by the product owner.** Store it in `docs/sources/` and derive your own `REQUIREMENTS.md` from it. It changes only when the product owner decides: during discovery (until G3) it may be revised in place with a dated revision note; after that, through change control.
 2. **One owner per fact.** Each requirement, decision or threshold lives in one doc; other docs link to it.
 3. **Traceable IDs end to end.** PRD section → `R-xx` → component, screen S-xx and `ADR-xxx` → `SPEC-xx` → `T-xx`.
 4. **Decisions are recorded when made**, as ADRs, not as a later stage.
-5. **Contracts before code.** API, event and agent-tool schemas are agreed before backend, frontend and agent work splits.
+5. **Contracts before code.** API, event, agent-tool and AG-UI schemas are agreed before backend, frontend and agent work splits.
 6. **Shift left.** Test harnesses, security checks and observability are built in M0, not added at the end.
 7. **Small, reversible changes.** One spec = one short-lived branch = one PR.
 8. **AI writes, humans own.** AI review assists; a person is accountable for every merge.
@@ -23,7 +23,7 @@ There are seven stages, each closed by a gate. Stages 1–3 run once per product
 | # | Stage | Question it answers | Owning docs | Gate |
 | --- | --- | --- | --- | --- |
 | 1 | Intake | Who is it for, what does it solve, and what exactly must we build? | Product framing in the PRD or `REQUIREMENTS.md`, `REQUIREMENTS.md`, `QUESTIONS.md`, `DISCOVERY.md` | G1 Requirements baseline signed off |
-| 2 | Design | How will it work? | `ARCHITECTURE.md`, ADRs, contracts, `UI_DESIGN.md`, Claude Design canvas, screens (docs/design/), `TECH_STACK.md`, `SECURITY.md`, `OBSERVABILITY.md` | G2 Design review passed, screens approved |
+| 2 | Design | How will it work? | `ARCHITECTURE.md`, `AGENT_ARCHITECTURE.md`, ADRs, contracts, `UI_DESIGN.md`, Claude Design canvas, screens (docs/design/), `TECH_STACK.md`, `SECURITY.md`, `OBSERVABILITY.md` | G2 Design review passed, screens approved |
 | 3 | Plan | In what order, and how do we prove it? | `DEVELOPMENT_PLAN.md`, `TEST_STRATEGY.md`, `DELIVERY_PLAN.md` | G3 Milestone scope and dates agreed |
 | 4 | Build | What is being built now? | `plans/Mx/specs/`, PRs, `STATUS.md` | Each spec meets its Definition of Done |
 | 5 | Verify | Does the milestone meet the requirements? | E2E and eval reports, UAT notes | G4 Milestone exit checklist met |
@@ -77,8 +77,9 @@ Design produces the architecture and its decisions together. Then come the contr
 | Step | Doc | Contents | Done when |
 | --- | --- | --- | --- |
 | 1 | `ARCHITECTURE.md` | Context, containers and components (C4 levels 1–3), data model, write path, migration of any existing data, quality scenarios for each NFR | Every `R-xx` maps to a component |
+| 1 | `AGENT_ARCHITECTURE.md` | For agentic products: the turn pipeline, routing sources of truth, agent catalogue, how an agent plugs in, the AG-UI contract (see Agent architecture) | Every agent and intent maps to an `R-xx` and a story; every consequential action has a confirmation step |
 | 1 | `docs/adr/ADR-xxx.md` | One ADR per significant choice, written when the choice is made | No open choice blocks M0 |
-| 2 | `docs/contracts/` | OpenAPI spec, event schemas, agent tool schemas, DB schema draft | Backend, frontend and agent can each mock the others |
+| 2 | `docs/contracts/` | OpenAPI spec, event schemas, agent tool schemas, the intent enum, the AG-UI contract (version, shared state, frontend tools, custom events), DB schema draft | Backend, frontend and agent can each mock the others |
 | 3 | `UI_DESIGN.md` | Journeys in scope and their steps, the stories and problem each screen serves, screens, flows, empty / loading / error states, accessibility, languages | Every user-facing `R-xx` and every in-scope journey step maps to a screen |
 | 3 | `TECH_STACK.md` | Tools and versions per layer, each linked to its ADR; a monthly cost estimate for infrastructure and model usage | Every layer has a chosen tool |
 | 4 | `SECURITY.md` | Threat model (STRIDE), auth and roles, data classification, secrets, personal-data handling and retention under the applicable law (for example India's DPDP Act or GDPR); for agents, prompt injection and excessive agency | Threats have mitigations or accepted risks |
@@ -110,6 +111,118 @@ The trace for UI work is `J-xx` / `US-xx` → `R-xx` → `S-xx` → frontend `SP
 - the HTML prototypes match the approved canvas;
 - nothing is designed that no requirement asks for.
 
+## Agent architecture
+
+Most products built with this process are agentic: an AI agent understands what the user wants, gathers what is missing and prepares an action, and a person confirms it. For these products Stage 2 also writes `docs/architecture/AGENT_ARCHITECTURE.md` (step 1, next to `ARCHITECTURE.md`). It answers five questions: what one turn does, where routing is decided, which agents exist, how a new agent plugs in, and how the UI and the agents talk (AG-UI). A product with no agent leaves it out.
+
+**Design rules.** They hold for every agent unless an ADR says otherwise.
+
+1. **One runtime, many agents.** An agent is a configuration entry plus its steps in one orchestrated graph or workflow, not a separate service. A new agent adds config and steps, not infrastructure.
+2. **Stateless per turn.** Each user turn runs the graph once. State lives in a session store between turns, so any instance can serve the next turn and a crash loses at most the current one.
+3. **The model understands; code decides.** The LLM classifies intent, extracts fields, answers from retrieved knowledge and drafts wording. Validation, permissions, payloads, submission, money and anything public are plain code. Model-generated code is never executed.
+4. **Route deterministically first.** Rules route whatever they can: an open record, a form action, an agent that already owns the session. The model classifies only what is left, into a closed intent list it cannot extend. The registry, not the model, decides which agent runs.
+5. **The router runs rarely.** Once an agent owns the session, later turns go straight to it. The router runs again only on cancel, switch, a help question or a new topic.
+6. **People approve consequential actions.** Every create, approve, spend or publish shows a confirmation, and the submit step runs only when the confirmation is recorded as confirmed. Agents never approve. A help question mid-task is answered without losing the draft.
+7. **Bounded and untrusted.** Each agent has an input and output schema, allowed tools, a budget, a retry ceiling, a timeout and named failure states. User input is checked for prompt injection before routing; tool results, documents and web pages are data, never instructions.
+8. **Observable by default.** One trace per turn, a span per step, and a record per model or tool call (model, prompt version, tokens, cost, latency) feed the agent telemetry under Observability.
+
+**One turn, in one picture.** `AGENT_ARCHITECTURE.md` draws the product's own version of this pipeline and names each file.
+
+```
+Client (web app, embedded copilot, partner channel)
+   │  AG-UI run request: thread, run, messages, state, frontend tools
+   ▼
+Entry adapters, one per channel → one orchestration service
+   per-session lock → load or create session → auth from the token → audit
+   → prompt-injection check → build the turn state
+   ▼
+Agent graph
+   load session → deterministic router
+      ├─ resume the agent that owns the session
+      ├─ open record → the stage it is in, and the agent that owns that stage
+      ├─ help question → retrieval answer (draft kept)
+      └─ nobody owns it → supervisor: closed intents → role check → registry
+   agent entry → collect: extract fields (model) → merge → look up → validate → ask next
+            → confirm (human in the loop) → build payload (code) → submit (idempotent)
+   → compose response → save session
+   ▼
+AG-UI event stream back to the client · session, drafts, traces, audit · system APIs
+```
+
+**Routing sources of truth.** Each fact lives in one file, and `AGENT_ARCHITECTURE.md` names it.
+
+| What | Holds | Rule |
+| --- | --- | --- |
+| Intent list | Every intent the router may return | A closed enum in the schema; the model cannot invent one |
+| Intent definitions | What each intent means and its routing hints | The router prompt, versioned like code |
+| Role → allowed intents | Which roles may start which intents | Checked before any agent runs |
+| Domain key → agent | Which agent owns each record type or category | The registry; it overrides the model's suggestion |
+| Agent workflow config | Stages, prompts, questions, confirmation step, terminal stages, intents | Makes the shared steps agent-aware; its intents feed routing |
+| Agent → entry step | Where a new or resumed agent enters the graph | One map in the graph definition |
+| External status → stage | Which stage and agent an existing record resumes at | One sync step; never inferred by the model |
+
+**Agent catalogue.** `AGENT_ARCHITECTURE.md` keeps one row per agent and per non-agent path (help, retrieval, notifications), plus what has no agent yet. Each row links its `R-xx` and stories.
+
+| Agent | Owns (record type or category) | What it does for the user | Tools and systems | Who approves, at which stage | R-xx, US-xx |
+| --- | --- | --- | --- | --- | --- |
+
+**Adding an agent.** Each new agent is a spec (`SPEC-xx`) and follows the same steps:
+
+1. Add its intents to the intent enum and the router prompt.
+2. Grant the intents to roles.
+3. Register its domain key in the registry.
+4. Add its workflow config: extraction prompt, field questions, stages, confirmation step, terminal stages, intents.
+5. Add its steps (entry, confirmation, payload builder, submission, and review or acknowledgement where needed), wire them into the graph and the entry map.
+6. Add agent-specific branches to shared steps only where they can't be avoided, and list them.
+7. Keep its stages, roles and required fields in one schema module.
+8. Add its AG-UI surface: confirmation card, frontend tools and any generated UI, each a screen or component on the design canvas.
+9. Add its tests: mocked unit, eval scenarios (routing, extraction, refusal, injection), the confirmation guard, and an E2E journey.
+10. Add its telemetry, its catalogue row and its row in `STATUS.md`.
+
+**Supporting layers.** Each is chosen by an ADR and sits behind an adapter: the model provider registry, so models can be swapped; retrieval (index, search, citation) for help and knowledge answers; the session and draft store; observability; and the external system APIs, called only by code.
+
+### AG-UI: the contract between agents and the UI
+
+AG-UI (Agent–User Interaction protocol) is the standard way our agents talk to the frontend. It is one of three layers that stack, each with a different job:
+
+| Layer | Protocol | Connects |
+| --- | --- | --- |
+| Agent ↔ user | AG-UI | Streams messages, tool activity, state and approvals to the app |
+| Agent ↔ tools and data | MCP | Databases, APIs and functions the agent may call |
+| Agent ↔ agent | A2A | Delegation to other agents |
+
+**How it works.** The client sends one run request (thread ID, run ID, messages, shared state, the frontend tools it offers, context). The agent answers with a stream of typed JSON events, over Server-Sent Events by default (WebSocket when an ADR needs it). The thread ID is the session.
+
+| Event family | Events | What the UI does with it |
+| --- | --- | --- |
+| Lifecycle | `RUN_STARTED`, `RUN_FINISHED`, `RUN_ERROR`, `STEP_STARTED`, `STEP_FINISHED` | Run indicator with the current step; end or error states |
+| Text | `TEXT_MESSAGE_START`, `_CONTENT`, `_END` | Streams the agent's reply |
+| Tool calls | `TOOL_CALL_START`, `_ARGS`, `_END`, `_RESULT` | Shows what the agent is doing; pre-fills forms as arguments stream; renders generated UI and confirmation cards |
+| State | `STATE_SNAPSHOT`, `STATE_DELTA` (JSON Patch), `MESSAGES_SNAPSHOT` | Keeps the draft, form and conversation in sync without re-sending everything |
+| Activity | `ACTIVITY_SNAPSHOT`, `ACTIVITY_DELTA` | Progress of long-running work |
+| Special | `RAW`, `CUSTOM` | Pass-through and product-specific events |
+
+The protocol is still adding events (reasoning and sub-agent events are in the draft), so each product pins the AG-UI version it uses in `TECH_STACK.md`.
+
+**Rules for AG-UI in our products:**
+
+- **A contract like any other.** The AG-UI version, the custom events, the shared-state schema and the frontend tools live in `docs/contracts/agui/` and are versioned. A breaking change needs a version bump.
+- **The UI reads state from events, never from text.** Forms, cards and progress come from state and tool events, not from parsing the reply.
+- **Human in the loop through the protocol.** A consequential action is a tool call the UI renders as a confirmation card. The run stops and waits for the user, and the answer comes back as the tool result or a new run on the same thread. The server re-checks permissions and the exact version before acting; the UI approval alone is never the authority.
+- **Recoverable.** On reconnect the client asks for `STATE_SNAPSHOT` and `MESSAGES_SNAPSHOT`, never replays actions. A lost stream never repeats a submission.
+- **Custom events are namespaced** (`<product>.<event>`) and listed in the contract.
+- **Debuggable.** Event streams are logged with the trace ID and can be replayed in tests and when investigating a bug.
+- **Errors are typed.** `RUN_ERROR` carries the product's error class, so the UI can show the right repair action.
+
+**Where agent architecture shows up in the process:**
+
+| Stage | What it adds |
+| --- | --- |
+| 1 Intake | Each journey step that an agent performs is marked in the stories |
+| 2 Design | `AGENT_ARCHITECTURE.md`; ADRs for the orchestration framework, model provider and AG-UI client; contracts for the intent enum, agent tool schemas and the AG-UI contract; agent surfaces (chat, confirmation cards, generated UI) designed on the canvas; agent threats (injection, excessive agency, data leaks through tools) in `SECURITY.md` |
+| 3 Plan | One spec per agent; `.cursor/rules/agent.mdc`; eval thresholds in `TEST_STRATEGY.md` |
+| 4–5 Build and verify | The ten steps above; routing, extraction and confirmation-guard evals; replayed AG-UI streams in Playwright |
+
 ## Stage 3 — Plan
 
 Planning turns the design into three things: an ordered spec backlog, a test strategy with CI/CD gates, and a milestone schedule the client agrees to. The development plan is the engineering view; the delivery plan is the client view.
@@ -128,7 +241,7 @@ Planning turns the design into three things: an ordered spec backlog, a test str
 | `.cursor/rules/000-core.mdc` | Always (`alwaysApply: true`) | Coding standards, ID conventions, branch and commit rules, "never change a contract outside a spec" |
 | `.cursor/rules/backend.mdc` | `globs: backend/**` | Layering, error handling, database and migration rules, test style |
 | `.cursor/rules/frontend.mdc` | `globs: web/**` | Component and state patterns; screens in docs/design/screens/ are the visual reference, rebuilt with the app's components and tokens, never copied; accessibility, languages, test style |
-| `.cursor/rules/agent.mdc` | `globs: agent/**` | Prompt and tool conventions, model mocking, eval scenario format |
+| `.cursor/rules/agent.mdc` | `globs: agent/**` | The agent design rules and the "Adding an agent" steps, prompt and tool conventions, AG-UI event rules, model mocking, eval scenario format |
 | `.cursor/rules/testing.mdc` | `globs: **/tests/**` | Test levels, fixtures, `T-xx` naming |
 | `.cursor/rules/observability.mdc` | Code that adds a flow | Span, log and metric conventions |
 | `CLAUDE.md` | Claude PR review | Review checklist; points to `AGENTS.md` so both tools share the same conventions |
@@ -209,7 +322,7 @@ Tests follow the pyramid: many fast tests on every PR, fewer cross-component tes
 | Backend unit | Functions and services in isolation | pytest | Every PR | Must pass; coverage floor on changed code |
 | Backend functional | API endpoints against a real database in a container | pytest, httpx, Testcontainers | Every PR | Must pass |
 | Frontend unit and component | Components, hooks, state | Vitest, Testing Library | Every PR | Must pass |
-| Contract | Backend ↔ frontend and backend ↔ agent tool schemas | OpenAPI validation, Pact | Every PR | No breaking change without a version bump |
+| Contract | Backend ↔ frontend, backend ↔ agent tool schemas, and the AG-UI contract | OpenAPI and JSON Schema validation, Pact | Every PR | No breaking change without a version bump |
 | Integration (BE + FE) | Real backend and frontend with seeded data; screenshot checks of key screens against their S-xx | Playwright | Smoke on every PR, full suite nightly | Must pass |
 | Agent, mocked | Agent logic with a stubbed model and recorded responses | pytest, fixtures | Every PR | Deterministic; must pass |
 | Agent, live eval | Real model over a scenario set, N ≥ 10 runs | Eval runner | Nightly and per milestone | Pass rate at or above threshold; zero safety failures |
@@ -220,7 +333,9 @@ Agent evals need their own discipline:
 
 - versioned scenario sets with expected outcomes;
 - graders that are rule-based where possible, with model-graded checks only where needed;
-- tracked metrics: task success, tool-call correctness, safety violations, latency, cost;
+- tracked metrics: task success, routing accuracy, field-extraction accuracy, tool-call correctness, safety violations, latency, cost;
+- a check that no consequential action is submitted without a recorded confirmation;
+- recorded AG-UI event streams replayed against the UI in Playwright;
 - a red-team set for prompt injection;
 - any regression against the last milestone blocks exit.
 
@@ -336,9 +451,9 @@ docs/
   product/        REQUIREMENTS.md, QUESTIONS.md, UI_DESIGN.md
   design/         tokens.md, screens/S-01-<name>.html, ...
   discovery/      DISCOVERY.md (only if an existing system is involved)
-  architecture/   ARCHITECTURE.md, TECH_STACK.md, SECURITY.md, OBSERVABILITY.md
+  architecture/   ARCHITECTURE.md, AGENT_ARCHITECTURE.md, TECH_STACK.md, SECURITY.md, OBSERVABILITY.md
   adr/            ADR-001-<slug>.md, ...
-  contracts/      openapi.yaml, events/, agent-tools/
+  contracts/      openapi.yaml, events/, agent-tools/, agui/
   ops/            RUNBOOK.md, RELEASE_NOTES.md, incidents/
 plans/
   STATUS.md
@@ -481,6 +596,7 @@ The draft's core shape is kept: PRD → design → plans → milestones of specs
 | Architecture description | C4 model, arc42, ISO/IEC/IEEE 42010 |
 | Decision records | ADRs (Michael Nygard format) |
 | Secure development | NIST SSDF (SP 800-218), OWASP ASVS, OWASP Top 10 for LLM Applications |
+| Agent interfaces | AG-UI (agent ↔ user), Model Context Protocol (agent ↔ tools), A2A (agent ↔ agent) |
 | AI risk | NIST AI Risk Management Framework |
 | Branching, commits, versions | GitHub flow, Conventional Commits, Semantic Versioning |
 | Delivery performance | DORA metrics |
@@ -577,7 +693,9 @@ the questions resolved, and re-check G1.
 ```text
 Run Stage 2 from docs/product/REQUIREMENTS.md, in the order PROCESS.md gives:
 ARCHITECTURE.md (C4 levels 1-3 as Mermaid, data model, write path, a quality
-scenario per NFR, an R-xx -> component table); an ADR for each significant
+scenario per NFR, an R-xx -> component table); for agentic products,
+AGENT_ARCHITECTURE.md (turn pipeline, routing sources of truth, agent
+catalogue, adding an agent, AG-UI contract); an ADR for each significant
 choice, written as you make it; docs/contracts/ (OpenAPI, event schemas,
 agent tool schemas); UI_DESIGN.md (journeys and stories in scope, screens,
 flows, states, an R-xx -> screen table); TECH_STACK.md (each tool linked to its ADR); SECURITY.md (STRIDE,
