@@ -1,0 +1,61 @@
+---
+description: Media layer (scene library, compiler, render service, media QA in TypeScript; TTS, alignment and captions in Python): typed specs only, reviewed components, house style, timing, cache, limits
+globs: media/**
+alwaysApply: false
+---
+
+# Media rules
+
+Applies to `media/scenes` (TypeScript: families, components, compiler, render service, media QA) and `media/audio` (Python: TTS adapters, alignment, caption segmentation). Decisions: ADR-002 (Remotion only, KaTeX), ADR-013 (ElevenLabs), ADR-007 and ADR-015 (storage), ADR-008 (generated types). Contracts: `docs/contracts/media/` (`video-spec`, `capabilities`, `demonstration`, `timing`, `render-job`, `render-manifest`) and the compiler rules table in `docs/contracts/README.md`. House style: `docs/design/tokens.md` section 2 (brand kit v1).
+
+## Typed specs only
+
+- The only input to rendering is a validated VideoSpec. Never evaluate, import or render code, HTML or TeX macros taken from a spec, a model or a page. KaTeX runs with `trust: false` and a length limit (TH-15).
+- Every operation maps to a reviewed component listed in `capabilities.json`. A spec asking for anything else fails with `CAPABILITY_UNSUPPORTED`; never improvise a fallback visual.
+- A new animation family needs an R-xx (R-24 is Could), a spec, reviewed components, fixtures and an estimate.
+
+## Compiler
+
+- Validate in order: schema (Ajv on the generated JSON Schema) → semantic rules → layout. Each failure returns a `ValidationError` with the exact code from the contracts README (`UNKNOWN_REFERENCE`, `FRAME_OUT_OF_RANGE`, `DEMONSTRATION_MISMATCH`, `CONTINUITY_BREAK`, `COLOR_MEANING_CHANGED`, `SAFE_ZONE`, `CAPTION_OVERLAP`, …), naming the scene, object and field (R-18 AC2, R-12).
+- The Python mirror used by preflight must agree with the TypeScript compiler on every fixture in `docs/contracts/examples/invalid/`.
+- Enforce limits on objects, actions, text length and asset size before rendering (NFR-12).
+
+## Meaning on screen
+
+- Values, counts and coordinates come only from demonstration results via `valueRef`; never compute or hard-code them in a component (R-11, R-12).
+- Objects keep a stable ID, colour and meaning across moves and scenes; a value transformation maps old terms to new explicitly (R-20).
+- Colour never carries meaning alone: pair it with a label, group or position (R-20 AC2).
+- Each scene's entry state equals the previous scene's exit state (R-22).
+- Illustrations and approximations carry their label (R-13).
+
+## House style
+
+- Use tokens from the pinned brand-kit version only: palette, type scale, equation typography, caption placement, safe zones, transitions, pacing, brand cue. No literal colours, fonts or sizes in components (R-23, R-02).
+- Fonts are the licensed files registered in the rights ledger (R-55); never load fonts or assets from the network at render time.
+- Output is 1080×1920 at 30 fps (NFR-16). Text and captions stay inside the safe zones; captions never cover active objects, labels or equations (R-27). No more than three flashes a second; WCAG 2.2 AA contrast for text (NFR-08, A-17).
+
+## Timing and audio (`media/audio`)
+
+- Narration goes through `TtsProvider` only (fake and ElevenLabs). Each take records provider, voice, settings, characters, cost, plan and commercial-use flag (R-35, R-55).
+- Masters use **measured** timing from the take's alignment, never model estimates (R-26). Anchors resolve to phrase timestamps.
+- When a take no longer fits, recompute and report the pacing change. Never speed audio up silently (R-26 AC2).
+- Caption phrases are segmented for phone-size reading (R-27).
+
+## Rendering, cache and manifest
+
+- Determinism: no `Math.random` without a seed from the spec, no `Date.now`, no network, pinned fonts, Remotion and Chrome versions (NFR-03).
+- Each scene clip's cache key is its effective input hash (params, entry state, demonstration results, assets, brand version, fonts, voice segment, component and renderer versions, timing). Equal hash → reuse the stored object; changed hash → rebuild (R-32).
+- A changed effective input always reassembles a new master, even when most clips are reused (R-32 AC2).
+- Every preview and master writes a manifest with input hashes, fonts, renderer, codec, component versions, seeds, timing and metrics (R-30). Masters are immutable.
+- The render service is private: it claims jobs with a lease, is idempotent by `jobId` = input hash, writes objects and the `media` schema only, has no internet egress and runs under CPU, memory and time caps (NFR-12).
+
+## Media QA
+
+Independent of the renderer: ffprobe for dimensions, fps, duration and audio; overlays for caption bounds, label overflow and safe zones; flash-rate and contrast checks (R-29, QA-03). QA never edits the media it judges.
+
+## Tests
+
+- Vitest for compiler rules and components; every invalid fixture fails with its code.
+- Render fixtures: small scenes per family with reference frames compared within a documented tolerance; defect fixtures for QA.
+- Python tests for alignment and caption segmentation with recorded alignment data; the fake TTS is deterministic.
+- Name tests with their T-xx (`testing.mdc`).

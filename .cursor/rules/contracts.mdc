@@ -1,0 +1,39 @@
+---
+description: Contracts between layers: Pydantic is canonical, generated JSON Schema and TypeScript are never hand-edited, versioning and fixtures
+globs: contracts/**,docs/contracts/**
+alwaysApply: false
+---
+
+# Contracts rules
+
+Applies to `contracts/` and `docs/contracts/`. Decisions: ADR-008 (Pydantic canonical), ADR-004 (OpenAPI conventions), ADR-010 (events), ADR-020 (AG-UI), ADR-021 (agent execution contract). Index and versioning: `docs/contracts/README.md`.
+
+## Source of truth
+
+- From SPEC-03 on, Pydantic v2 models in `contracts/python/opportunityos_contracts/` are canonical. `make contracts` generates:
+  - JSON Schema (2020-12) into `docs/contracts/**/*.schema.json`;
+  - TypeScript types into `contracts/ts/`.
+- **Never hand-edit a generated file.** CI regenerates and fails on any difference.
+- `docs/contracts/openapi.yaml` is the reviewed API contract; CI compares it with the OpenAPI FastAPI generates and fails on drift. Change both together.
+- `capabilities.json`, `tasks.json` and `agui/stream.json` are data contracts validated against their schemas.
+
+## Changing a contract
+
+- Only inside a spec that names the change. Make the contract change first, in its own commit, before code that uses it.
+- **Minor bump:** additive optional fields, new enum values a consumer can ignore, new endpoints. **Major bump:** removing, renaming or tightening anything, or a new required field on stored documents. A major bump needs a migration for stored documents (VideoSpec, manifests) and `feat(contracts)!:` in the title.
+- Update `$id` / `x-version` (and `schemaVersion` / `manifestVersion` inside documents), the change-log row in `docs/contracts/README.md`, and every fixture the change affects.
+- R3 additions arrive as a minor version in the spec that starts R3 (A-18).
+
+## Schema style
+
+- Discriminated unions and simple bounds; avoid conditional `if/then` that the two generators handle differently (ADR-008).
+- IDs are UUIDs or prefixed stable IDs as in `common.schema.json`; money is integer minor units with currency; times are RFC 3339 UTC; frames are integers at the pinned frame rate.
+- `additionalProperties: false` on objects that cross a trust boundary (task outputs, VideoSpec, events, AG-UI payloads).
+- Events carry references and redacted summaries, never payload bodies, secrets or signed URLs.
+
+## Fixtures
+
+- Valid examples in `docs/contracts/examples/`; invalid ones in `examples/invalid/`, each listed in `manifest.json` with the level (`schema` or `semantic`) and the expected error code.
+- Every fixture must pass or fail identically in Pydantic and in Ajv (NFR-19). Add a fixture for every new rule.
+- Recorded AG-UI streams (`examples/agui/*.stream.jsonl`) are one SSE frame per line with ordered `seq`; add one per new run type.
+- Synthetic data only.

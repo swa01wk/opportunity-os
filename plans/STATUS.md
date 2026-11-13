@@ -1,5 +1,5 @@
 # STATUS: OpportunityOS        Updated: 2026-11-14
-Current stage: 2 Design (2c screens) | Next gate: G2 Design review and screens
+Current stage: 3 Plan | Next gate: G3 Milestone scope and dates (after you record G2)
 
 Release target: R0 -> R1 -> R2 (PRD Section 4). R3 conditional; R4/R5 out of scope.
 
@@ -11,38 +11,65 @@ All gates are signed by the product owner / tech lead (same person).
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
-| 2 Design | G2 Design review and screens | 2a Done (merged 2026-11-12); 2b Done (merged 2026-11-12); 2c: tokens and S-07 HTML in review; S-01–S-16 designed on the Claude Design canvas, in client review | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5 |
-| 3 Plan | G3 Milestone scope and dates | Not started | | |
+| 2 Design | G2 Design review and screens | Done: 2a, 2b, 2c merged (HTML prototypes S-01–S-16 merged in #7); all G2 checks pass; **your G2 signature is not yet recorded** | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5, #7 |
+| 3 Plan | G3 Milestone scope and dates | In review: DEVELOPMENT_PLAN, TEST_STRATEGY, DELIVERY_PLAN, AGENTS.md, CLAUDE.md, Cursor rules, ADR-022 | | docs/stage-3-plan |
 
 | Milestone | Scope | Status | Exit date |
 |---|---|---|---|
-| — | Defined in Stage 3 (DELIVERY_PLAN.md) | — | — |
+| M0 | Foundation: walking skeleton: 14 specs, 32 spec-days | Proposed at G3 | 22 Jan 2027 (proposed at 25 h/week, A-36) |
+| M1 | Feasibility (R0): 11 specs, 28 spec-days | Proposed at G3 | 12 Mar 2027 (proposed at 25 h/week, A-36) |
+| M2 | Brief to evidence (R1): 15 specs, 33 spec-days | Proposed at G3 | 7 May 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
+| M3 | Script to preview (R1): 12 specs, 26 spec-days | Proposed at G3 | 25 Jun 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
+| M4 | Master to export (R1): 8 specs, 19 spec-days | Proposed at G3 | 30 Jul 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
+| M5 | Revision and recovery (R1 gate): 9 specs, 22 spec-days | Proposed at G3 | 17 Sep 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
+| M6 | Channel record (R2 features): 7 specs, 13 spec-days | Proposed at G3 | 15 Oct 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
+| M7 | Hardening, go-live (G5): 7 specs, 12 spec-days | Proposed at G3 | 5 Nov 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
+| R2 slate | Twelve originals 4/4/2/2 published; R2 gate | Planned | 31 Dec 2027 (indicative) |
+
+Scope, slices, exit criteria and RAID: [DELIVERY_PLAN.md](DELIVERY_PLAN.md). Specs: [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md). Tests and pipeline: [TEST_STRATEGY.md](TEST_STRATEGY.md).
 
 ## Current milestone specs
+
+M0, prepared in Stage 4 (`plans/M0/specs/`).
+
 | Spec | Requirements | Screens | Branch / PR | Status | Owner |
 |---|---|---|---|---|---|
+| SPEC-01 Repo toolchain, Makefile and Compose stack | NFR-13 | — | `feat/SPEC-01-toolchain` | Planned | Owner (Cursor) |
+| SPEC-02 CI pipeline, security scans and branch rules | NFR-05, NFR-06, NFR-13, NFR-18 | — | `feat/SPEC-02-ci-pipeline` | Planned | Owner (Cursor) |
+| SPEC-03 Canonical Pydantic contracts, generated JSON Schema and TS (contracts 1.0.0) | NFR-19, R-18, NFR-11 | — | `feat/SPEC-03-contracts-codegen` | Planned | Owner (Cursor) |
+| SPEC-04 Database baseline, migrations, service roles and RLS | R-01, NFR-04, NFR-13 | — | `feat/SPEC-04-database` | Planned | Owner (Cursor) |
+| SPEC-05 Object store choice and BlobStore adapter (ADR-015 amendment) | R-30, NFR-04 | — | `feat/SPEC-05-object-store` | Planned | Owner (Cursor) |
+| SPEC-06 API authentication, members and responsibilities | R-01, R-05, NFR-04 | — | `feat/SPEC-06-api-auth` | Planned | Owner (Cursor) |
+| SPEC-07 Studio sign-in and app shell | R-01, R-05, R-61 | S-01 | `feat/SPEC-07-studio-shell` | Planned | Owner (Cursor) |
+| SPEC-08 Telemetry wiring, Collector redaction and health checks | NFR-09, NFR-06, NFR-15 | — | `feat/SPEC-08-telemetry` | Planned | Owner (Cursor) |
+| SPEC-09 Outbox, dispatcher and DBOS kill-and-resume spike (ADR-003) | NFR-01, R-50, R-51 | — | `feat/SPEC-09-outbox-dbos` | Planned | Owner (Cursor) |
+| SPEC-10 AG-UI relay and project event stream (ADR-020) | R-50, R-61, NFR-04 | — | `feat/SPEC-10-agui-relay` | Planned | Owner (Cursor) |
+| SPEC-11 Agent runtime, tool host, LLM adapter and fake model (ADR-021) | R-63, NFR-05, NFR-11 | — | `feat/SPEC-11-agent-runtime` | Planned | Owner (Cursor) |
+| SPEC-12 Render service skeleton, job API and resource limits | R-29, NFR-12 | — | `feat/SPEC-12-render-skeleton` | Planned | Owner (Cursor) |
+| SPEC-13 Walking skeleton: web → api → worker → agent → render, traced | NFR-09, NFR-13 | S-01 | `feat/SPEC-13-walking-skeleton` | Planned | Owner (Cursor) |
+| SPEC-14 Search API choice and SearchProvider adapter (Q-29) | R-08, NFR-11 | — | `feat/SPEC-14-search-provider` | Planned | Owner (Cursor) |
 
 ## Screens
 Designed by journey on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS) (journey map, what it solves, J1, J6, J3), approved by you on 2026-11-14. Each approved screen has a self-contained HTML prototype with its empty, loading and error states (PROCESS.md, Stage 2 screens).
 
 | Screen | Requirements | Specs | Status |
 |---|---|---|---|
-| S-01 Sign-in and app shell | R-01, R-05 | — | Approved (canvas, 2026-11-14); HTML [S-01-shell.html](../docs/design/screens/S-01-shell.html) |
-| S-02 Projects | R-01, R-44 | — | Approved (canvas, 2026-11-14); HTML [S-02-projects.html](../docs/design/screens/S-02-projects.html) |
-| S-03 Brief and preflight | R-06, R-07, R-57, Gate A | — | Approved (canvas, 2026-11-14); HTML [S-03-brief.html](../docs/design/screens/S-03-brief.html) |
-| S-04 Project settings and data | R-02–R-04, R-34, R-56, R-60 | — | Approved (canvas, 2026-11-14); HTML [S-04-settings.html](../docs/design/screens/S-04-settings.html) |
-| S-05 Evidence | R-08–R-10 | — | Approved (canvas, 2026-11-14); HTML [S-05-evidence.html](../docs/design/screens/S-05-evidence.html) |
-| S-06 Script and demonstration | R-11–R-15, R-59, Gate B | — | Approved (canvas, 2026-11-14); HTML [S-06-script.html](../docs/design/screens/S-06-script.html) |
-| S-07 Storyboard and preview | R-16, R-18–R-23, R-27, R-28, Gate C | — | Approved (canvas, 2026-11-14); HTML [S-07-storyboard.html](../docs/design/screens/S-07-storyboard.html) |
-| S-08 Narration | R-25, R-26 | — | Approved (canvas, 2026-11-14); HTML [S-08-narration.html](../docs/design/screens/S-08-narration.html) |
-| S-09 Revision impact | R-31, R-32, R-42 | — | Approved (canvas, 2026-11-14); HTML [S-09-revision.html](../docs/design/screens/S-09-revision.html) |
-| S-10 Compare versions | R-33 | — | Approved (canvas, 2026-11-14); HTML [S-10-compare.html](../docs/design/screens/S-10-compare.html) |
-| S-11 Final review and package | R-29, R-30, R-37, R-38, R-45, R-54, R-55, R-60, Gate D | — | Approved (canvas, 2026-11-14); HTML [S-11-package.html](../docs/design/screens/S-11-package.html) |
-| S-12 Publication record (R2) | R-46–R-49, R-72 (manual), Gate E | — | Approved (canvas, 2026-11-14); HTML [S-12-publication.html](../docs/design/screens/S-12-publication.html) |
-| S-13 Runs and recovery | R-50–R-53 | — | Approved (canvas, 2026-11-14); HTML [S-13-runs.html](../docs/design/screens/S-13-runs.html) |
-| S-14 Cost and effort | R-34–R-36 | — | Approved (canvas, 2026-11-14); HTML [S-14-cost.html](../docs/design/screens/S-14-cost.html) |
-| S-15 Library | R-02, R-55, R-62 | — | Approved (canvas, 2026-11-14); HTML [S-15-library.html](../docs/design/screens/S-15-library.html) |
-| S-16 Series slate (R2) | R-39, R-58 | — | Approved (canvas, 2026-11-14); HTML [S-16-slate.html](../docs/design/screens/S-16-slate.html) |
+| S-01 Sign-in and app shell | R-01, R-05 | SPEC-07, SPEC-13, SPEC-34, SPEC-35 | Approved (canvas, 2026-11-14); HTML [S-01-shell.html](../docs/design/screens/S-01-shell.html) |
+| S-02 Projects | R-01, R-44 | SPEC-36 | Approved (canvas, 2026-11-14); HTML [S-02-projects.html](../docs/design/screens/S-02-projects.html) |
+| S-03 Brief and preflight | R-06, R-07, R-57, Gate A | SPEC-38 | Approved (canvas, 2026-11-14); HTML [S-03-brief.html](../docs/design/screens/S-03-brief.html) |
+| S-04 Project settings and data | R-02–R-04, R-34, R-56, R-60 | SPEC-37, SPEC-68, SPEC-73 | Approved (canvas, 2026-11-14); HTML [S-04-settings.html](../docs/design/screens/S-04-settings.html) |
+| S-05 Evidence | R-08–R-10 | SPEC-39 | Approved (canvas, 2026-11-14); HTML [S-05-evidence.html](../docs/design/screens/S-05-evidence.html) |
+| S-06 Script and demonstration | R-11–R-15, R-59, Gate B | SPEC-45 | Approved (canvas, 2026-11-14); HTML [S-06-script.html](../docs/design/screens/S-06-script.html) |
+| S-07 Storyboard and preview | R-16, R-18–R-23, R-27, R-28, Gate C | SPEC-51, SPEC-52 | Approved (canvas, 2026-11-14); HTML [S-07-storyboard.html](../docs/design/screens/S-07-storyboard.html) |
+| S-08 Narration | R-25, R-26 | SPEC-49 | Approved (canvas, 2026-11-14); HTML [S-08-narration.html](../docs/design/screens/S-08-narration.html) |
+| S-09 Revision impact | R-31, R-32, R-42 | SPEC-64 | Approved (canvas, 2026-11-14); HTML [S-09-revision.html](../docs/design/screens/S-09-revision.html) |
+| S-10 Compare versions | R-33 | SPEC-65 | Approved (canvas, 2026-11-14); HTML [S-10-compare.html](../docs/design/screens/S-10-compare.html) |
+| S-11 Final review and package | R-29, R-30, R-37, R-38, R-45, R-54, R-55, R-60, Gate D | SPEC-57, SPEC-58, SPEC-73 | Approved (canvas, 2026-11-14); HTML [S-11-package.html](../docs/design/screens/S-11-package.html) |
+| S-12 Publication record (R2) | R-46–R-49, R-72 (manual), Gate E | SPEC-72 | Approved (canvas, 2026-11-14); HTML [S-12-publication.html](../docs/design/screens/S-12-publication.html) |
+| S-13 Runs and recovery | R-50–R-53 | SPEC-40, SPEC-66 | Approved (canvas, 2026-11-14); HTML [S-13-runs.html](../docs/design/screens/S-13-runs.html) |
+| S-14 Cost and effort | R-34–R-36 | SPEC-67 | Approved (canvas, 2026-11-14); HTML [S-14-cost.html](../docs/design/screens/S-14-cost.html) |
+| S-15 Library | R-02, R-55, R-62 | SPEC-59 | Approved (canvas, 2026-11-14); HTML [S-15-library.html](../docs/design/screens/S-15-library.html) |
+| S-16 Series slate (R2) | R-39, R-58 | SPEC-75 | Approved (canvas, 2026-11-14); HTML [S-16-slate.html](../docs/design/screens/S-16-slate.html) |
 | S-17 Connections (R3) | R-66, R-67 | — | Planned (prototype after A-18) |
 | S-18 Publishing calendar (R3) | R-68–R-71 | — | Planned (prototype after A-18) |
 | S-19 Opportunity Lab (R3) | R-73 | — | Planned (prototype after A-18) |
@@ -82,10 +109,24 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 | Every key journey has an SLO | Pass: SLO-01–SLO-10, provisional, calibrate after R0 (A-15) |
 | Every layer has a chosen tool | Pass: TECH_STACK.md; exact pins in M0 lockfiles. Q-29 search API still open (does not block M0). |
 
+## Plan (Stage 3)
+
+[DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) (83 specs SPEC-01–SPEC-83, 185 spec-days, dependency groups, tracks, screen → spec map, Cursor and Claude workflow) · [TEST_STRATEGY.md](TEST_STRATEGY.md) (levels, cadence, eval thresholds, C01–C14 as T-01–T-14, QA-01–QA-12 map, T-01–T-97 catalogue, Definition of Ready and Done, pipeline, environments) · [DELIVERY_PLAN.md](DELIVERY_PLAN.md) (M0–M7, R2 slate, dates, RAID) · [AGENTS.md](../AGENTS.md), [CLAUDE.md](../CLAUDE.md), [.cursor/rules/](../.cursor/rules/) (000-core, backend, agent, media, frontend, contracts, testing, observability) · [ADR-022](../docs/adr/ADR-022-delivery-pipeline-local-hosting.md).
+
+| G3 check | Result |
+|---|---|
+| Every Must R-xx is in a milestone | Pass (checked by script): all 62 Must R-xx and all 19 NFR-xx map to specs in M0–M7; Should R-66–R-77 are R3 (conditional) except the manual parts of R-48 and R-72; Could and Won't not planned |
+| Every spec lists its R-xx and T-xx | Pass: 83 of 83; every T-xx exists in the catalogue (T-13 C13 and T-89 UAT have no spec by design) |
+| Every frontend spec lists its approved S-xx | Pass: every W and B+W spec names its screen; S-01–S-16 each built by at least one spec and tested by T-15–T-30 |
+| Dependency order valid | Pass: every spec depends only on earlier specs in the same or an earlier milestone |
+| You agree what is in each milestone and when | **Open: needs you.** Capacity (Q-36) and the M0–M1 windows to agree; M2–M7 indicative until the M1 re-estimate |
+
 ## Open questions and risks
 
 - [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-35 (DEC-01–12 are Q-01–Q-12).
-- No open questions. Q-32 (moat claims) accepted 2026-11-14.
+- Open: **Q-36** weekly capacity (A-36: 25 h/week), needed to commit dates at G3.
+- Issue: G2 signature not recorded (checks pass).
+- Risk: the plan is about 925 engineering hours, roughly 2.5× PRD §22.1's 228–364; at A-36 go-live is about 5 Nov 2027 and the R2 gate about 31 Dec 2027 (DELIVERY_PLAN.md).
 - Parked: Q-05 budget limits. Development uses free credits with costs recorded; real limits are set from measured per-video cost before the AWS move.
 - Before the first real provider call: opt out of ElevenLabs model training on every account; OpenAI calls use `store: false` (SECURITY.md).
 - Specialist checks: none outstanding. Q-14, Q-20, Q-25 and the narrator licence rule were decided by the tech lead at your request (engineering decisions, not legal advice).
@@ -97,6 +138,8 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 - Risk: Remotion render time and memory are unmeasured until the R0 baseline (NFR-02, ADR-002).
 
 ## Recent decisions
+
+- 2026-11-14: Stage 3 (tech lead, for you to confirm at G3): milestones M0 Foundation → M1 R0 feasibility (media first, PRD §22) → M2–M5 R1 slices → M6 R2 features → M7 hardening → R2 slate; re-estimate and renderer check after M1 (PRD §22.1–22.2). ADR-022: CI verifies, your machine builds each release once, staging and production are local Compose projects promoted by digest. ADR-019 amended (k6, OWASP ZAP, diff-cover). Eval thresholds set (hard gates zero; rates provisional, calibrated at M2 and M3). Conformance C05–C11 due at M2 exit, not M1 (M1 has no approvals, agent runs or budgets). Q-36 raised.
 
 - 2026-11-14: You approved the screens on the Claude Design canvas. HTML prototypes S-01–S-16 built in docs/design/screens/ (S-07 is the step-1 reference prototype).
 - 2026-11-14: Q-32 accepted: the four moats stay hypotheses until their PRD §1.1 proof is met (moats 1–3 at the R2 gate, moat 4 at R3); no external defensibility claim before R4 pilots show repeat use.

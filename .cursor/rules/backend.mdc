@@ -1,0 +1,73 @@
+---
+description: Backend (FastAPI api and DBOS worker) layering, write path, authorisation, workflows, database and migrations, tests
+globs: backend/**
+alwaysApply: false
+---
+
+# Backend rules
+
+Applies to `backend/` (api and worker are one Python package with two entry points, ADR-001). Decisions: ADR-003 (DBOS), ADR-004 (FastAPI), ADR-006 (PostgreSQL), ADR-007 (storage), ADR-009 (adapters), ADR-010 (outbox), ADR-012 (identity). Architecture: `docs/architecture/ARCHITECTURE.md` (write path, revision path). Who may do what: the responsibility matrix in `docs/architecture/SECURITY.md`.
+
+## Layering
+
+```
+api/        routers: parse, authenticate, call one domain service, map errors to problem responses
+domain/     aggregates, state machine (R-44), guards, services; no FastAPI, no HTTP clients
+repo/       SQLAlchemy repositories; every query scoped by workspace_id
+workflows/  DBOS workflows and steps; dispatcher; outbox relay; AG-UI projection
+adapters/   ports (Protocols) + implementations + fakes; the only place provider SDKs appear
+```
+
+- Routers hold no business logic (ADR-004). A rule that decides anything lives in `domain/`.
+- `domain/` depends on ports, never on adapters, SQLAlchemy sessions or FastAPI.
+- Provider SDKs (OpenAI, ElevenLabs, boto3, httpx for fetching) appear only in `adapters/`, `agent/opportunityos_agent/llm/` and `media/audio/` (ADR-009). Each adapter has a fake and an `estimate_cost`.
+
+## The write path (every consequential command)
+
+Follow ARCHITECTURE.md "Write path" exactly:
+
+1. Authenticate (JWT via `IdentityProvider`), resolve member and responsibility, check the responsibility matrix. Agents and services never reach approval, publication, budget-raise or gate commands (R-43).
+2. Updates require `If-Match` with the row version; return 412 on mismatch. Creates require `Idempotency-Key`; a replay returns the stored response (ADR-004).
+3. One transaction writes the domain change, the `audit_log` row, the `outbox_event` and, for long work, the `workflow_request` (ADR-010). No dual writes to other systems.
+4. Return 202 with the run for long work. The API never does long work itself.
+
+Errors are RFC 9457 problem responses carrying the R-53 error class (`retryable_provider`, `invalid_content`, `render_defect`, `uncertain_external`, `conflict`, `authorization`, `resource_limit`) and the repair options the Studio shows. Blockers return 409 with the list of blockers; step-up returns 403 `step_up_required`.
+
+## Versions, hashes and approvals
+
+- Content versions are insert-only rows with a SHA-256 of canonical JSON (RFC 8785). Parents hold a head pointer and `row_version`.
+- Approvals bind gate, target, version, hash, scope, destination, member, responsibility, evidence shown and policy versions (R-41, Q-35). Never update an approval; invalidate it with a reason.
+- Any action that relies on an approval re-reads its currency in the same transaction as the effect (write path rule 4).
+
+## Workflows (DBOS, ADR-003)
+
+- Workflow ID = `workflow_request.id`; a duplicate start is a no-op.
+- Workflow functions are deterministic: no I/O, no clock, no randomness, no environment reads. All I/O happens in steps.
+- Each step is idempotent: keyed by attempt ID or effective input hash, results stored by that key.
+- Before any effect, a step's transaction re-checks: run not cancelled, approval still current, budget reserved (R-34, R-41, R-52). On failure it records the reason and stops; it never proceeds optimistically.
+- Budget is reserved per attempt under a row lock before dispatch and settled after (R-34, NFR-07). A failed reservation pauses the run as `paused_budget`.
+- Retries stop at the task's ceiling (`tasks.json`); each retry is a new `task_attempt`.
+- `execution_run` and `task_attempt` are projections written by steps, never a second state machine.
+- Changing a workflow's steps needs a version bump and a note on in-flight runs (C12).
+
+## Database and migrations (ADR-006)
+
+- Every table carries `workspace_id`; repositories filter by it and RLS policies enforce it as a second guard (NFR-04). Each service connects with its own role (SECURITY.md least privilege).
+- Alembic migrations only, each with a working `downgrade`, tested in CI. Prefer expand → migrate → contract for changes to populated tables.
+- Lock rows explicitly (`SELECT … FOR UPDATE`) where the design says so (budget, heads). Never rely on read-then-write without a lock or `If-Match`.
+- No raw SQL built from strings; use bound parameters.
+
+## Storage (ADR-007, ADR-015)
+
+- Keys are content-addressed. The api only signs reads (15-minute signed GET after an authorised request); worker and render have no delete; only the retention job deletes unreferenced objects.
+
+## Logging and telemetry
+
+Follow `observability.mdc`: named log events with correlation attributes, spans per operation, no payloads in logs.
+
+## Tests
+
+- Unit tests in `backend/tests/unit/` for domain rules (state machine, guards, budget arithmetic, hashing); Hypothesis where inputs vary.
+- Functional tests in `backend/tests/functional/` call the API through httpx against PostgreSQL and the object store in Testcontainers. No network calls to real providers; use the fakes.
+- Conformance scenarios in `backend/tests/conformance/` (T-01–T-14).
+- Name tests after the T-xx they implement (see `testing.mdc`). Cover every acceptance criterion in the spec, including the refusal cases.
