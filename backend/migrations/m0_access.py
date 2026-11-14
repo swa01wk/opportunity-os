@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Iterable
 from pathlib import Path
+from typing import Literal
 
+from psycopg import sql
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
+
+Privilege = Literal["SELECT", "INSERT", "UPDATE", "DELETE"]
 
 LOGIN_ROLES = (
     "oos_api",
@@ -39,8 +44,6 @@ WORKSPACE_ID_TABLES: tuple[tuple[str, str], ...] = (
     ("media", "render_job"),
 )
 
-VERSION_TABLES: tuple[tuple[str, str], ...] = (("app", "brand_kit_version"),)
-
 M0_APP_TABLES: tuple[tuple[str, str], ...] = (
     ("app", "workspace"),
     ("app", "member"),
@@ -60,6 +63,71 @@ M0_MEDIA_TABLES: tuple[tuple[str, str], ...] = (("media", "render_job"),)
 
 ALL_M0_TABLES = M0_APP_TABLES + M0_MEDIA_TABLES
 
+# Domain tables api/worker may change; neither deletes (SECURITY.md:152).
+_APP_MUTABLE: tuple[tuple[str, str], ...] = (
+    ("app", "workspace"),
+    ("app", "member"),
+    ("app", "brand_kit"),
+    ("app", "project"),
+    ("app", "workflow_request"),
+    ("app", "execution_run"),
+    ("app", "task_attempt"),
+    ("app", "outbox_event"),
+    ("app", "idempotency_key"),
+)
+
+GrantRow = tuple[str, str, str, frozenset[Privilege]]
+
+
+def _row(role: str, schema: str, table: str, privs: Iterable[Privilege]) -> GrantRow:
+    return (role, schema, table, frozenset(privs))
+
+
+def grant_matrix() -> tuple[GrantRow, ...]:
+    """Explicit privileges per role and table (SECURITY.md least privilege)."""
+    rows: list[GrantRow] = []
+
+    for schema, table in _APP_MUTABLE:
+        rows.append(_row("oos_api", schema, table, ("SELECT", "INSERT", "UPDATE")))
+        rows.append(_row("oos_worker", schema, table, ("SELECT", "INSERT", "UPDATE")))
+        rows.append(_row("oos_retention", schema, table, ("SELECT", "DELETE")))
+
+    for role in ("oos_api", "oos_worker"):
+        rows.append(_row(role, "app", "brand_kit_version", ("SELECT", "INSERT")))
+        rows.append(_row(role, "app", "audit_log", ("SELECT", "INSERT")))
+
+    rows.append(_row("oos_retention", "app", "brand_kit_version", ("SELECT",)))
+    rows.append(_row("oos_retention", "app", "audit_log", ("SELECT",)))
+
+    for role in ("oos_api", "oos_worker", "oos_retention"):
+        rows.append(_row(role, "app", "service_identity", ("SELECT",)))
+
+    rows.append(_row("oos_render", "media", "render_job", ("SELECT", "INSERT", "UPDATE", "DELETE")))
+    rows.append(_row("oos_retention", "media", "render_job", ("SELECT", "DELETE")))
+
+    return tuple(rows)
+
+
+_MATRIX_INDEX: dict[tuple[str, str, str], frozenset[Privilege]] | None = None
+
+
+def _matrix_index() -> dict[tuple[str, str, str], frozenset[Privilege]]:
+    global _MATRIX_INDEX
+    if _MATRIX_INDEX is None:
+        idx: dict[tuple[str, str, str], frozenset[Privilege]] = {}
+        for role, schema, table, privs in grant_matrix():
+            idx[(role, schema, table)] = privs
+        _MATRIX_INDEX = idx
+    return _MATRIX_INDEX
+
+
+def privileges_for(role: str, schema: str, table: str) -> frozenset[Privilege]:
+    return _matrix_index().get((role, schema, table), frozenset())
+
+
+def table_qualified_name(schema: str, table: str) -> str:
+    return f"{schema}.{table}"
+
 
 def sql_m0_tables() -> str:
     path = Path(__file__).resolve().parent / "sql" / "m0_tables_up.sql"
@@ -67,36 +135,64 @@ def sql_m0_tables() -> str:
 
 
 def execute_sql_script(conn: Connection, script: str) -> None:
-    for raw in script.split(";"):
-        stmt = raw.strip()
-        if stmt:
-            conn.execute(text(stmt))
+    conn.exec_driver_sql(script)
 
 
-def _quote_password(raw: str) -> str:
-    return raw.replace("'", "''")
-
-
-def _pg_ident(name: str) -> str:
+def _validate_ident(name: str) -> None:
     if not re.fullmatch(r"[a-z_][a-z0-9_]*", name):
         msg = f"invalid SQL identifier: {name!r}"
         raise ValueError(msg)
-    return name
 
 
-def _qualified(schema: str, table: str) -> str:
-    return f"{_pg_ident(schema)}.{_pg_ident(table)}"
+def _validate_db_name(name: str) -> None:
+    if not re.fullmatch(r"[a-zA-Z_][a-zA-Z0-9_]*", name):
+        msg = f"unsupported database name: {name!r}"
+        raise ValueError(msg)
+
+
+def _run_composable(conn: Connection, statement: sql.Composable) -> None:
+    conn.connection.driver_connection.execute(statement)
+
+
+def _grant_table(
+    conn: Connection,
+    role: str,
+    schema: str,
+    table: str,
+    privs: frozenset[Privilege],
+) -> None:
+    if not privs:
+        return
+    priv_sql = sql.SQL(", ").join(sql.SQL(p) for p in sorted(privs))
+    _run_composable(
+        conn,
+        sql.SQL("GRANT {} ON TABLE {}.{} TO {}").format(
+            priv_sql,
+            sql.Identifier(schema),
+            sql.Identifier(table),
+            sql.Identifier(role),
+        ),
+    )
 
 
 def create_roles(conn: Connection) -> None:
     conn.execute(text("CREATE ROLE oos_migrator NOLOGIN"))
-    bootstrap = conn.execute(text("SELECT current_user AS name")).one().name
-    conn.execute(text(f"GRANT oos_migrator TO {_pg_ident(bootstrap)}"))
+    bootstrap = conn.execute(text("SELECT current_user AS name")).scalar_one()
+    _validate_ident(bootstrap)
+    _run_composable(
+        conn,
+        sql.SQL("GRANT {} TO {}").format(sql.Identifier("oos_migrator"), sql.Identifier(bootstrap)),
+    )
+
     db_name = conn.execute(text("SELECT current_database()")).scalar_one()
-    if not re.fullmatch(r"[a-zA-Z_][a-zA-Z0-9_]*", db_name):
-        msg = f"unsupported database name for grants: {db_name!r}"
-        raise ValueError(msg)
-    conn.execute(text(f"GRANT CREATE ON DATABASE {_pg_ident(db_name)} TO oos_migrator"))
+    _validate_db_name(db_name)
+    _run_composable(
+        conn,
+        sql.SQL("GRANT CREATE ON DATABASE {} TO {}").format(
+            sql.Identifier(db_name),
+            sql.Identifier("oos_migrator"),
+        ),
+    )
 
     for role in LOGIN_ROLES:
         env_key = ENV_PASSWORD_KEYS[role]
@@ -104,23 +200,58 @@ def create_roles(conn: Connection) -> None:
         if not password:
             msg = f"missing {env_key} for role {role}"
             raise RuntimeError(msg)
+        _run_composable(conn, sql.SQL("CREATE ROLE {} LOGIN").format(sql.Identifier(role)))
+        conn.execute(text("SELECT set_config('oos.pw', :pw, true)"), {"pw": password})
+        conn.execute(text("SELECT set_config('oos.role', :role, true)"), {"role": role})
         conn.execute(
-            text(f"CREATE ROLE {_pg_ident(role)} LOGIN PASSWORD '{_quote_password(password)}'")
+            text(
+                """
+                DO $do$
+                BEGIN
+                  EXECUTE format(
+                    'ALTER ROLE %I PASSWORD %L',
+                    current_setting('oos.role'),
+                    current_setting('oos.pw')
+                  );
+                END
+                $do$;
+                """
+            )
         )
-        conn.execute(text(f"GRANT {_pg_ident(role)} TO {_pg_ident(bootstrap)}"))
-
-    for role in LOGIN_ROLES:
-        conn.execute(text(f"GRANT CONNECT ON DATABASE {_pg_ident(db_name)} TO {_pg_ident(role)}"))
+        _run_composable(
+            conn,
+            sql.SQL("GRANT {} TO {}").format(sql.Identifier(role), sql.Identifier(bootstrap)),
+        )
+        _run_composable(
+            conn,
+            sql.SQL("GRANT CONNECT ON DATABASE {} TO {}").format(
+                sql.Identifier(db_name),
+                sql.Identifier(role),
+            ),
+        )
 
 
 def drop_roles(conn: Connection) -> None:
-    bootstrap = conn.execute(text("SELECT current_user AS name")).one().name
+    bootstrap = conn.execute(text("SELECT current_user AS name")).scalar_one()
+    _validate_ident(bootstrap)
     for role in (*reversed(LOGIN_ROLES), "oos_migrator"):
-        conn.execute(text(f"DROP OWNED BY {_pg_ident(role)} CASCADE"))
+        _run_composable(
+            conn,
+            sql.SQL("DROP OWNED BY {} CASCADE").format(sql.Identifier(role)),
+        )
     for role in reversed(LOGIN_ROLES):
-        conn.execute(text(f"REVOKE {_pg_ident(role)} FROM {_pg_ident(bootstrap)}"))
-        conn.execute(text(f"DROP ROLE IF EXISTS {_pg_ident(role)}"))
-    conn.execute(text(f"REVOKE oos_migrator FROM {_pg_ident(bootstrap)}"))
+        _run_composable(
+            conn,
+            sql.SQL("REVOKE {} FROM {}").format(sql.Identifier(role), sql.Identifier(bootstrap)),
+        )
+        _run_composable(conn, sql.SQL("DROP ROLE IF EXISTS {}").format(sql.Identifier(role)))
+    _run_composable(
+        conn,
+        sql.SQL("REVOKE {} FROM {}").format(
+            sql.Identifier("oos_migrator"),
+            sql.Identifier(bootstrap),
+        ),
+    )
     conn.execute(text("DROP ROLE IF EXISTS oos_migrator"))
 
 
@@ -130,9 +261,22 @@ def assume_migrator(conn: Connection) -> None:
 
 def configure_ownership(conn: Connection) -> None:
     for schema in ("app", "media", "analytics", "dbos"):
-        conn.execute(text(f"ALTER SCHEMA {_pg_ident(schema)} OWNER TO oos_migrator"))
+        _run_composable(
+            conn,
+            sql.SQL("ALTER SCHEMA {} OWNER TO {}").format(
+                sql.Identifier(schema),
+                sql.Identifier("oos_migrator"),
+            ),
+        )
     for schema, table in ALL_M0_TABLES:
-        conn.execute(text(f"ALTER TABLE {_qualified(schema, table)} OWNER TO oos_migrator"))
+        _run_composable(
+            conn,
+            sql.SQL("ALTER TABLE {}.{} OWNER TO {}").format(
+                sql.Identifier(schema),
+                sql.Identifier(table),
+                sql.Identifier("oos_migrator"),
+            ),
+        )
 
 
 def apply_rls(conn: Connection) -> None:
@@ -143,12 +287,16 @@ def apply_rls(conn: Connection) -> None:
             ALTER TABLE app.workspace FORCE ROW LEVEL SECURITY;
             DROP POLICY IF EXISTS workspace_isolation ON app.workspace;
             CREATE POLICY workspace_isolation ON app.workspace
-              USING (id = current_setting('app.workspace_id', true)::uuid);
+              USING (
+                id = NULLIF(current_setting('app.workspace_id', true), '')::uuid
+              );
             """
         )
     )
     for schema, table in WORKSPACE_ID_TABLES:
-        qualified = _qualified(schema, table)
+        _validate_ident(schema)
+        _validate_ident(table)
+        qualified = table_qualified_name(schema, table)
         conn.execute(
             text(
                 f"""
@@ -156,7 +304,11 @@ def apply_rls(conn: Connection) -> None:
                 ALTER TABLE {qualified} FORCE ROW LEVEL SECURITY;
                 DROP POLICY IF EXISTS workspace_isolation ON {qualified};
                 CREATE POLICY workspace_isolation ON {qualified}
-                  USING (workspace_id = current_setting('app.workspace_id', true)::uuid);
+                  USING (
+                    workspace_id = NULLIF(
+                      current_setting('app.workspace_id', true), ''
+                    )::uuid
+                  );
                 """
             )
         )
@@ -167,83 +319,57 @@ def drop_rls(conn: Connection) -> None:
     conn.execute(text("ALTER TABLE app.workspace NO FORCE ROW LEVEL SECURITY"))
     conn.execute(text("ALTER TABLE app.workspace DISABLE ROW LEVEL SECURITY"))
     for schema, table in WORKSPACE_ID_TABLES:
-        qualified = _qualified(schema, table)
+        qualified = table_qualified_name(schema, table)
         conn.execute(text(f"DROP POLICY IF EXISTS workspace_isolation ON {qualified}"))
         conn.execute(text(f"ALTER TABLE {qualified} NO FORCE ROW LEVEL SECURITY"))
         conn.execute(text(f"ALTER TABLE {qualified} DISABLE ROW LEVEL SECURITY"))
 
 
-def _grant_tables(
-    conn: Connection,
-    role: str,
-    tables: tuple[tuple[str, str], ...],
-    *,
-    select: bool = False,
-    insert: bool = False,
-    update: bool = False,
-    delete: bool = False,
-) -> None:
-    priv_parts = [
-        p
-        for flag, p in (
-            (select, "SELECT"),
-            (insert, "INSERT"),
-            (update, "UPDATE"),
-            (delete, "DELETE"),
-        )
-        if flag
-    ]
-    if not priv_parts:
-        return
-    priv = ", ".join(priv_parts)
-    for schema, table in tables:
-        qualified = _qualified(schema, table)
-        target = _pg_ident(role)
-        conn.execute(text(f"GRANT {priv} ON TABLE {qualified} TO {target}"))
-
-
 def apply_grants(conn: Connection) -> None:
-    for schema in ("app", "media", "analytics", "dbos"):
-        conn.execute(text(f"GRANT USAGE ON SCHEMA {_pg_ident(schema)} TO PUBLIC"))
-
-    app_mutable = tuple(
-        t for t in M0_APP_TABLES if t not in VERSION_TABLES and t != ("app", "audit_log")
+    schema_roles: tuple[tuple[str, tuple[str, ...]], ...] = (
+        ("app", ("oos_api", "oos_worker", "oos_retention")),
+        ("media", ("oos_render", "oos_retention")),
+        ("analytics", ("oos_analytics_ro",)),
+        ("dbos", ("oos_worker",)),
     )
-    app_read = (*M0_APP_TABLES, ("media", "render_job"))
+    for schema, roles in schema_roles:
+        for role in roles:
+            _run_composable(
+                conn,
+                sql.SQL("GRANT USAGE ON SCHEMA {} TO {}").format(
+                    sql.Identifier(schema),
+                    sql.Identifier(role),
+                ),
+            )
 
-    for role in LOGIN_ROLES:
-        conn.execute(text(f"GRANT USAGE ON SCHEMA app TO {_pg_ident(role)}"))
-        conn.execute(text(f"GRANT USAGE ON SCHEMA media TO {_pg_ident(role)}"))
-        conn.execute(text(f"GRANT USAGE ON SCHEMA analytics TO {_pg_ident(role)}"))
-        conn.execute(text(f"GRANT USAGE ON SCHEMA dbos TO {_pg_ident(role)}"))
-
-    _grant_tables(conn, "oos_api", app_read, select=True)
-    _grant_tables(conn, "oos_worker", app_read, select=True)
-    _grant_tables(conn, "oos_retention", app_read, select=True)
-    _grant_tables(conn, "oos_analytics_ro", ALL_M0_TABLES, select=True)
-
-    _grant_tables(conn, "oos_api", app_mutable, insert=True, update=True, delete=True)
-    _grant_tables(conn, "oos_worker", app_mutable, insert=True, update=True, delete=True)
-    _grant_tables(conn, "oos_retention", app_mutable, delete=True)
-
-    _grant_tables(conn, "oos_api", VERSION_TABLES, insert=True, select=True)
-    _grant_tables(conn, "oos_worker", VERSION_TABLES, insert=True, select=True)
-
-    _grant_tables(conn, "oos_api", (("app", "audit_log"),), insert=True, select=True)
-    _grant_tables(conn, "oos_worker", (("app", "audit_log"),), insert=True, select=True)
+    for role, schema, table, privs in grant_matrix():
+        _grant_table(conn, role, schema, table, privs)
 
     for role in ("oos_api", "oos_worker"):
-        audit_seq = "GRANT USAGE, SELECT ON SEQUENCE app.audit_log_id_seq TO "
-        outbox_seq = "GRANT USAGE, SELECT ON SEQUENCE app.outbox_event_seq_seq TO "
-        conn.execute(text(f"{audit_seq}{_pg_ident(role)}"))
-        conn.execute(text(f"{outbox_seq}{_pg_ident(role)}"))
+        _run_composable(
+            conn,
+            sql.SQL("GRANT USAGE, SELECT ON SEQUENCE {}.{} TO {}").format(
+                sql.Identifier("app"),
+                sql.Identifier("audit_log_id_seq"),
+                sql.Identifier(role),
+            ),
+        )
+        _run_composable(
+            conn,
+            sql.SQL("GRANT USAGE, SELECT ON SEQUENCE {}.{} TO {}").format(
+                sql.Identifier("app"),
+                sql.Identifier("outbox_event_seq_seq"),
+                sql.Identifier(role),
+            ),
+        )
 
-    _grant_tables(
-        conn, "oos_render", M0_MEDIA_TABLES, select=True, insert=True, update=True, delete=True
+    _run_composable(
+        conn,
+        sql.SQL("GRANT CREATE ON SCHEMA {} TO {}").format(
+            sql.Identifier("dbos"),
+            sql.Identifier("oos_worker"),
+        ),
     )
-    _grant_tables(conn, "oos_render", M0_APP_TABLES, select=True)
-
-    conn.execute(text("GRANT CREATE ON SCHEMA dbos TO oos_worker"))
     conn.execute(
         text(
             """
@@ -264,6 +390,15 @@ def apply_grants(conn: Connection) -> None:
 
 def drop_m0_schema(conn: Connection) -> None:
     for schema, table in reversed(ALL_M0_TABLES):
-        conn.execute(text(f"DROP TABLE IF EXISTS {_qualified(schema, table)} CASCADE"))
+        _run_composable(
+            conn,
+            sql.SQL("DROP TABLE IF EXISTS {}.{} CASCADE").format(
+                sql.Identifier(schema),
+                sql.Identifier(table),
+            ),
+        )
     for schema in reversed(("analytics", "media", "app", "dbos")):
-        conn.execute(text(f"DROP SCHEMA IF EXISTS {_pg_ident(schema)} CASCADE"))
+        _run_composable(
+            conn,
+            sql.SQL("DROP SCHEMA IF EXISTS {} CASCADE").format(sql.Identifier(schema)),
+        )

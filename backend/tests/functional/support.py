@@ -10,6 +10,7 @@ from alembic import command
 from alembic.config import Config
 from m0_access import ENV_PASSWORD_KEYS, LOGIN_ROLES
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
 from testcontainers.postgres import PostgresContainer
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -67,7 +68,6 @@ def pg_dump_schema_only(container: PostgresContainer) -> str:
                 user,
                 "--schema-only",
                 "--no-owner",
-                "--no-privileges",
                 db,
             ],
         )
@@ -104,14 +104,17 @@ def role_urls(container: PostgresContainer) -> dict[str, str]:
     return urls
 
 
-def count_rows(connection_url: str, role: str, workspace_id: str | None, table: str) -> int:
+def engines_for_roles(urls: dict[str, str]) -> dict[str, Engine]:
+    return {role: create_engine(urls[role]) for role in LOGIN_ROLES}
+
+
+def count_rows(engine: Engine, role: str, workspace_id: str | None, table: str) -> int:
     schema, _, table_name = table.partition(".")
     if not re.fullmatch(r"[a-z_][a-z0-9_]*", schema) or not re.fullmatch(
         r"[a-z_][a-z0-9_]*", table_name
     ):
         msg = f"invalid table name: {table!r}"
         raise ValueError(msg)
-    engine = create_engine(connection_url)
     with engine.connect() as conn, conn.begin():
         conn.execute(text(f"SET LOCAL ROLE {role}"))
         if workspace_id is not None:
@@ -122,3 +125,48 @@ def count_rows(connection_url: str, role: str, workspace_id: str | None, table: 
         sql = f"SELECT count(*)::int FROM {schema}.{table_name}"
         result = conn.execute(text(sql))
         return int(result.scalar_one())
+
+
+def seed_row_snapshot(migrate_url: str) -> list[dict[str, object]]:
+    """Canonical rows written by infra.seed.load (AC4 idempotence)."""
+    engine = create_engine(migrate_url)
+    with engine.begin() as conn:
+        conn.execute(text("SET LOCAL ROLE oos_migrator"))
+        conn.execute(
+            text("SELECT set_config('app.workspace_id', :wid, true)"),
+            {"wid": "00000000-0000-4000-8000-000000000001"},
+        )
+        project = (
+            conn.execute(text("SELECT id::text, title, series, state FROM app.project ORDER BY id"))
+            .mappings()
+            .all()
+        )
+        workspace = (
+            conn.execute(text("SELECT id::text, name FROM app.workspace ORDER BY id"))
+            .mappings()
+            .all()
+        )
+        members = (
+            conn.execute(
+                text("SELECT id::text, idp_subject, display_name FROM app.member ORDER BY id")
+            )
+            .mappings()
+            .all()
+        )
+        identities = (
+            conn.execute(text("SELECT id, kind FROM app.service_identity ORDER BY id"))
+            .mappings()
+            .all()
+        )
+        kits = (
+            conn.execute(text("SELECT id::text, name, head_version FROM app.brand_kit ORDER BY id"))
+            .mappings()
+            .all()
+        )
+    return [
+        {"workspace": [dict(r) for r in workspace]},
+        {"member": [dict(r) for r in members]},
+        {"service_identity": [dict(r) for r in identities]},
+        {"brand_kit": [dict(r) for r in kits]},
+        {"project": [dict(r) for r in project]},
+    ]

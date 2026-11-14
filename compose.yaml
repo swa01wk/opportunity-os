@@ -193,7 +193,7 @@ services:
 
   seed:
     profiles: [tools]
-    image: oos/py-tools:dev
+    image: oos/seed:dev
     build:
       context: .
       dockerfile: docker/api.Dockerfile
@@ -207,7 +207,7 @@ services:
       HOME: /tmp
       PYTHONPATH: /repo
       APP_ENV: ${APP_ENV:?set in .env}
-      DATABASE_URL: postgresql+psycopg://oos_api:${DB_PASSWORD_API:?set in .env}@postgres:5432/${POSTGRES_DB:?set in .env}
+      MIGRATE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:?set in .env}:${POSTGRES_PASSWORD:?set in .env}@postgres:5432/${POSTGRES_DB:?set in .env}
     networks: [private]
     depends_on:
       postgres: { condition: service_healthy }

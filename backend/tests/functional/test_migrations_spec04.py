@@ -16,6 +16,7 @@ from support import (
     alembic_upgrade,
     normalize_schema_dump,
     pg_dump_schema_only,
+    seed_row_snapshot,
 )
 from testcontainers.postgres import PostgresContainer
 
@@ -23,20 +24,20 @@ pytestmark = pytest.mark.functional
 
 
 @pytest.mark.t("T-34")
-def test_upgrade_downgrade_reupgrade_schema_unchanged(postgres_spec04: PostgresContainer) -> None:
-    host = postgres_spec04.get_container_host_ip()
-    port = int(postgres_spec04.get_exposed_port(5432))
-    user = postgres_spec04.username
-    password = postgres_spec04.password
-    db = postgres_spec04.dbname
+def test_upgrade_downgrade_reupgrade_schema_unchanged(postgres_ac1: PostgresContainer) -> None:
+    host = postgres_ac1.get_container_host_ip()
+    port = int(postgres_ac1.get_exposed_port(5432))
+    user = postgres_ac1.username
+    password = postgres_ac1.password
+    db = postgres_ac1.dbname
     url = f"postgresql+psycopg://{user}:{password}@{host}:{port}/{db}"
 
     alembic_upgrade(url)
-    first_dump = normalize_schema_dump(pg_dump_schema_only(postgres_spec04))
+    first_dump = normalize_schema_dump(pg_dump_schema_only(postgres_ac1))
 
     alembic_downgrade(url)
     alembic_upgrade(url)
-    second_dump = normalize_schema_dump(pg_dump_schema_only(postgres_spec04))
+    second_dump = normalize_schema_dump(pg_dump_schema_only(postgres_ac1))
 
     assert first_dump == second_dump
 
@@ -50,22 +51,26 @@ def test_render_cannot_write_app_role_refused(migrated_database: dict[str, str])
             conn.execute(
                 text(
                     """
-                        INSERT INTO app.workspace (id, name)
-                        VALUES (gen_random_uuid(), 'blocked')
-                        """
+                    INSERT INTO app.workspace (id, name)
+                    VALUES (gen_random_uuid(), 'blocked')
+                    """
                 ),
             )
 
 
 @pytest.mark.t("T-34")
-def test_version_and_audit_rows_are_insert_only(migrated_database: dict[str, str]) -> None:
-    engine = create_engine(migrated_database["oos_api"])
+@pytest.mark.parametrize("role", ["oos_api", "oos_worker"])
+def test_version_and_audit_rows_are_insert_only(
+    migrated_database: dict[str, str],
+    role: str,
+) -> None:
+    engine = create_engine(migrated_database[role])
     with engine.begin() as conn:
-        conn.execute(text("SET LOCAL ROLE oos_api"))
+        conn.execute(text(f"SET LOCAL ROLE {role}"))
         with pytest.raises(Exception, match="permission denied"):
             conn.execute(text("UPDATE app.brand_kit_version SET sha256 = sha256 WHERE false"))
     with engine.begin() as conn:
-        conn.execute(text("SET LOCAL ROLE oos_api"))
+        conn.execute(text(f"SET LOCAL ROLE {role}"))
         with pytest.raises(Exception, match="permission denied"):
             conn.execute(text("DELETE FROM app.audit_log"))
 
@@ -75,7 +80,7 @@ def test_seed_idempotent_and_refuses_production(migrated_database: dict[str, str
     env = {
         **os.environ,
         **TEST_PASSWORDS,
-        "DATABASE_URL": migrated_database["oos_api"],
+        "MIGRATE_DATABASE_URL": migrated_database["migrate_url"],
         "APP_ENV": "development",
         "PYTHONPATH": str(__import__("pathlib").Path(__file__).resolve().parents[3]),
     }
@@ -86,15 +91,7 @@ def test_seed_idempotent_and_refuses_production(migrated_database: dict[str, str
         capture_output=True,
         text=True,
     )
-    workspace = "00000000-0000-4000-8000-000000000001"
-    engine = create_engine(migrated_database["oos_api"])
-    with engine.begin() as conn:
-        conn.execute(text("SET LOCAL ROLE oos_api"))
-        conn.execute(
-            text("SELECT set_config('app.workspace_id', :wid, true)"),
-            {"wid": workspace},
-        )
-        first = conn.execute(text("SELECT count(*)::int FROM app.project")).scalar_one()
+    first_snapshot = seed_row_snapshot(migrated_database["migrate_url"])
     subprocess.run(
         [sys.executable, "-m", "infra.seed.load"],
         check=True,
@@ -102,14 +99,8 @@ def test_seed_idempotent_and_refuses_production(migrated_database: dict[str, str
         capture_output=True,
         text=True,
     )
-    with engine.begin() as conn:
-        conn.execute(text("SET LOCAL ROLE oos_api"))
-        conn.execute(
-            text("SELECT set_config('app.workspace_id', :wid, true)"),
-            {"wid": workspace},
-        )
-        second = conn.execute(text("SELECT count(*)::int FROM app.project")).scalar_one()
-    assert first == second == 1
+    second_snapshot = seed_row_snapshot(migrated_database["migrate_url"])
+    assert first_snapshot == second_snapshot
 
     prod_env = {**env, "APP_ENV": "production"}
     failed = subprocess.run(
@@ -140,10 +131,10 @@ def test_outbox_seq_unique_under_concurrent_inserts(migrated_database: dict[str,
                 row = conn.execute(
                     text(
                         """
-                            INSERT INTO app.outbox_event (id, workspace_id, type, body)
-                            VALUES (gen_random_uuid(), :ws, 'test.event', '{}'::jsonb)
-                            RETURNING seq
-                            """
+                        INSERT INTO app.outbox_event (id, workspace_id, type, body)
+                        VALUES (gen_random_uuid(), :ws, 'test.event', '{}'::jsonb)
+                        RETURNING seq
+                        """
                     ),
                     {"ws": workspace_id},
                 ).one()

@@ -55,9 +55,9 @@ def _refuse_production() -> None:
 
 
 def _engine() -> Engine:
-    url = os.environ.get("DATABASE_URL")
+    url = os.environ.get("MIGRATE_DATABASE_URL") or os.environ.get("DATABASE_URL")
     if not url:
-        print("seed: DATABASE_URL is required", file=sys.stderr)
+        print("seed: MIGRATE_DATABASE_URL or DATABASE_URL is required", file=sys.stderr)
         raise SystemExit(1)
     return create_engine(url)
 
@@ -174,7 +174,7 @@ def run() -> None:
     _refuse_production()
     engine = _engine()
     with engine.connect() as conn, conn.begin():
-        conn.execute(text("SET LOCAL ROLE oos_api"))
+        conn.execute(text("SET LOCAL ROLE oos_migrator"))
         conn.execute(
             text("SELECT set_config('app.workspace_id', :wid, true)"),
             {"wid": str(WORKSPACE_ID)},
