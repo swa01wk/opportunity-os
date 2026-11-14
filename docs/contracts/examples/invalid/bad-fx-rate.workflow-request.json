@@ -1,0 +1,17 @@
+{
+  "requestId": "00000000-0000-4000-8000-000000000055",
+  "workflowType": "preview",
+  "projectId": "00000000-0000-4000-8000-000000000010",
+  "requestedBy": {
+    "type": "member",
+    "id": "00000000-0000-4000-8000-000000000002",
+    "responsibility": "editor"
+  },
+  "input": {
+    "estimatedCost": {
+      "amountMinor": 100,
+      "currency": "INR",
+      "fxRateToReporting": "abc"
+    }
+  }
+}

@@ -2,6 +2,41 @@
   "$comment": "Expected outcome per fixture. level=schema: rejected by JSON Schema/Pydantic. level=semantic: schema-valid, rejected by the compiler with the given ValidationError code.",
   "fixtures": [
     {
+      "file": "bad-workflow-type.workflow-request.json",
+      "contract": "events/workflow-request.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "Unknown workflowType (contract enum)."
+    },
+    {
+      "file": "extra-workflow-property.workflow-request.json",
+      "contract": "events/workflow-request.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "additionalProperties is false on WorkflowRequest."
+    },
+    {
+      "file": "bad-fx-rate.workflow-request.json",
+      "contract": "events/workflow-request.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "fxRateToReporting must match the Money pattern."
+    },
+    {
+      "file": "null-not-before.workflow-request.json",
+      "contract": "events/workflow-request.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "Optional timestamps must be omitted, not null."
+    },
+    {
+      "file": "bool-amount.workflow-request.json",
+      "contract": "events/workflow-request.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "amountMinor must be a strict integer, not a boolean."
+    },
+    {
       "file": "unknown-op.video-spec.json",
       "contract": "media/video-spec.schema.json",
       "level": "schema",

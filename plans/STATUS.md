@@ -38,7 +38,7 @@ M0, prepared in Stage 4: [plans/M0/milestone.md](M0/milestone.md) (dependency gr
 | [SPEC-01a Repo toolchain, Makefile and Compose stack](M0/specs/SPEC-01a/spec.md) | NFR-13 | — | `feat/SPEC-01a-toolchain`, [#13](https://github.com/swa01wk/opportunity-os/pull/13) | Done (merged 2026-11-14; T-31 passed) | Owner (Claude) |
 | [SPEC-01b Release host: make release and deploy to local staging](M0/specs/SPEC-01b/spec.md) | NFR-13 | — | `feat/SPEC-01b-release-host` | Ready | Owner (Cursor) |
 | [SPEC-02 CI pipeline, security scans and branch rules](M0/specs/SPEC-02/spec.md) | NFR-05, NFR-06, NFR-13, NFR-18 | — | `feat/SPEC-02-ci-pipeline` | Ready | Owner (Cursor) |
-| [SPEC-03a Contracts I: pipeline, drift, dual-runtime fixtures, common, workflow requests](M0/specs/SPEC-03a/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03a-contracts-pipeline` | Ready | Owner (Cursor) |
+| [SPEC-03a Contracts I: pipeline, drift, dual-runtime fixtures, common, workflow requests](M0/specs/SPEC-03a/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03a-contracts-pipeline`, [#15](https://github.com/swa01wk/opportunity-os/pull/15) | In review | Owner (Cursor) |
 | [SPEC-05 Object store choice and BlobStore adapter (ADR-015 amendment)](M0/specs/SPEC-05/spec.md) | R-30, NFR-04 | — | `feat/SPEC-05-object-store` | Ready | Owner (Cursor) |
 | [SPEC-08 Telemetry wiring, Collector redaction and health checks](M0/specs/SPEC-08/spec.md) | NFR-09, NFR-06, NFR-15 | — | `feat/SPEC-08-telemetry` | Ready | Owner (Cursor) |
 | [SPEC-03b Contracts II: domain events, AG-UI stream, analytics](M0/specs/SPEC-03b/spec.md) | NFR-19, R-50 | — | `feat/SPEC-03b-contracts-events` | Draft: needs SPEC-03a | Owner (Cursor) |

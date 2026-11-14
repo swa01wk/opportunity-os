@@ -8,8 +8,8 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "format:check": "prettier --check web media/scenes contracts/ts contracts/tests/*.ts eslint.config.mjs package.json tsconfig.base.json pnpm-workspace.yaml",
-    "format": "prettier --write web media/scenes contracts/ts contracts/tests/*.ts eslint.config.mjs package.json tsconfig.base.json pnpm-workspace.yaml",
+    "format:check": "prettier --check web media/scenes contracts/ts contracts/ts/tests contracts/tests/*.ts eslint.config.mjs package.json tsconfig.base.json pnpm-workspace.yaml",
+    "format": "prettier --write web media/scenes contracts/ts contracts/ts/tests contracts/tests/*.ts eslint.config.mjs package.json tsconfig.base.json pnpm-workspace.yaml",
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r test"
   },

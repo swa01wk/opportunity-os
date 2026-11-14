@@ -4,5 +4,5 @@
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true
   },
-  "include": ["src", "../tests/*.ts", "vitest.config.ts"]
+  "include": ["src", "tests", "../tests/*.ts", "vitest.config.ts"]
 }

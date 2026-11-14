@@ -1,0 +1,11 @@
+{
+  "requestId": "00000000-0000-4000-8000-0000000000d1",
+  "workflowType": "diagnostic",
+  "projectId": "00000000-0000-4000-8000-000000000010",
+  "requestedBy": {
+    "type": "member",
+    "id": "00000000-0000-4000-8000-000000000002",
+    "responsibility": "owner"
+  },
+  "input": {}
+}

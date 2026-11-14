@@ -5,7 +5,16 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["**/node_modules/**", "**/.next/**", "**/dist/**", "**/coverage/**", "docs/**"] },
+  {
+    ignores: [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/coverage/**",
+      "docs/**",
+      "contracts/ts/src/generated/**",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

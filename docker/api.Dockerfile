@@ -17,7 +17,8 @@ COPY media/audio media/audio
 COPY contracts/python contracts/python
 
 FROM base AS dev
-RUN apt-get update && apt-get install -y --no-install-recommends make \
+# SPEC-03a deviation: git for contracts drift test (B10); py-tools prompt normally omits it.
+RUN apt-get update && apt-get install -y --no-install-recommends make git \
     && rm -rf /var/lib/apt/lists/*
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --all-packages
 

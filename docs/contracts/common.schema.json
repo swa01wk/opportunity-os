@@ -1,105 +1,187 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opportunityos.invalid/contracts/common.schema.json",
-  "x-version": "0.1.0",
-  "title": "Common definitions",
-  "description": "Shared primitives used by every OpportunityOS contract. Canonical source from M0: Pydantic (ADR-008).",
   "$defs": {
-    "Uuid": {
-      "type": "string",
-      "format": "uuid",
-      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-    },
-    "Sha256": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{64}$",
-      "description": "Lowercase hex SHA-256 of canonical JSON (RFC 8785) or of file bytes."
-    },
-    "Timestamp": {
-      "type": "string",
-      "format": "date-time",
-      "description": "Absolute UTC timestamp (RFC 3339). Display timezone is a destination setting (R-04)."
-    },
-    "SemVer": {
-      "type": "string",
-      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$"
-    },
-    "LocalId": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9_.-]{0,63}$",
-      "description": "Stable, human-readable ID unique within its document (objects, elements, scenes, beats, phrases)."
-    },
-    "Token": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9]*(\\.[a-z0-9]+)*$",
-      "maxLength": 64,
-      "description": "Design-token name from docs/design/tokens.md, e.g. color.layer.3 or ease.standard. Never a raw value."
-    },
-    "Money": {
-      "type": "object",
+    "Actor": {
       "additionalProperties": false,
-      "required": ["amountMinor", "currency"],
       "properties": {
-        "amountMinor": { "type": "integer", "description": "Amount in minor units (paise, cents)." },
-        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
-        "fxRateToReporting": {
-          "type": "string",
-          "pattern": "^[0-9]+(\\.[0-9]+)?$",
-          "description": "Recorded conversion rate into the reporting currency (INR, Q-05), as a decimal string."
+        "id": {
+          "maxLength": 100,
+          "type": "string"
+        },
+        "responsibility": {
+          "description": "PRD §2.3 responsibility the action was taken under (R-05). Only members have one.",
+          "enum": [
+            "owner",
+            "editor",
+            "reviewer",
+            "publisher",
+            "analyst"
+          ],
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "member",
+            "service",
+            "agent_task"
+          ],
+          "type": "string"
         }
-      }
-    },
-    "VersionRef": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["id", "version", "sha256"],
-      "properties": {
-        "id": { "$ref": "#/$defs/Uuid" },
-        "version": { "type": "integer", "minimum": 1 },
-        "sha256": { "$ref": "#/$defs/Sha256" }
       },
-      "description": "Pointer to one immutable version of a record. Approvals and manifests bind to these."
+      "required": [
+        "type",
+        "id"
+      ],
+      "type": "object"
     },
     "BlobRef": {
-      "type": "object",
       "additionalProperties": false,
-      "required": ["key", "sha256", "bytes", "mediaType"],
+      "description": "Content-addressed object in private storage (ADR-007).",
       "properties": {
-        "key": { "type": "string", "pattern": "^ws/[0-9a-f-]{36}/sha256/[0-9a-f]{64}\\.[a-z0-9]{1,8}$" },
-        "sha256": { "$ref": "#/$defs/Sha256" },
-        "bytes": { "type": "integer", "minimum": 0 },
-        "mediaType": { "type": "string", "maxLength": 100 }
-      },
-      "description": "Content-addressed object in private storage (ADR-007)."
-    },
-    "Actor": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["type", "id"],
-      "properties": {
-        "type": { "enum": ["member", "service", "agent_task"] },
-        "id": { "type": "string", "maxLength": 100 },
-        "responsibility": {
-          "enum": ["owner", "editor", "reviewer", "publisher", "analyst"],
-          "description": "PRD §2.3 responsibility the action was taken under (R-05). Only members have one."
+        "bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "key": {
+          "pattern": "^ws/[0-9a-f-]{36}/sha256/[0-9a-f]{64}\\.[a-z0-9]{1,8}$",
+          "type": "string"
+        },
+        "mediaType": {
+          "maxLength": 100,
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
         }
-      }
+      },
+      "required": [
+        "key",
+        "sha256",
+        "bytes",
+        "mediaType"
+      ],
+      "type": "object"
     },
     "ErrorClass": {
-      "enum": ["retryable_provider", "invalid_content", "render_defect", "uncertain_external", "resource_limit", "authorization", "conflict", "internal"],
-      "description": "R-53 classification. Each class has its own repair options."
+      "description": "R-53 classification. Each class has its own repair options.",
+      "enum": [
+        "retryable_provider",
+        "invalid_content",
+        "render_defect",
+        "uncertain_external",
+        "resource_limit",
+        "authorization",
+        "conflict",
+        "internal"
+      ],
+      "type": "string"
     },
     "ErrorTarget": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "sceneId": { "$ref": "#/$defs/LocalId" },
-        "objectId": { "$ref": "#/$defs/LocalId" },
-        "claimId": { "$ref": "#/$defs/Uuid" },
-        "assetId": { "$ref": "#/$defs/Uuid" },
-        "accountLabel": { "type": "string", "maxLength": 100 },
-        "field": { "type": "string", "maxLength": 200, "description": "JSON pointer into the failing document." }
-      }
+        "accountLabel": {
+          "maxLength": 100,
+          "type": "string"
+        },
+        "assetId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "claimId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "field": {
+          "description": "JSON pointer into the failing document.",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "objectId": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "sceneId": {
+          "$ref": "#/$defs/LocalId"
+        }
+      },
+      "type": "object"
+    },
+    "LocalId": {
+      "description": "Stable, human-readable ID unique within its document (objects, elements, scenes, beats, phrases).",
+      "pattern": "^[a-z][a-z0-9_.-]{0,63}$",
+      "type": "string"
+    },
+    "Money": {
+      "additionalProperties": false,
+      "properties": {
+        "amountMinor": {
+          "description": "Amount in minor units (paise, cents).",
+          "type": "integer"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "type": "string"
+        },
+        "fxRateToReporting": {
+          "description": "Recorded conversion rate into the reporting currency (INR, Q-05), as a decimal string.",
+          "pattern": "^[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "type": "object"
+    },
+    "SemVer": {
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$",
+      "type": "string"
+    },
+    "Sha256": {
+      "description": "Lowercase hex SHA-256 of canonical JSON (RFC 8785) or of file bytes.",
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "Timestamp": {
+      "description": "Absolute UTC timestamp (RFC 3339). Display timezone is a destination setting (R-04).",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?Z$",
+      "type": "string"
+    },
+    "Token": {
+      "description": "Design-token name from docs/design/tokens.md, e.g. color.layer.3 or ease.standard. Never a raw value.",
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9]*(\\.[a-z0-9]+)*$",
+      "type": "string"
+    },
+    "Uuid": {
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "VersionRef": {
+      "additionalProperties": false,
+      "description": "Pointer to one immutable version of a record. Approvals and manifests bind to these.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "version": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "sha256"
+      ],
+      "type": "object"
     }
-  }
+  },
+  "$id": "https://opportunityos.invalid/contracts/common.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Shared primitives used by every OpportunityOS contract. Canonical source from M0: Pydantic (ADR-008).",
+  "title": "Common definitions",
+  "x-version": "0.1.0"
 }
