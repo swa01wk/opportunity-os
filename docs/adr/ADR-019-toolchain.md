@@ -20,3 +20,7 @@ Engineers, CI and Cursor must run the same commands (PROCESS "Make and Docker");
 ## Consequences
 - Easier: one command set for humans, CI and Cursor.
 - Harder: two toolchains to keep current; Renovate groups updates weekly.
+
+## Amendment (Stage 3, 2026-11-14)
+- **Non-functional tools:** k6 for load tests on key API flows and OWASP ZAP baseline scans of `web` and `api`, run per milestone on staging and in hardening only (TEST_STRATEGY.md).
+- **Coverage on changed code:** `diff-cover` over pytest and Vitest coverage reports enforces the floors in TEST_STRATEGY.md on every PR.

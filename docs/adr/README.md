@@ -27,3 +27,4 @@ One ADR per significant choice, written when the choice is made, as `ADR-xxx-<sl
 | [ADR-019](ADR-019-toolchain.md) | Build and test toolchain (uv, Ruff, pytest, pnpm, ESLint, Vitest, Playwright, CI scanners) | Accepted | 2026-11-13 |
 | [ADR-020](ADR-020-ag-ui-event-stream.md) | AG-UI events on the Studio's project event stream; runs observed, not held; outbox `seq` cursor | Accepted | 2026-11-14 |
 | [ADR-021](ADR-021-agent-runtime-contract.md) | Agent runtime: thin `AgentRuntime` loop, per-attempt task contract and context envelope, three validation stages, stale results rejected; revision redraft scope check | Accepted | 2026-11-14 |
+| [ADR-022](ADR-022-delivery-pipeline-local-hosting.md) | Delivery pipeline while hosting is local: CI verifies, your machine builds each release once, staging and production promote by digest | Accepted (confirm at G3) | 2026-11-14 |

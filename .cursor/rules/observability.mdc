@@ -1,0 +1,42 @@
+---
+description: Apply when adding or changing a flow (endpoint, workflow, step, agent task, render job, stream event, scheduled job): span, metric and log conventions, redaction, dashboards
+globs: backend/opportunityos/api/**,backend/opportunityos/workflows/**,agent/opportunityos_agent/**,media/scenes/src/server/**,media/audio/**,web/lib/telemetry/**
+alwaysApply: false
+---
+
+# Observability rules
+
+Owning doc: `docs/architecture/OBSERVABILITY.md` (signals per component, SLOs, alerts, retention, redaction, KPI events). Stack: ADR-016 (OpenTelemetry, Collector, Grafana LGTM), ADR-017 (KPI events in PostgreSQL). A spec that adds a flow adds its spans, metrics, log events and dashboard panel, and updates OBSERVABILITY.md (Definition of Done).
+
+## Traces
+
+- One trace per user request; propagate `traceparent` web → api → outbox event → workflow → agent task, TTS or render job.
+- Span names are `component.operation`: `api.approvals.record`, `agent.research.call_model`, `render.scene_clip`.
+- Set the correlation attributes that apply: `oos.workspace_id`, `oos.project_id`, `oos.run_id`, `oos.task_attempt_id`, `oos.workflow_type`, `oos.task_type`, `oos.gate`, `oos.artifact_sha256`, `oos.render_job_id`.
+- Use OpenTelemetry semantic conventions for HTTP, DB and GenAI (`gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`).
+- The Collector keeps only allowlisted span attributes. A new attribute must be added to the allowlist in `infra/otel/` in the same PR.
+
+## Metrics
+
+- Custom metrics are prefixed `oos.` (`oos.run.duration_seconds`, `oos.budget.remaining_minor`). Keep label cardinality low: no IDs as labels.
+- Money in minor units of INR after conversion at the recorded rate.
+- Every endpoint and job has rate, errors and duration.
+
+## Logs
+
+- Structured JSON (structlog in Python, pino in Node) with `trace_id`, `span_id`, `request_id` and the correlation attributes.
+- Log **named events** (`approval.refused`, `budget.paused`, `agent.stale_result_rejected`), not free text.
+- Never log secrets, tokens, cookies, signed URLs, email addresses, display names, prompt bodies, model output, fetched page text, narration or script text. Refer to them by ID, hash or version.
+
+## Invariants
+
+Emit the invariant signals in OBSERVABILITY.md where your flow can break them: `oos.budget.overrun`, `authority.violation`, `agent.stale_result_accepted`. They page on the first occurrence.
+
+## Dashboards, SLOs and alerts
+
+- Add a panel for the new flow to the provisioned Grafana dashboards in `infra/grafana/`.
+- If the flow belongs to a key journey, count its events in the SLO indicator; add or adjust alert rules in `infra/grafana/` and a RUNBOOK.md entry for any page-level alert.
+
+## KPI events
+
+Never write `analytics.event` directly. KPI events are projected by the outbox relay from domain events (ADR-017); add the domain event and the projection rule, typed, with no free text.

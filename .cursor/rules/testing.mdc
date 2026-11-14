@@ -1,0 +1,40 @@
+---
+description: Test levels, T-xx naming, fixtures, fakes, recorded streams and conformance scenarios for every test and eval file
+globs: **/tests/**,e2e/**,agent/evals/**,**/*.test.ts,**/*.test.tsx,**/*.spec.ts
+alwaysApply: false
+---
+
+# Testing rules
+
+Owning doc: `plans/TEST_STRATEGY.md` (levels, cadence, thresholds, the T-xx catalogue, Definition of Done). Tools: ADR-019.
+
+## Naming
+
+- Every test traces to a T-xx from the catalogue. If your spec needs a new one, add it to the catalogue in the same PR.
+- Python: mark with `@pytest.mark.t("T-55")` and name the function for the behaviour: `test_stale_approval_is_rejected`.
+- TypeScript and Playwright: start the title with the ID: `test("T-44 compiler errors name the scene and field", …)`.
+- Conformance scenarios keep their C-ID in the title too: `T-05 C05 approval bound to an old version is invalid`.
+
+## Where tests live
+
+| Level | Path |
+|---|---|
+| Backend unit, functional, conformance | `backend/tests/unit/`, `backend/tests/functional/`, `backend/tests/conformance/` |
+| Agent mocked | `agent/tests/`; eval scenarios in `agent/evals/` (format in `agent.mdc`) |
+| Media | `media/scenes/tests/`, `media/audio/tests/` |
+| Web unit and component | `web/tests/` |
+| Contract | `contracts/tests/` |
+| Playwright | `e2e/smoke/`, `e2e/screens/` (T-15–T-30), `e2e/journeys/`, `e2e/conformance/`, `e2e/nfr/` |
+
+## Rules
+
+- Write the spec's listed tests first, covering every acceptance criterion including refusals, blockers and error classes.
+- Deterministic: freeze time, seed randomness, no sleeps (wait on conditions), no order dependence.
+- No real provider or network calls outside `make eval LIVE=1` and the weekly and milestone jobs. Use the adapter fakes; the fake identity provider only with `APP_ENV=test`.
+- Functional tests use real PostgreSQL and the object store through Testcontainers, never SQLite or mocks of the database.
+- Synthetic data only: the odd-squares fixture, the first three topics' fixtures, seeds from `make seed`. Never copy real channel or production data into a fixture.
+- Live progress in UI tests comes from the recorded AG-UI streams in `docs/contracts/examples/agui/`.
+- Screen tests cover every state in the screen's UI_DESIGN row, copy, the keyboard path and axe; visual baselines are updated only when you approved the change in the PR.
+- Hypothesis for functions with input domains (demonstrations, budget arithmetic, hashing).
+- Never weaken, skip or delete a test, eval, golden file or threshold to make a change pass. A flaky test is fixed or quarantined with an issue, never ignored.
+- Never edit the criteria that judge a change (graders, goldens, thresholds) in the same PR that changes what they judge, unless the spec says so (C13).

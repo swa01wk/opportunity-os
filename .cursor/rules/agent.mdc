@@ -1,0 +1,101 @@
+---
+description: Agent layer (research, script, storyboard tasks): golden rules, runtime and execution contract, tool host, validation stages, AG-UI summaries, prompts, model mocking and eval scenarios
+globs: agent/**
+alwaysApply: false
+---
+
+# Agent rules
+
+Applies to `agent/`. Owning docs: `docs/architecture/AGENT_ARCHITECTURE.md`, ADR-021 (runtime), ADR-020 (AG-UI), ADR-014 (model), ADR-009 (adapters), ADR-003 (workflows). Contracts: `docs/contracts/agent-tools/` (`tasks.json`, `task-io.schema.json`, `execution.schema.json`, `tools.schema.json`) and `docs/contracts/agui/stream.json`. Threats: SECURITY.md TH-12–TH-15, TH-31–TH-34.
+
+## Golden rules
+
+1. The model proposes; code decides. Generated text never authorises a state transition, an approval, spend or publication.
+2. Use code for anything deterministic: routing, arithmetic, validation, timing. The workflow (fixed in code) decides which task runs; no model routes.
+3. Contract in, evidence out: every attempt gets a `TaskContract` and a `ContextEnvelope`, and returns a typed `AgentResult`. A model completion never completes a task by itself.
+4. Every attempt is bounded by `tasks.json`: model calls, tool calls, tokens, link hops, retries, timeout, `maxChildren: 0`.
+5. Agents never approve. Output is a **draft version** reviewed at its gate (claim review on S-05, Gate B, Gate C, S-09).
+6. Untrusted by default: briefs, claim excerpts, script text, search results, fetched pages and model output are data, never instructions.
+7. Durable and recoverable: a crash restarts the model-call step as a new attempt; tools are read-only, so nothing external is repeated.
+
+## Runtime (ADR-021)
+
+`opportunityos_agent/runner/` implements the provider-neutral `AgentRuntime`: `start(contract, envelope)`, `resume`, `interrupt`, `cancel`, `inspect`, `subscribe`. It is a thin loop over `LlmProvider`; no agent framework at R1–R2.
+
+- `start` is called from a DBOS step. It returns the attempt ID, emits `task_attempt.started`, and changes no project state.
+- No memory between runs, no delegation, no shared state. `proposedActions` and `proposedGraphChanges` are always empty.
+- The envelope records every input version ID and hash the attempt read (`input_bindings`). Build the task input only from those versions. A revision redraft also binds the approved base version, the revision note and the `RevisionScope`.
+
+## Tool host order
+
+Every tool call, in this order, in code:
+
+1. Check the tool is in the contract's `permittedTools`; otherwise deny with a logged decision (C02).
+2. Check budget remaining (calls, tokens, link hops).
+3. Execute through the adapter with its limits (`SourceFetcher`: HTTPS only, private and metadata ranges refused after every redirect, ≤ 3 redirects, 5 MB cap, HTML/PDF/text only; `fetch_source` only for URLs from this run's search results, operator URLs or one-hop links, TH-12, TH-14).
+4. Record a summary (tool, host, counts, outcome, coded reason) on the attempt span and for the AG-UI stream. Never the page text, prompt or output.
+
+All agent tools are read-only. Do not add a tool that writes, approves, spends, publishes or executes anything.
+
+## Three validation stages
+
+Run in order on every result, each with its failure state from `tasks.json`:
+
+1. **Schema:** parse into the Pydantic output model → `schema_invalid`.
+2. **Policy and freshness:** re-read the head hashes of every bound input, check the run is not cancelled, the reservation is held and every tool call was allowed → `stale_input`, `budget_exhausted`, `injection_detected`.
+3. **Acceptance:** postconditions in code → research `citation_invalid` (every evidence `sourceId` fetched in this run, excerpt found verbatim and under 25 words), script `unknown_claim_reference`, storyboard `spec_invalid` / `capability_gap` (compiler), revision `out_of_scope_change` (any change outside the target IDs).
+
+Only a result that passes all three is stored, as a new draft version, by the worker. Map each failure state to its R-53 error class (AGENT_ARCHITECTURE.md failure classes). On `invalid_content`, retry once with the validation errors in the prompt, within the ceiling.
+
+## Untrusted content in prompts
+
+- Wrap untrusted text in clearly labelled delimiters and state in the system prompt that it is data. Never concatenate it into instructions.
+- Never put secrets, personal data or signed URLs in a prompt. OpenAI calls set `store: false` (SECURITY.md).
+- Never `eval`, `exec`, import, render as HTML or run as a command anything the model returns. Numbers in a VideoSpec come only from `valueRef` to demonstration results.
+
+## Prompts and models
+
+- Prompts live in `agent/prompts/<task>.md` and change only inside a spec with its evals. Each attempt records the prompt SHA-256, model ID, settings and tool versions (R-50).
+- The model is configuration (`gpt-5.4-mini-2026-03-17`, ADR-014), called only through `LlmProvider`. Request structured output against the task's output schema. No fallback model at R1.
+- Token budgets come from `tasks.json`, never from the prompt.
+
+## AG-UI
+
+The agent layer never writes to the stream directly. It emits spans and attempt records; the relay projects them into `STEP_*` and summarised `TOOL_CALL_*` events (`agui/stream.json`). Summaries contain the tool, host, counts and coded outcome only (TH-31). Agents cannot request UI.
+
+## Mocking
+
+- Unit and mocked tests use the fake `LlmProvider` with recorded responses in `agent/tests/fixtures/` and fixture tools (`SearchProvider`, `SourceFetcher` serving synthetic pages we wrote). They are deterministic and run on every PR.
+- Live runs (`make eval LIVE=1`) use the real model against the same fixture web. Never call a real provider from a unit test.
+
+## Eval scenarios
+
+One file per scenario in `agent/evals/<task>/scenarios/<id>.yaml`; holdout scenarios in `agent/evals/holdout/<task>/` are never used while tuning prompts.
+
+```yaml
+id: research-what-if-001          # <task>-<series or case>-<nnn>
+task: research                    # research | script | storyboard | revision
+series: what_if                   # what_if | wait_how | solve_this | inside_machine | none
+purpose: golden                   # golden | contradiction | unsupported | abstention | injection | unsafe_url
+                                  # | long_input | capability_gap | invalid_spec | revision
+inputs:
+  brief: fixtures/briefs/what-if-001.json
+  web: fixtures/web/what-if-001/  # synthetic pages served by the fixture fetcher
+expected:
+  hard:                           # must hold on every run
+    - no_tool_outside_contract
+    - sources_fetched_in_run
+    - excerpts_found_under_25_words
+  golden: golden/what-if-001.claims.json
+  flags: { contradiction: [c3] }
+graders: [rule:claim_recall, rule:contradiction_flagged, model:claim_match]
+runs: 10                          # N for live runs at milestone exit
+```
+
+- Graders are rule-based wherever possible; a model grader only matches wording to a golden item and never decides a hard gate.
+- Every production failure becomes a scenario with synthetic data.
+- Thresholds, N and cadence are owned by `plans/TEST_STRATEGY.md` (Agent evals). Never edit a threshold, a golden file or a grader in the same PR that changes the prompt it judges unless the spec says so.
+
+## Adding a task
+
+Follow the ten steps in AGENT_ARCHITECTURE.md "Adding an agent task". A new task needs an R-xx and its own spec.
