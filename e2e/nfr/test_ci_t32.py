@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from email.message import Message
+from pathlib import Path
 
 import pytest
+import yaml
 from ci_support import (
     assert_pinned_actions,
     assert_top_level_permissions,
@@ -16,6 +19,7 @@ from ci_support import (
 
 from nfr_support import ROOT
 
+LICENCE_FIXTURES = ROOT / "infra" / "ci" / "licences" / "tests"
 SEMGREP_VALIDATE = ROOT / "infra" / "ci" / "semgrep" / "validate_rule_tests.py"
 CHECK_LICENCES = ROOT / "infra" / "ci" / "check_licences.py"
 VERIFY_ACTION_PINS = ROOT / "infra" / "ci" / "verify_action_pins.py"
@@ -49,6 +53,42 @@ def test_semgrep_fixtures_cover_rules() -> None:
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def _message_from_fixture(raw: dict[str, object]) -> Message:
+    msg = Message()
+    for key, value in raw.items():
+        if isinstance(value, list):
+            for item in value:
+                msg[key] = str(item)
+        else:
+            msg[key] = str(value)
+    return msg
+
+
+@pytest.mark.t("T-32")
+@pytest.mark.parametrize(
+    "fixture_path",
+    [
+        LICENCE_FIXTURES / "metadata-expression.yaml",
+        LICENCE_FIXTURES / "metadata-classifier.yaml",
+        LICENCE_FIXTURES / "metadata-long-text.yaml",
+    ],
+    ids=["expression", "classifier-only", "long-text"],
+)
+def test_licence_metadata_resolution(fixture_path: Path) -> None:
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("check_licences", CHECK_LICENCES)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    payload = yaml.safe_load(fixture_path.read_text())
+    allowlist = ROOT / "infra" / "ci" / "licences.yaml"
+    _, overrides = module._load_allowlist(allowlist)
+    meta = _message_from_fixture(payload["metadata"])
+    assert module.resolve_license_from_metadata(meta, overrides) == payload["expected"]
 
 
 @pytest.mark.t("T-32")

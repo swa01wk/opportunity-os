@@ -8,12 +8,28 @@ import json
 import re
 import subprocess
 import sys
+from email.message import Message
 from importlib import metadata
 from pathlib import Path
 
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
+
+CLASSIFIER_PREFIX = "License :: OSI Approved :: "
+
+# PyPI trove classifiers that do not spell SPDX literally (SPEC-02 B13).
+CLASSIFIER_TO_SPDX: dict[str, str] = {
+    "MIT License": "MIT",
+    "BSD License": "BSD-3-Clause",
+    "Apache Software License": "Apache-2.0",
+    "Python Software Foundation License": "PSF-2.0",
+    "ISC License (ISCL)": "ISC",
+    "Mozilla Public License 2.0 (MPL 2.0)": "MPL-2.0",
+    "The Unlicense (Unlicense)": "Unlicense",
+}
+
+LICENSE_SUMMARY_MAX = 60
 
 
 def _load_allowlist(path: Path) -> tuple[frozenset[str], dict[str, str]]:
@@ -51,18 +67,78 @@ def _licensed_or_allowed(
     return _normalise_license(expr, overrides) in allowed
 
 
+def _metadata_get(msg: Message, key: str) -> str | None:
+    value = msg.get(key)
+    if value is None:
+        return None
+    return str(value)
+
+
+def _metadata_get_all(msg: Message, key: str) -> list[str]:
+    return [str(v) for v in msg.get_all(key, [])]
+
+
+def _short_license_field(raw: str | None) -> str | None:
+    if not raw:
+        return None
+    if "\n" in raw or "\r" in raw:
+        return None
+    stripped = raw.strip()
+    if not stripped:
+        return None
+    return stripped
+
+
+def _license_from_classifiers(classifiers: list[str]) -> str | None:
+    for classifier in classifiers:
+        if not classifier.startswith(CLASSIFIER_PREFIX):
+            continue
+        label = classifier[len(CLASSIFIER_PREFIX) :].strip()
+        if label in CLASSIFIER_TO_SPDX:
+            return CLASSIFIER_TO_SPDX[label]
+        if label.endswith(" License"):
+            candidate = label[: -len(" License")]
+            if candidate in {"MIT", "ISC"}:
+                return candidate
+    return None
+
+
+def resolve_license_from_metadata(meta: Message, overrides: dict[str, str]) -> str:
+    """Resolve SPDX-ish licence from distribution metadata (SPEC-02 B13)."""
+    package = _metadata_get(meta, "Name") or ""
+    if package in overrides:
+        return overrides[package]
+
+    expr = _metadata_get(meta, "License-Expression")
+    if expr:
+        license_name = expr.strip()
+    else:
+        from_classifiers = _license_from_classifiers(_metadata_get_all(meta, "Classifier"))
+        if from_classifiers:
+            license_name = from_classifiers
+        else:
+            short = _short_license_field(_metadata_get(meta, "License"))
+            license_name = short if short else "UNKNOWN"
+
+    if license_name in overrides:
+        return overrides[license_name]
+    return license_name
+
+
+def _license_summary(license_name: str) -> str:
+    one_line = " ".join(license_name.split())
+    if len(one_line) <= LICENSE_SUMMARY_MAX:
+        return one_line
+    return f"{one_line[: LICENSE_SUMMARY_MAX - 3]}..."
+
+
 def _python_licences(allowed: frozenset[str], overrides: dict[str, str]) -> list[tuple[str, str]]:
     violations: list[tuple[str, str]] = []
     for dist in sorted(metadata.distributions(), key=lambda d: (d.metadata["Name"] or "").lower()):
         name = dist.metadata.get("Name") or dist.metadata.get("Summary") or "unknown"
         if str(name).startswith("opportunityos"):
             continue
-        if str(name) in overrides:
-            license_name = overrides[str(name)]
-        else:
-            license_name = (
-                dist.metadata.get("License") or dist.metadata.get("License-Expression") or "UNKNOWN"
-            )
+        license_name = resolve_license_from_metadata(dist.metadata, overrides)
         if not _licensed_or_allowed(str(license_name), allowed, overrides):
             violations.append((str(name), str(license_name)))
     return violations
@@ -143,7 +219,7 @@ def main(argv: list[str] | None = None) -> int:
     if violations:
         print("licence check: disallowed licences:", file=sys.stderr)
         for package, license_name in sorted(set(violations)):
-            print(f"  {package}: {license_name}", file=sys.stderr)
+            print(f"  {package}: {_license_summary(license_name)}", file=sys.stderr)
         return 1
     print("licence check: all packages on the allowlist")
     return 0

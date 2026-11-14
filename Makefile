@@ -13,6 +13,7 @@ export HOST_GID := $(shell id -g)
 
 COMPOSE := docker compose --project-name $(COMPOSE_PROJECT) --env-file infra/images.env --env-file .env
 PY := $(COMPOSE) run --rm --no-deps py-tools
+PY_AUDIT := $(COMPOSE) run --rm --no-deps py-audit
 PY_FUNC := $(COMPOSE) run --rm --no-deps -e OOS_HOST_REPO=$(CURDIR) py-functional
 TS := $(COMPOSE) run --rm --no-deps ts-tools
 
@@ -220,7 +221,7 @@ _step-semgrep:
 	@docker run --rm -v "$(CURDIR):/src:ro" -w /src "$(SEMGREP_IMAGE)" semgrep --error \
 		--config /src/infra/ci/semgrep/rules --exclude /src/infra/ci/semgrep/tests /src
 
-_step-pip-audit: ; $(PY) pip-audit
+_step-pip-audit: ; $(PY_AUDIT) pip-audit
 
 _step-pnpm-audit: ; $(TS) pnpm audit --audit-level high
 
@@ -229,7 +230,7 @@ _step-trivy:
 	@for img in oos/api:dev oos/worker:dev oos/web:dev oos/render:dev oos/objectstore:interim; do \
 		docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$(CURDIR):/repo:ro" \
 			"$(TRIVY_IMAGE)" image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed \
-			--ignorefile /repo/infra/ci/.trivyignore "$$img"; \
+			--ignorefile /repo/infra/ci/.trivyignore.yaml "$$img"; \
 	done
 
 _step-licences:

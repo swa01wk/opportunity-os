@@ -18,7 +18,7 @@ from support import (
     pg_dump_schema_only,
     seed_row_snapshot,
 )
-from testcontainers.postgres import PostgresContainer
+from testcontainers.community.postgres import PostgresContainer
 
 pytestmark = pytest.mark.functional
 

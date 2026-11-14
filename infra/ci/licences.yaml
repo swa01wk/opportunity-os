@@ -18,6 +18,7 @@ allowed:
   - 0BSD
   # Metadata gaps on some wheels: treat as unknown and fail unless mapped in overrides.
 overrides:
-  # PyPI classifiers that resolve to a normalised SPDX name.
+  # PyPI classifiers and legacy short names (SPEC-02 B13).
+  PSFL: PSF-2.0
   "Python Software Foundation License": PSF-2.0
   pathspec: MIT

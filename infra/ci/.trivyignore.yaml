@@ -1,0 +1,448 @@
+# Trivy accept-list (SPEC-02 B14). Scoped by purls; renew before expired_at.
+# Owner acceptance tracked in PR #19; SECURITY.md owns long-term risk records.
+
+vulnerabilities:
+  - id: CVE-2025-47273
+    purls:
+      - "pkg:pypi/setuptools@70.3.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/api:dev: setuptools@70.3.0; fixed in 78.1.1; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2025-47273
+    purls:
+      - "pkg:pypi/setuptools@70.3.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/worker:dev: setuptools@70.3.0; fixed in 78.1.1; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2025-47913
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.43.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-102276
+    purls:
+      - "pkg:npm/brace-expansion@5.0.9"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/web:dev: brace-expansion@5.0.9; fixed in 5.0.10, 3.0.7, 2.1.5, 1.1.19; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-102276
+    purls:
+      - "pkg:npm/brace-expansion@5.0.9"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/render:dev: brace-expansion@5.0.9; fixed in 5.0.10, 3.0.7, 2.1.5, 1.1.19; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-102278
+    purls:
+      - "pkg:npm/brace-expansion@5.0.9"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/web:dev: brace-expansion@5.0.9; fixed in 5.0.11, 3.0.8, 2.1.6, 1.1.20; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-102278
+    purls:
+      - "pkg:npm/brace-expansion@5.0.9"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/render:dev: brace-expansion@5.0.9; fixed in 5.0.11, 3.0.8, 2.1.6, 1.1.20; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-109383
+    purls:
+      - "pkg:npm/undici@6.28.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/web:dev: undici@6.28.0; fixed in 6.29.1, 7.30.1, 8.12.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-109383
+    purls:
+      - "pkg:npm/undici@6.28.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/render:dev: undici@6.28.0; fixed in 6.29.1, 7.30.1, 8.12.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-109869
+    purls:
+      - "pkg:npm/undici@6.28.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/web:dev: undici@6.28.0; fixed in 6.29.1, 7.30.1, 8.12.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-109869
+    purls:
+      - "pkg:npm/undici@6.28.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/render:dev: undici@6.28.0; fixed in 6.29.1, 7.30.1, 8.12.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-111943
+    purls:
+      - "pkg:golang/stdlib@v1.25.14"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): stdlib@v1.25.14; fixed in 1.26.10, 1.27.3; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-114613
+    purls:
+      - "pkg:pypi/msgpack@1.1.2"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/api:dev: msgpack@1.1.2; fixed in 1.2.3; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-114613
+    purls:
+      - "pkg:pypi/msgpack@1.1.2"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/worker:dev: msgpack@1.1.2; fixed in 1.2.3; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-116587
+    purls:
+      - "pkg:golang/github.com/go-jose/go-jose/v4@v4.1.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/go-jose/go-jose/v4@v4.1.0; fixed in 4.1.6; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-19534
+    purls:
+      - "pkg:npm/undici@6.28.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/web:dev: undici@6.28.0; fixed in 6.28.1, 7.29.1, 8.10.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-19534
+    purls:
+      - "pkg:npm/undici@6.28.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/render:dev: undici@6.28.0; fixed in 6.28.1, 7.29.1, 8.10.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-24051
+    purls:
+      - "pkg:golang/go.opentelemetry.io/otel/sdk@v1.35.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): go.opentelemetry.io/otel/sdk@v1.35.0; fixed in 1.40.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-25681
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/net@v0.39.0; fixed in 0.55.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-27136
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/net@v0.39.0; fixed in 0.55.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-32285
+    purls:
+      - "pkg:golang/github.com/buger/jsonparser@v1.1.1"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/buger/jsonparser@v1.1.1; fixed in 1.1.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-33186
+    purls:
+      - "pkg:golang/google.golang.org/grpc@v1.72.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): google.golang.org/grpc@v1.72.0; fixed in 1.79.3; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-33814
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/net@v0.39.0; fixed in 0.53.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-34986
+    purls:
+      - "pkg:golang/github.com/go-jose/go-jose/v4@v4.1.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/go-jose/go-jose/v4@v4.1.0; fixed in 4.1.4; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-39821
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/net@v0.39.0; fixed in 0.55.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-39828
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.52.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-39829
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.52.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-39830
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.52.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-39831
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.52.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-39832
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.52.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-39835
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.52.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-39883
+    purls:
+      - "pkg:golang/go.opentelemetry.io/otel/sdk@v1.35.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): go.opentelemetry.io/otel/sdk@v1.35.0; fixed in 1.43.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-41602
+    purls:
+      - "pkg:golang/github.com/apache/thrift@v0.21.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/apache/thrift@v0.21.0; fixed in 0.23.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-42151
+    purls:
+      - "pkg:golang/github.com/prometheus/prometheus@v0.303.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/prometheus/prometheus@v0.303.0; fixed in 0.311.3; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-42154
+    purls:
+      - "pkg:golang/github.com/prometheus/prometheus@v0.303.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/prometheus/prometheus@v0.303.0; fixed in 0.311.3, 0.305.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-42508
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.52.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-43871
+    purls:
+      - "pkg:golang/github.com/apache/thrift@v0.21.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/apache/thrift@v0.21.0; fixed in 0.24.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-46595
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.52.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-46597
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.52.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-46600
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/net@v0.39.0; fixed in 0.56.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-56851
+    purls:
+      - "pkg:golang/golang.org/x/text@v0.24.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/text@v0.24.0; fixed in 0.41.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-56852
+    purls:
+      - "pkg:golang/golang.org/x/text@v0.24.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/text@v0.24.0; fixed in 0.39.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-56854
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/crypto@v0.37.0; fixed in 0.55.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-63209
+    purls:
+      - "pkg:golang/github.com/klauspost/compress@v1.18.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/klauspost/compress@v1.18.0; fixed in 1.18.7; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-76844
+    purls:
+      - "pkg:deb/debian/zlib1g@1.3.dfsg%2Breally1.3.1-1%2Bb1?arch=arm64&distro=debian-13.7&epoch=1"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/api:dev: zlib1g@1:1.3.dfsg+really1.3.1-1+b1; fixed in 1:1.3.dfsg+really1.3.1-1+deb13u1; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-76844
+    purls:
+      - "pkg:deb/debian/zlib1g@1.3.dfsg%2Breally1.3.1-1%2Bb1?arch=arm64&distro=debian-13.7&epoch=1"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/worker:dev: zlib1g@1:1.3.dfsg+really1.3.1-1+b1; fixed in 1:1.3.dfsg+really1.3.1-1+deb13u1; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-77403
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/rabbitmq/amqp091-go@v1.10.0; fixed in 1.13.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-77404
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/rabbitmq/amqp091-go@v1.10.0; fixed in 1.13.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-77405
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/rabbitmq/amqp091-go@v1.10.0; fixed in 1.13.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-77406
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/rabbitmq/amqp091-go@v1.10.0; fixed in 1.13.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-77407
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/rabbitmq/amqp091-go@v1.10.0; fixed in 1.13.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-77408
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/rabbitmq/amqp091-go@v1.10.0; fixed in 1.13.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-77410
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/rabbitmq/amqp091-go@v1.10.0; fixed in 1.13.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-77411
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/rabbitmq/amqp091-go@v1.10.0; fixed in 1.13.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-77412
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/rabbitmq/amqp091-go@v1.10.0; fixed in 1.13.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-78661
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/net@v0.39.0; fixed in 0.62.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-78667
+    purls:
+      - "pkg:golang/stdlib@v1.25.14"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): stdlib@v1.25.14; fixed in 1.26.9, 1.27.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-78669
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): golang.org/x/net@v0.39.0; fixed in 0.60.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-78669
+    purls:
+      - "pkg:golang/stdlib@v1.25.14"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): stdlib@v1.25.14; fixed in 1.26.9, 1.27.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-79921
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): github.com/rabbitmq/amqp091-go@v1.10.0; fixed in 1.13.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-84304
+    purls:
+      - "pkg:golang/google.golang.org/grpc@v1.72.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): google.golang.org/grpc@v1.72.0; fixed in 1.83.1; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-84445
+    purls:
+      - "pkg:golang/google.golang.org/grpc@v1.72.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): google.golang.org/grpc@v1.72.0; fixed in 1.82.2, 1.83.2, 1.84.0-dev.0.20260825144003-d5a41119e0e3, 1.85.0-dev.0.20260825072537-93e31b48545e; accepted until base or dependency bump (A...
+  - id: CVE-2026-85091
+    purls:
+      - "pkg:deb/debian/zlib1g@1.3.dfsg%2Breally1.3.1-1%2Bb1?arch=arm64&distro=debian-13.7&epoch=1"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/api:dev: zlib1g@1:1.3.dfsg+really1.3.1-1+b1; fixed in 1:1.3.dfsg+really1.3.1-1+deb13u1; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-85091
+    purls:
+      - "pkg:deb/debian/zlib1g@1.3.dfsg%2Breally1.3.1-1%2Bb1?arch=arm64&distro=debian-13.7&epoch=1"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/worker:dev: zlib1g@1:1.3.dfsg+really1.3.1-1+b1; fixed in 1:1.3.dfsg+really1.3.1-1+deb13u1; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-87018
+    purls:
+      - "pkg:npm/undici@6.28.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/web:dev: undici@6.28.0; fixed in 6.29.1, 7.30.1, 8.12.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-87018
+    purls:
+      - "pkg:npm/undici@6.28.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/render:dev: undici@6.28.0; fixed in 6.29.1, 7.30.1, 8.12.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-97031
+    purls:
+      - "pkg:golang/stdlib@v1.25.14"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): stdlib@v1.25.14; fixed in 1.26.9, 1.27.2; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-97687
+    purls:
+      - "pkg:pypi/urllib3@2.7.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/api:dev: urllib3@2.7.0; fixed in 2.8.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-97687
+    purls:
+      - "pkg:pypi/urllib3@2.7.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/worker:dev: urllib3@2.7.0; fixed in 2.8.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-97689
+    purls:
+      - "pkg:pypi/urllib3@2.7.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/api:dev: urllib3@2.7.0; fixed in 2.8.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: CVE-2026-97689
+    purls:
+      - "pkg:pypi/urllib3@2.7.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/worker:dev: urllib3@2.7.0; fixed in 2.8.0; accepted until base or dependency bump (ADR-015 where interim)
+  - id: GHSA-6v7p-g79w-8964
+    purls:
+      - "pkg:pypi/msgpack@1.1.2"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/api:dev: msgpack@1.1.2; fixed in 1.2.1; accepted until base or dependency bump (ADR-015 where interim)
+  - id: GHSA-6v7p-g79w-8964
+    purls:
+      - "pkg:pypi/msgpack@1.1.2"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/worker:dev: msgpack@1.1.2; fixed in 1.2.1; accepted until base or dependency bump (ADR-015 where interim)
+  - id: GHSA-hrxh-6v49-42gf
+    purls:
+      - "pkg:golang/google.golang.org/grpc@v1.72.0"
+    expired_at: 2027-05-15
+    statement: >-
+      oos/objectstore:interim (ADR-015 interim MinIO build): google.golang.org/grpc@v1.72.0; fixed in 1.82.1; accepted until base or dependency bump (ADR-015 where interim)

@@ -1,0 +1,7 @@
+# T-32: classifier-only metadata when License is absent (SPEC-02 B13).
+name: metadata-classifier
+expected: BSD-3-Clause
+metadata:
+  Name: pkg-fixture-classifier
+  Classifier:
+    - "License :: OSI Approved :: BSD License"
