@@ -11,8 +11,10 @@ ref() { sed -n "s/^$1=//p" "$pins"; }
 
 for name in $(sed -n 's/^\([A-Z_]*_IMAGE\)=.*/\1/p' "$pins"); do
   tag=$(ref "$name"); tag=${tag%@*}
-  digest=$(docker buildx imagetools inspect "$tag" --format '{{.Manifest.Digest}}')
-  [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "pin.sh: could not resolve $tag" >&2; exit 1; }
+  # The first "Digest:" line of the default output is the tag's index (multi-arch) digest.
+  out=$(docker buildx imagetools inspect "$tag" 2>&1) || { echo "pin.sh: $tag: $out" >&2; exit 1; }
+  digest=$(printf '%s\n' "$out" | awk '$1 == "Digest:" { print $2; exit }')
+  [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || { printf 'pin.sh: no digest for %s in:\n%s\n' "$tag" "$out" >&2; exit 1; }
   sed -i.bak "s|^$name=.*|$name=$tag@$digest|" "$pins" && rm -f "$pins.bak"
   echo "pinned $name=$tag@$digest"
 done
