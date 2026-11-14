@@ -96,18 +96,18 @@ Mapped to OpportunityOS in [AGENT_ARCHITECTURE.md](../docs/architecture/AGENT_AR
 
 | Scenario | Test | Due by | Built in | Runs |
 |---|---|---|---|---|
-| C01 Duplicate transition command | T-01 | M0 | SPEC-09, extended in SPEC-26 | Every PR |
-| C02 Tool outside the allowed capability | T-02 | M0 | SPEC-11, extended per task | Every PR |
+| C01 Duplicate transition command | T-01 | M0 | SPEC-09a, extended in SPEC-13, SPEC-26 | Every PR |
+| C02 Tool outside the allowed capability | T-02 | M0 | SPEC-11a, extended per task | Every PR |
 | C03 Two dependencies complete at once | T-03 | M0 | SPEC-13, extended in SPEC-23, SPEC-53 | Every PR |
-| C04 Worker dies after an external write | T-04 | M0 | SPEC-09, extended in SPEC-29, SPEC-66 | Every PR (short), nightly (full) |
+| C04 Worker dies after an external write | T-04 | M0 | SPEC-09b, extended in SPEC-29, SPEC-66 | Every PR (short), nightly (full) |
 | C05 Approval bound to an old version | T-05 | M2 | SPEC-28, extended in SPEC-56 | Nightly |
 | C06 Malicious tool output | T-06 | M2 | SPEC-33 | Nightly, weekly live |
 | C07 Cross-tenant lookup | T-07 | M2 | SPEC-04, SPEC-10, SPEC-26, extended in SPEC-68, SPEC-79 | Nightly |
-| C08 Sub-agent privilege request | T-08 | Not applicable (no delegation); guard test at M0 | SPEC-11 | Every PR |
-| C09 Input edited during inference; redraft out of scope | T-09 | M2 (stale), M5 (scope) | SPEC-11, SPEC-33, SPEC-43, SPEC-47, SPEC-62 | Nightly |
+| C08 Sub-agent privilege request | T-08 | Not applicable (no delegation); guard test at M0 | SPEC-11a | Every PR |
+| C09 Input edited during inference; redraft out of scope | T-09 | M2 (stale), M5 (scope) | SPEC-11a, SPEC-33, SPEC-43, SPEC-47, SPEC-62 | Nightly |
 | C10 Stream reconnects after lost events | T-10 | M2 | SPEC-10, SPEC-34 | Nightly |
 | C11 Budget exhausted mid-loop | T-11 | M2 | SPEC-29, extended in SPEC-53 | Nightly |
-| C12 Old workflow resumes after a deploy | T-12 | M7 | SPEC-09 (spike), SPEC-83 | Nightly, release candidate |
+| C12 Old workflow resumes after a deploy | T-12 | M7 | SPEC-09b (spike), SPEC-83 | Nightly, release candidate |
 | C13 Repair agent changes trusted tests | T-13 | Not applicable (no repair agent); CODEOWNERS and the ruleset protect tests | — | — |
 | C14 Verified artifact differs from the delivered one | T-14 | M4 (package), M7 (build) | SPEC-56, SPEC-70, SPEC-83 | Nightly, release candidate |
 
@@ -155,21 +155,21 @@ This table owns the T-xx IDs. Specs reference them; a spec that needs a new one 
 
 | Test | What it proves | Level | Runs | Traces to | Specs |
 |---|---|---|---|---|---|
-| T-01 | C01 Duplicate transition command: same Idempotency-Key gives one transition and a replay-safe receipt | Functional | Every PR | C01, QA-05, QA-06, R-44 | SPEC-09, SPEC-26 |
-| T-02 | C02 Tool call outside permittedTools: denied before any effect, decision logged | Agent mocked | Every PR | C02, QA-01, R-63, NFR-05 | SPEC-11, SPEC-33, SPEC-47 |
+| T-01 | C01 Duplicate transition command: same Idempotency-Key gives one transition and a replay-safe receipt | Functional | Every PR | C01, QA-05, QA-06, R-44 | SPEC-09a, SPEC-13, SPEC-26 |
+| T-02 | C02 Tool call outside permittedTools: denied before any effect, decision logged | Agent mocked | Every PR | C02, QA-01, R-63, NFR-05 | SPEC-11a, SPEC-33, SPEC-47 |
 | T-03 | C03 Two scene clips finish at once: assembly dispatched once | Functional | Every PR | C03, QA-06, R-32 | SPEC-13, SPEC-23, SPEC-53 |
-| T-04 | C04 Worker killed after a TTS, render or model call: no duplicate spend or effect | Fault | Every PR (short), nightly (full) | C04, QA-06, NFR-01 | SPEC-09, SPEC-29, SPEC-66 |
+| T-04 | C04 Worker killed after a TTS, render or model call: no duplicate spend or effect | Fault | Every PR (short), nightly (full) | C04, QA-06, NFR-01 | SPEC-09b, SPEC-29, SPEC-66 |
 | T-05 | C05 Gate approval bound to an old version: invalid, promotion blocked | Functional | Nightly | C05, QA-05, R-41 | SPEC-28, SPEC-56 |
 | T-06 | C06 Fetched page carries instructions: treated as data, exfiltration fetch refused | Agent mocked + red-team eval | Nightly | C06, QA-08, NFR-05 | SPEC-33 |
 | T-07 | C07 Cross-workspace version, artifact, job, stream or export request: rejected and audited | Functional | Nightly | C07, QA-10, NFR-04 | SPEC-04, SPEC-10, SPEC-26, SPEC-68, SPEC-79 |
-| T-08 | C08 Sub-agent privilege or budget request: not applicable (no delegation); guard asserts maxChildren = 0 | Contract | Every PR | C08 (n/a), ADR-021 | SPEC-11 |
-| T-09 | C09 Input edited during inference, or redraft outside its target: stale or out-of-scope result rejected | Functional + agent mocked | Nightly | C09, TH-33, TH-34, R-31 | SPEC-11, SPEC-33, SPEC-43, SPEC-47, SPEC-62 |
+| T-08 | C08 Sub-agent privilege or budget request: not applicable (no delegation); guard asserts maxChildren = 0 | Contract | Every PR | C08 (n/a), ADR-021 | SPEC-11a |
+| T-09 | C09 Input edited during inference, or redraft outside its target: stale or out-of-scope result rejected | Functional + agent mocked | Nightly | C09, TH-33, TH-34, R-31 | SPEC-11a, SPEC-33, SPEC-43, SPEC-47, SPEC-62 |
 | T-10 | C10 Stream reconnects after lost events: snapshot plus cursor converge; duplicates dropped | Contract + Playwright replay | Nightly | C10, TH-32, R-50 | SPEC-10, SPEC-34 |
 | T-11 | C11 Allowance exhausted mid-run: paused_budget, safe state kept, no overrun | Functional | Nightly | C11, QA-06, NFR-07 | SPEC-29, SPEC-53 |
-| T-12 | C12 Old workflow resumes after a deploy: pinned version honoured or documented migration | Fault | Nightly, release candidate | C12, NFR-01 | SPEC-09, SPEC-83 |
+| T-12 | C12 Old workflow resumes after a deploy: pinned version honoured or documented migration | Fault | Nightly, release candidate | C12, NFR-01 | SPEC-09b, SPEC-83 |
 | T-13 | C13 Repair agent changes trusted tests: not applicable (no repair agent); tests protected by CODEOWNERS and the ruleset | — | — | C13 (n/a) | Not applicable |
 | T-14 | C14 Approved package differs from the exported file, or verified build differs from the deployed one: blocked | Functional + release | Nightly, release candidate | C14, QA-09, TH-28 | SPEC-56, SPEC-70, SPEC-83 |
-| T-15 | Screen S-01 Sign-in and app shell: states, copy, keyboard path, axe, visual baseline | Playwright | Every PR (smoke state), nightly (all states) | S-01 | SPEC-07, SPEC-34, SPEC-35 |
+| T-15 | Screen S-01 Sign-in and app shell: states, copy, keyboard path, axe, visual baseline | Playwright | Every PR (smoke state), nightly (all states) | S-01 | SPEC-07, SPEC-13, SPEC-34, SPEC-35 |
 | T-16 | Screen S-02 Projects: states, copy, keyboard path, axe, visual baseline | Playwright | Every PR (smoke state), nightly (all states) | S-02 | SPEC-36 |
 | T-17 | Screen S-03 Brief and preflight: states, copy, keyboard path, axe, visual baseline | Playwright | Every PR (smoke state), nightly (all states) | S-03 | SPEC-38 |
 | T-18 | Screen S-04 Project settings and data: states, copy, keyboard path, axe, visual baseline | Playwright | Every PR (smoke state), nightly (all states) | S-04 | SPEC-37, SPEC-68 |
@@ -185,14 +185,14 @@ This table owns the T-xx IDs. Specs reference them; a spec that needs a new one 
 | T-28 | Screen S-14 Cost and effort: states, copy, keyboard path, axe, visual baseline | Playwright | Every PR (smoke state), nightly (all states) | S-14 | SPEC-67 |
 | T-29 | Screen S-15 Library: states, copy, keyboard path, axe, visual baseline | Playwright | Every PR (smoke state), nightly (all states) | S-15 | SPEC-59 |
 | T-30 | Screen S-16 Series slate: states, copy, keyboard path, axe, visual baseline | Playwright | Every PR (smoke state), nightly (all states) | S-16 | SPEC-75 |
-| T-31 | Fresh clone: make setup, make up, make check | Integration | Nightly; M0 exit | NFR-13 | SPEC-01 |
+| T-31 | Fresh clone: make setup, make up, make check | Integration | Nightly; M0 exit | NFR-13 | SPEC-01a |
 | T-32 | Pipeline gates present and required; Semgrep bans eval/exec on task output and scraping or browser automation | Static | Every PR | NFR-05, NFR-06, NFR-18 | SPEC-02 |
-| T-33 | Contract codegen drift; valid and invalid fixtures in Pydantic and Ajv; OpenAPI drift | Contract | Every PR | NFR-19, R-18, QA-01 | SPEC-03 |
+| T-33 | Contract codegen drift; valid and invalid fixtures in Pydantic and Ajv; OpenAPI drift | Contract | Every PR | NFR-19, R-18, QA-01 | SPEC-03a, SPEC-03b, SPEC-03c, SPEC-03d, SPEC-03e |
 | T-34 | Migrations apply and downgrade; RLS policies per service role | Functional | Every PR | NFR-04, NFR-13 | SPEC-04 |
 | T-35 | BlobStore conformance: put, get, presign expiry, conditional put, no-delete credentials | Functional | Every PR | R-30, NFR-04 | SPEC-05 |
 | T-36 | Authentication: missing, forged, expired tokens; fake IdP outside test; step-up | Functional + Playwright | Every PR | R-01, NFR-04, TH-01, TH-02 | SPEC-06, SPEC-07 |
 | T-37 | Responsibility matrix (SECURITY.md) enforced; agent and service identities refused | Functional | Every PR | R-05, R-43, QA-05 | SPEC-06, SPEC-28 |
-| T-38 | Trace continuity web → api → worker → agent → render; redaction and attribute allowlist | Integration | Nightly | NFR-09, NFR-06, TH-20 | SPEC-08 |
+| T-38 | Trace continuity web → api → worker → agent → render; redaction and attribute allowlist | Integration | Nightly | NFR-09, NFR-06, TH-20 | SPEC-08, SPEC-13 |
 | T-39 | AG-UI mapping against the pinned SDK; field allowlist; recorded streams validate | Contract | Every PR | R-50, TH-31 | SPEC-10 |
 | T-40 | Render jobs idempotent by input hash; oversized specs rejected; CPU, memory and time caps | Functional | Every PR | NFR-12, QA-06 | SPEC-12, SPEC-16 |
 | T-41 | Walking skeleton end to end, traced | Playwright | Every PR (smoke) | M0 exit | SPEC-13 |
@@ -244,14 +244,15 @@ This table owns the T-xx IDs. Specs reference them; a spec that needs a new one 
 | T-87 | Journey J6 end to end on staging: revision, failure, recovery | E2E | Nightly; milestone | QA-09, QA-06, J6 | SPEC-66 |
 | T-88 | Journey J3 end to end: slate, variety flag, brand change | E2E | Nightly; milestone | QA-09, J3 | SPEC-75 |
 | T-89 | Story walkthrough and UAT by the owner (PRD §6.11) | UAT (manual) | Milestone | QA-09, US-xx of the milestone | Milestone exit |
-| T-90 | Fault and chaos: worker kill mid-render and mid-call, duplicate relay, provider timeout, unknown outcome | Fault | Nightly | NFR-01, QA-06 | SPEC-09, SPEC-83 |
-| T-91 | Provider portability: LLM and TTS adapters swapped in config pass shared fixtures | Functional | Weekly | NFR-11 | SPEC-11, SPEC-21 |
+| T-90 | Fault and chaos: worker kill mid-render and mid-call, duplicate relay, provider timeout, unknown outcome | Fault | Nightly | NFR-01, QA-06 | SPEC-09b, SPEC-83 |
+| T-91 | Provider portability: LLM and TTS adapters swapped in config pass shared fixtures | Functional | Weekly | NFR-11 | SPEC-11b, SPEC-21 |
 | T-92 | Studio accessibility: axe on every screen in both themes, keyboard walkthrough | Playwright + manual | Milestone; hardening | NFR-08, A-17 | SPEC-80 |
 | T-93 | Load and render performance against SLO-01, SLO-05, SLO-06 | Non-functional | Hardening; milestone for key flows | NFR-02, A-15 | SPEC-78 |
 | T-94 | Security: ZAP baseline on web and api, full isolation suite, log secret scan | Non-functional | Hardening; milestone | NFR-04, NFR-06, QA-10 | SPEC-79 |
 | T-95 | Backup and restore: content, manifests and run references within RPO 24 h and RTO one working day | Operations drill | Hardening; quarterly | NFR-14, QA-12 | SPEC-69, SPEC-77 |
 | T-96 | Alerts: each page alert fires on a synthetic fault; stuck run detected | Operations drill | Hardening | NFR-15, QA-12 | SPEC-82 |
 | T-97 | Kill switch per task and tool, credential revocation, audit export | Operations drill | Hardening; before G5 | NFR-06, NFR-15 | SPEC-81 |
+| T-98 | Release once, promote by digest: release record (commit, image digests, contracts version, migration head); deploy starts exactly the recorded digests; promote refuses a digest mismatch; deploy refuses credentials shared with dev | Integration | Release candidate; nightly dry run | NFR-13, ADR-022 | SPEC-01b, SPEC-13 |
 
 ## Definition of Ready
 

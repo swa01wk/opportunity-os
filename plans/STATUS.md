@@ -1,5 +1,5 @@
 # STATUS: OpportunityOS        Updated: 2026-11-14
-Current stage: 4 Prepare M0 (next) | Next gate: G4 M0 exit
+Current stage: 4 Prepare M0 (in review, PR #12) | Next gate: G4 M0 exit
 
 Release target: R0 -> R1 -> R2 (PRD Section 4). R3 conditional; R4/R5 out of scope.
 
@@ -13,41 +13,49 @@ All gates are signed by the product owner / tech lead (same person).
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
 | 2 Design | G2 Design review and screens | Signed: 2a, 2b, 2c merged (HTML prototypes S-01–S-16 in #7); all G2 checks pass | 2026-11-14 | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5, #7 |
 | 3 Plan | G3 Milestone scope and dates | Signed: plan (#8), Strategy v1.0 intake (#9, #10); Q-36–Q-42 decided; all G3 checks pass; milestones not dated (Q-36) | 2026-11-14 | docs/stage-3-plan, #8 · docs/strategy-v1-intake, #9 |
+| 4 Prepare M0 | — (Definition of Ready per spec; G4 at M0 exit) | In review: [plans/M0/milestone.md](M0/milestone.md) and 21 specs with prompts; SPEC-01a Ready; Q-43 open | — | docs/m0-specs, #12 |
 
 | Milestone | Scope | Status | Exit date |
 |---|---|---|---|
-| M0 | Foundation: walking skeleton: 14 specs, 32 spec-days | Planned | Not dated (Q-36); forecast 22 Jan 2027 |
-| M1 | Feasibility (R0): 11 specs, 28 spec-days | Planned | Not dated (Q-36); forecast 12 Mar 2027 |
-| M2 | Brief to evidence (R1): 15 specs, 33 spec-days | Planned | Not dated (Q-36); forecast 7 May 2027 |
-| M3 | Script to preview (R1): 12 specs, 26 spec-days | Planned | Not dated (Q-36); forecast 25 Jun 2027 |
-| M4 | Master to export (R1): 8 specs, 19 spec-days | Planned | Not dated (Q-36); forecast 30 Jul 2027 |
-| M5 | Revision and recovery (R1 gate): 9 specs, 22 spec-days | Planned | Not dated (Q-36); forecast 17 Sep 2027 |
-| M6 | Channel record (R2 features): 7 specs, 13 spec-days | Planned | Not dated (Q-36); forecast 15 Oct 2027 |
-| M7 | Hardening, go-live (G5): 7 specs, 12 spec-days | Planned | Not dated (Q-36); forecast 5 Nov 2027 |
-| R2 slate | Twelve originals 4/4/2/2 published; R2 gate | Planned | Not dated (Q-36); forecast 31 Dec 2027 |
+| M0 | Foundation: walking skeleton: 21 specs, 39 spec-days | Prepared (Stage 4) | Not dated (Q-36); forecast 5 Feb 2027 |
+| M1 | Feasibility (R0): 11 specs, 28 spec-days | Planned | Not dated (Q-36); forecast 26 Mar 2027 |
+| M2 | Brief to evidence (R1): 15 specs, 33 spec-days | Planned | Not dated (Q-36); forecast 21 May 2027 |
+| M3 | Script to preview (R1): 12 specs, 26 spec-days | Planned | Not dated (Q-36); forecast 9 Jul 2027 |
+| M4 | Master to export (R1): 8 specs, 19 spec-days | Planned | Not dated (Q-36); forecast 13 Aug 2027 |
+| M5 | Revision and recovery (R1 gate): 9 specs, 22 spec-days | Planned | Not dated (Q-36); forecast 1 Oct 2027 |
+| M6 | Channel record (R2 features): 7 specs, 13 spec-days | Planned | Not dated (Q-36); forecast 29 Oct 2027 |
+| M7 | Hardening, go-live (G5): 7 specs, 12 spec-days | Planned | Not dated (Q-36); forecast 19 Nov 2027 |
+| R2 slate | Twelve originals 4/4/2/2 published; R2 gate | Planned | Not dated (Q-36); forecast 14 Jan 2028 |
 
 Scope, slices, exit criteria and RAID: [DELIVERY_PLAN.md](DELIVERY_PLAN.md). Specs: [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md). Tests and pipeline: [TEST_STRATEGY.md](TEST_STRATEGY.md).
 
 ## Current milestone specs
 
-M0, prepared in Stage 4 (`plans/M0/specs/`).
+M0, prepared in Stage 4: [plans/M0/milestone.md](M0/milestone.md) (dependency groups, Definition of Ready check, splits). Each spec's `spec.md` and Cursor `prompt.md` are in `plans/M0/specs/SPEC-xx/`. Listed in dependency order.
 
 | Spec | Requirements | Screens | Branch / PR | Status | Owner |
 |---|---|---|---|---|---|
-| SPEC-01 Repo toolchain, Makefile and Compose stack | NFR-13 | — | `feat/SPEC-01-toolchain` | Planned | Owner (Cursor) |
-| SPEC-02 CI pipeline, security scans and branch rules | NFR-05, NFR-06, NFR-13, NFR-18 | — | `feat/SPEC-02-ci-pipeline` | Planned | Owner (Cursor) |
-| SPEC-03 Canonical Pydantic contracts, generated JSON Schema and TS (contracts 1.0.0) | NFR-19, R-18, NFR-11 | — | `feat/SPEC-03-contracts-codegen` | Planned | Owner (Cursor) |
-| SPEC-04 Database baseline, migrations, service roles and RLS | R-01, NFR-04, NFR-13 | — | `feat/SPEC-04-database` | Planned | Owner (Cursor) |
-| SPEC-05 Object store choice and BlobStore adapter (ADR-015 amendment) | R-30, NFR-04 | — | `feat/SPEC-05-object-store` | Planned | Owner (Cursor) |
-| SPEC-06 API authentication, members and responsibilities | R-01, R-05, NFR-04 | — | `feat/SPEC-06-api-auth` | Planned | Owner (Cursor) |
-| SPEC-07 Studio sign-in and app shell | R-01, R-05, R-61 | S-01 | `feat/SPEC-07-studio-shell` | Planned | Owner (Cursor) |
-| SPEC-08 Telemetry wiring, Collector redaction and health checks | NFR-09, NFR-06, NFR-15 | — | `feat/SPEC-08-telemetry` | Planned | Owner (Cursor) |
-| SPEC-09 Outbox, dispatcher and DBOS kill-and-resume spike (ADR-003) | NFR-01, R-50, R-51 | — | `feat/SPEC-09-outbox-dbos` | Planned | Owner (Cursor) |
-| SPEC-10 AG-UI relay and project event stream (ADR-020) | R-50, R-61, NFR-04 | — | `feat/SPEC-10-agui-relay` | Planned | Owner (Cursor) |
-| SPEC-11 Agent runtime, tool host, LLM adapter and fake model (ADR-021) | R-63, NFR-05, NFR-11 | — | `feat/SPEC-11-agent-runtime` | Planned | Owner (Cursor) |
-| SPEC-12 Render service skeleton, job API and resource limits | R-29, NFR-12 | — | `feat/SPEC-12-render-skeleton` | Planned | Owner (Cursor) |
-| SPEC-13 Walking skeleton: web → api → worker → agent → render, traced | NFR-09, NFR-13 | S-01 | `feat/SPEC-13-walking-skeleton` | Planned | Owner (Cursor) |
-| SPEC-14 Search API choice and SearchProvider adapter (Q-29) | R-08, NFR-11 | — | `feat/SPEC-14-search-provider` | Planned | Owner (Cursor) |
+| [SPEC-01a Repo toolchain, Makefile and Compose stack](M0/specs/SPEC-01a/spec.md) | NFR-13 | — | `feat/SPEC-01a-toolchain` | Ready | Owner (Cursor) |
+| [SPEC-01b Release host: make release and deploy to local staging](M0/specs/SPEC-01b/spec.md) | NFR-13 | — | `feat/SPEC-01b-release-host` | Draft: needs SPEC-01a | Owner (Cursor) |
+| [SPEC-02 CI pipeline, security scans and branch rules](M0/specs/SPEC-02/spec.md) | NFR-05, NFR-06, NFR-13, NFR-18 | — | `feat/SPEC-02-ci-pipeline` | Draft: needs SPEC-01a | Owner (Cursor) |
+| [SPEC-03a Contracts I: pipeline, drift, dual-runtime fixtures, common, workflow requests](M0/specs/SPEC-03a/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03a-contracts-pipeline` | Draft: needs SPEC-01a and Q-43 | Owner (Cursor) |
+| [SPEC-05 Object store choice and BlobStore adapter (ADR-015 amendment)](M0/specs/SPEC-05/spec.md) | R-30, NFR-04 | — | `feat/SPEC-05-object-store` | Draft: needs SPEC-01a | Owner (Cursor) |
+| [SPEC-08 Telemetry wiring, Collector redaction and health checks](M0/specs/SPEC-08/spec.md) | NFR-09, NFR-06, NFR-15 | — | `feat/SPEC-08-telemetry` | Draft: needs SPEC-01a | Owner (Cursor) |
+| [SPEC-03b Contracts II: domain events, AG-UI stream, analytics](M0/specs/SPEC-03b/spec.md) | NFR-19, R-50 | — | `feat/SPEC-03b-contracts-events` | Draft: needs SPEC-03a | Owner (Cursor) |
+| [SPEC-03c Contracts III: agent task, execution and tool contracts](M0/specs/SPEC-03c/spec.md) | NFR-19, R-63 | — | `feat/SPEC-03c-contracts-agent` | Draft: needs SPEC-03a | Owner (Cursor) |
+| [SPEC-03d Contracts IV: media contracts](M0/specs/SPEC-03d/spec.md) | NFR-19, R-18 | — | `feat/SPEC-03d-contracts-media` | Draft: needs SPEC-03a | Owner (Cursor) |
+| [SPEC-04 Database baseline, migrations, service roles and RLS](M0/specs/SPEC-04/spec.md) | R-01, NFR-04, NFR-13 | — | `feat/SPEC-04-database` | Draft: needs SPEC-01a, SPEC-03a | Owner (Cursor) |
+| [SPEC-03e Contracts V: Studio API models, OpenAPI drift, TS client, contracts 1.0.0](M0/specs/SPEC-03e/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03e-contracts-api` | Draft: needs SPEC-03b–03d | Owner (Cursor) |
+| [SPEC-09a Write path: idempotency, audit, outbox and workflow dispatch](M0/specs/SPEC-09a/spec.md) | NFR-01, R-50 | — | `feat/SPEC-09a-outbox` | Draft: needs SPEC-04, SPEC-03b, SPEC-08 | Owner (Cursor) |
+| [SPEC-12 Render service skeleton, job API and resource limits](M0/specs/SPEC-12/spec.md) | R-29, NFR-12 | — | `feat/SPEC-12-render-skeleton` | Draft: needs SPEC-03d, SPEC-05 | Owner (Cursor) |
+| [SPEC-06 API authentication, members and responsibilities](M0/specs/SPEC-06/spec.md) | R-01, R-05, NFR-04 | — | `feat/SPEC-06-api-auth` | Draft: needs SPEC-04, SPEC-03e | Owner (Cursor) |
+| [SPEC-09b DBOS kill-and-resume spike (ADR-003)](M0/specs/SPEC-09b/spec.md) | NFR-01, R-50, R-51 | — | `feat/SPEC-09b-dbos-spike` | Draft: needs SPEC-09a | Owner (Cursor) |
+| [SPEC-07 Studio sign-in and app shell](M0/specs/SPEC-07/spec.md) | R-01, R-05, R-61 | S-01 | `feat/SPEC-07-studio-shell` | Draft: needs SPEC-06 | Owner (Cursor) |
+| [SPEC-10 AG-UI relay and project event stream (ADR-020)](M0/specs/SPEC-10/spec.md) | R-50, R-61, NFR-04 | — | `feat/SPEC-10-agui-relay` | Draft: needs SPEC-06, SPEC-09a | Owner (Cursor) |
+| [SPEC-11a Agent runtime, tool host, validation stages, fake model (ADR-021)](M0/specs/SPEC-11a/spec.md) | R-63, NFR-05, NFR-11 | — | `feat/SPEC-11a-agent-runtime` | Draft: needs SPEC-03c, SPEC-09b | Owner (Cursor) |
+| [SPEC-11b OpenAI LlmProvider adapter, portability fixtures, eval runner](M0/specs/SPEC-11b/spec.md) | NFR-11, R-63 | — | `feat/SPEC-11b-openai-adapter` | Draft: needs SPEC-11a | Owner (Cursor) |
+| [SPEC-13 Walking skeleton, traced and deployed to staging](M0/specs/SPEC-13/spec.md) | NFR-09, NFR-13 | S-01 | `feat/SPEC-13-walking-skeleton` | Draft: needs six specs and Q-43 | Owner (Cursor) |
+| [SPEC-14 Search API choice and SearchProvider adapter (Q-29)](M0/specs/SPEC-14/spec.md) | R-08, NFR-11 | — | `feat/SPEC-14-search-provider` | Draft: needs SPEC-11a | Owner (Cursor) |
 
 ## Screens
 Designed by journey on the [Claude Design canvas](https://claude.ai/artifact/6jStrLtkcRDG5GfEf5g8HS) (journey map, what it solves, J1, J6, J3), approved by you on 2026-11-14. Each approved screen has a self-contained HTML prototype with its empty, loading and error states (PROCESS.md, Stage 2 screens).
@@ -111,7 +119,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Plan (Stage 3)
 
-[DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) (83 specs SPEC-01–SPEC-83, 185 spec-days, dependency groups, tracks, screen → spec map, Cursor and Claude workflow) · [TEST_STRATEGY.md](TEST_STRATEGY.md) (levels, cadence, eval thresholds, C01–C14 as T-01–T-14, QA-01–QA-12 map, T-01–T-97 catalogue, Definition of Ready and Done, pipeline, environments) · [DELIVERY_PLAN.md](DELIVERY_PLAN.md) (M0–M7, R2 slate, dates, RAID) · [AGENTS.md](../AGENTS.md), [CLAUDE.md](../CLAUDE.md), [.cursor/rules/](../.cursor/rules/) (000-core, backend, agent, media, frontend, contracts, testing, observability) · [ADR-022](../docs/adr/ADR-022-delivery-pipeline-local-hosting.md).
+[DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) (90 specs SPEC-01a–SPEC-83 after the Stage 4 splits, 192 spec-days, dependency groups, tracks, screen → spec map, Cursor and Claude workflow) · [TEST_STRATEGY.md](TEST_STRATEGY.md) (levels, cadence, eval thresholds, C01–C14 as T-01–T-14, QA-01–QA-12 map, T-01–T-98 catalogue, Definition of Ready and Done, pipeline, environments) · [DELIVERY_PLAN.md](DELIVERY_PLAN.md) (M0–M7, R2 slate, dates, RAID) · [AGENTS.md](../AGENTS.md), [CLAUDE.md](../CLAUDE.md), [.cursor/rules/](../.cursor/rules/) (000-core, backend, agent, media, frontend, contracts, testing, observability) · [ADR-022](../docs/adr/ADR-022-delivery-pipeline-local-hosting.md).
 
 | G3 check | Result |
 |---|---|
@@ -124,23 +132,24 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 ## Open questions and risks
 
 - [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-35 (DEC-01–12 are Q-01–Q-12).
-- No open questions. Q-36 answered 14 Nov 2026: no dates; build it the right way.
+- **Open: Q-43** (Stage 4): the walking skeleton's trivial request. A-43 in force for planning: a diagnostic run behind `FEATURE_DIAGNOSTICS` (off in production) and a System check entry in the S-01 app shell. Needed before SPEC-03a starts.
+- Q-36 answered 14 Nov 2026: no dates; build it the right way.
 - Decided 14 Nov 2026, from [Strategy v1.0](../docs/sources/Strategy-v1.0.md): Q-37–Q-42 accepted (no generative video at R0–R2, no January launch, Remotion only, strategy briefs as M0 candidates, specialist tag for physics What If briefs, secondary manual metrics at R2).
 - Risk: several strategy briefs need animation families beyond the six; tagged in M0 and estimated before M6 (DELIVERY_PLAN.md RAID).
-- Issue: G2 signature not recorded (checks pass).
-- Risk: the plan is about 925 engineering hours, roughly 2.5× PRD §22.1's 228–364; the indicative forecast puts go-live around Nov 2027 at 25 h/week (DELIVERY_PLAN.md). Re-estimated after M1.
+- Risk: the plan is about 960 engineering hours (192 spec-days after the M0 splits), roughly 2.6× PRD §22.1's 228–364; the indicative forecast puts go-live around 19 Nov 2027 at 25 h/week (DELIVERY_PLAN.md). Re-estimated after M1.
 - Parked: Q-05 budget limits. Development uses free credits with costs recorded; real limits are set from measured per-video cost before the AWS move.
 - Before the first real provider call: opt out of ElevenLabs model training on every account; OpenAI calls use `store: false` (SECURITY.md).
 - Specialist checks: none outstanding. Q-14, Q-20, Q-25 and the narrator licence rule were decided by the tech lead at your request (engineering decisions, not legal advice).
 - Hosting: local only through R2; AWS Mumbai after the R2 gate (Q-21). Staging is a second local environment. Risk: the owner's machine is a single point of failure, so backups are copied off it (NFR-14).
 - Narration made on ElevenLabs free credits cannot be published; Gate D blocks it until takes are regenerated on a paid plan (ADR-013).
-- Open, low cost: Q-29 search API (M0 research spec).
-- Risk: MinIO Community Edition is no longer developed; interim pinned image, replaced in M0 (ADR-015).
-- Risk: DBOS Transact must pass an M0 kill-and-resume spike (ADR-003); if it fails, ADR-003 is superseded before M1 depends on it.
+- Open, low cost: Q-29 search API (SPEC-14).
+- Risk: MinIO Community Edition is no longer developed; interim pinned image, replaced by SPEC-05 (ADR-015).
+- Risk: DBOS Transact must pass the M0 kill-and-resume spike in SPEC-09b (ADR-003); if it fails, ADR-003 is superseded before M1 depends on it.
 - Risk: Remotion render time and memory are unmeasured until the R0 baseline (NFR-02, ADR-002).
 
 ## Recent decisions
 
+- 2026-11-14: **Stage 4, M0 prepared** (PR #12, for your review): [milestone.md](M0/milestone.md) and spec.md plus prompt.md for 21 specs. Tech lead decisions: SPEC-01, SPEC-03, SPEC-09 and SPEC-11 split into lettered parts to meet the Definition of Ready (M0 32 → 39 spec-days; critical path unchanged at 39; indicative forecast moves two weeks at 25 h/week); SPEC-04 creates only M0 tables; SPEC-07 calls the API through a Next.js route handler; SPEC-10 maps AG-UI on read from the outbox; T-98 added. Q-43 raised (walking-skeleton diagnostic run, A-43). DEVELOPMENT_PLAN effort table corrected (its spec counts were wrong). Spec template gains the Agent line and the media layer, as in PROCESS.md.
 - 2026-11-14: **G2 and G3 signed** by the product owner. Architecture, agent architecture, UI design, tech stack, security, observability and the approved screens are baselined (change control from here). Development plan, test strategy and delivery plan agreed; ADR-022 confirmed. Next: Stage 4 prepares the M0 specs.
 - 2026-11-14: Q-36 answered: no capacity commitment and no milestone dates; milestones close on exit criteria (in line with Q-03). Forecast windows kept as indicative only.
 - 2026-11-14: Q-37–Q-42 accepted by the product owner; baseline and dates unchanged.
