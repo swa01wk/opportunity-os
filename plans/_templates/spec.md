@@ -1,5 +1,6 @@
 # SPEC-xx: <title>
-Milestone: Mx | Status: Draft | Layer: backend / frontend / agent / cross-cutting
+Milestone: Mx | Status: Draft | Layer: backend / frontend / agent / media / cross-cutting
+Agent (if any): task contract, maturity level, eval scenarios, conformance scenarios C-xx
 Requirements: R-xx, R-yy | Feature: F-xx | ADRs: ADR-xxx
 Screens: S-xx (docs/design/screens/S-xx-<name>.html) | Branch: feat/SPEC-xx-<name>
 

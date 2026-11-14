@@ -12,8 +12,9 @@ Owners of related facts: requirements [REQUIREMENTS.md](../docs/product/REQUIREM
 - **Requirements** lists the R-xx and NFR-xx whose acceptance criteria the spec implements or extends. A requirement spanning several specs is accepted when its last spec merges ([requirement → milestone map](DELIVERY_PLAN.md#requirements-to-milestones)).
 - **Tests** are T-xx from the [catalogue](TEST_STRATEGY.md#test-catalogue-t-xx). T-01–T-14 are the agent conformance scenarios C01–C14; T-15–T-30 are the screen tests for S-01–S-16.
 - Every frontend spec names the approved screen it builds, from `docs/design/screens/S-xx-<name>.html`.
+- **Split specs** keep their parent's number with a letter (SPEC-03a, SPEC-03b, …), so the order and every later ID stay unchanged. A dependency on a split spec means all its parts, unless a row names a part.
 
-Totals: **83 specs, 185 spec-days** (M0 32, M1 28, M2 33, M3 26, M4 19, M5 22, M6 13, M7 12).
+Totals: **90 specs, 192 spec-days** (M0 39, M1 28, M2 33, M3 26, M4 19, M5 22, M6 13, M7 12). M0 was re-sized in Stage 4: SPEC-01, SPEC-03, SPEC-09 and SPEC-11 were split to meet the Definition of Ready ([plans/M0/milestone.md](M0/milestone.md#changes-made-while-preparing-m0)).
 
 ## Features → specs
 
@@ -50,24 +51,31 @@ Milestones are defined in [DELIVERY_PLAN.md](DELIVERY_PLAN.md#milestones). Each 
 
 ### M0 Foundation: walking skeleton
 
-Contracts first: SPEC-03 regenerates contracts 0.4.0 from Pydantic as 1.0.0 before any layer codes against them (ADR-008). SPEC-09 is the DBOS kill-and-resume spike; if it fails, ADR-003 is superseded before M1 work depends on it. SPEC-05 replaces the interim MinIO image (ADR-015). SPEC-14 decides Q-29. The owner's discovery tasks run alongside (see [DELIVERY_PLAN.md](DELIVERY_PLAN.md#m0-foundation)).
+Prepared in Stage 4: [plans/M0/milestone.md](M0/milestone.md), with each spec's `spec.md` and `prompt.md` in `plans/M0/specs/`. Contracts first: SPEC-03a–03e regenerate contracts 0.4.0 from Pydantic, part by part, and SPEC-03e cuts 1.0.0 before any layer codes against it (ADR-008). SPEC-09b is the DBOS kill-and-resume spike; if it fails, ADR-003 is superseded before M1 work depends on it. SPEC-05 replaces the interim MinIO image (ADR-015). SPEC-14 decides Q-29. SPEC-13's trivial request is the diagnostic run of A-43 (Q-43 accepted). The owner's discovery tasks run alongside (see [DELIVERY_PLAN.md](DELIVERY_PLAN.md#m0-foundation)).
 
 | Spec | Title | Layer | Requirements | Screens | Tests | Depends on | Size | Branch |
 |---|---|---|---|---|---|---|---|---|
-| SPEC-01 | Repo toolchain, Makefile and Compose stack | X | NFR-13 | — | T-31 | — | M | `feat/SPEC-01-toolchain` |
-| SPEC-02 | CI pipeline, security scans and branch rules | X | NFR-05, NFR-06, NFR-13, NFR-18 | — | T-32 | SPEC-01 | M | `feat/SPEC-02-ci-pipeline` |
-| SPEC-03 | Canonical Pydantic contracts, generated JSON Schema and TS (contracts 1.0.0) | X | NFR-19, R-18, NFR-11 | — | T-33 | SPEC-01 | L | `feat/SPEC-03-contracts-codegen` |
-| SPEC-04 | Database baseline, migrations, service roles and RLS | B | R-01, NFR-04, NFR-13 | — | T-34, T-07 | SPEC-01, SPEC-03 | M | `feat/SPEC-04-database` |
-| SPEC-05 | Object store choice and BlobStore adapter (ADR-015 amendment) | B | R-30, NFR-04 | — | T-35 | SPEC-01 | M | `feat/SPEC-05-object-store` |
-| SPEC-06 | API authentication, members and responsibilities | B | R-01, R-05, NFR-04 | — | T-36, T-37 | SPEC-04 | M | `feat/SPEC-06-api-auth` |
+| SPEC-01a | Repo toolchain, Makefile and Compose stack | X | NFR-13 | — | T-31 | — | M | `feat/SPEC-01a-toolchain` |
+| SPEC-01b | Release host: make release and deploy to local staging | X | NFR-13 | — | T-98 | SPEC-01a | S | `feat/SPEC-01b-release-host` |
+| SPEC-02 | CI pipeline, security scans and branch rules | X | NFR-05, NFR-06, NFR-13, NFR-18 | — | T-32 | SPEC-01a | M | `feat/SPEC-02-ci-pipeline` |
+| SPEC-03a | Contracts I: Pydantic pipeline, drift and dual-runtime fixtures, common types and workflow requests | X | NFR-19, NFR-11 | — | T-33 | SPEC-01a | M | `feat/SPEC-03a-contracts-pipeline` |
+| SPEC-03b | Contracts II: domain events, AG-UI stream and analytics events | X | NFR-19, R-50 | — | T-33 | SPEC-03a | S | `feat/SPEC-03b-contracts-events` |
+| SPEC-03c | Contracts III: agent task, execution and tool contracts | X | NFR-19, R-63 | — | T-33 | SPEC-03a | S | `feat/SPEC-03c-contracts-agent` |
+| SPEC-03d | Contracts IV: media contracts | X | NFR-19, R-18 | — | T-33 | SPEC-03a | S | `feat/SPEC-03d-contracts-media` |
+| SPEC-03e | Contracts V: Studio API models, OpenAPI drift check, TS client and contracts 1.0.0 | X | NFR-19, NFR-11 | — | T-33 | SPEC-03b, SPEC-03c, SPEC-03d | M | `feat/SPEC-03e-contracts-api` |
+| SPEC-04 | Database baseline, migrations, service roles and RLS | B | R-01, NFR-04, NFR-13 | — | T-34, T-07 | SPEC-01a, SPEC-03a | M | `feat/SPEC-04-database` |
+| SPEC-05 | Object store choice and BlobStore adapter (ADR-015 amendment) | B | R-30, NFR-04 | — | T-35 | SPEC-01a | M | `feat/SPEC-05-object-store` |
+| SPEC-06 | API authentication, members and responsibilities | B | R-01, R-05, NFR-04 | — | T-36, T-37 | SPEC-04, SPEC-03e | M | `feat/SPEC-06-api-auth` |
 | SPEC-07 | Studio sign-in and app shell | W | R-01, R-05, R-61 | S-01 | T-15, T-36 | SPEC-06 | M | `feat/SPEC-07-studio-shell` |
-| SPEC-08 | Telemetry wiring, Collector redaction and health checks | X | NFR-09, NFR-06, NFR-15 | — | T-38 | SPEC-01 | M | `feat/SPEC-08-telemetry` |
-| SPEC-09 | Outbox, dispatcher and DBOS kill-and-resume spike (ADR-003) | B | NFR-01, R-50, R-51 | — | T-01, T-04, T-12, T-90 | SPEC-04 | L | `feat/SPEC-09-outbox-dbos` |
-| SPEC-10 | AG-UI relay and project event stream (ADR-020) | B | R-50, R-61, NFR-04 | — | T-10, T-39, T-07 | SPEC-06, SPEC-09 | L | `feat/SPEC-10-agui-relay` |
-| SPEC-11 | Agent runtime, tool host, LLM adapter and fake model (ADR-021) | A | R-63, NFR-05, NFR-11 | — | T-02, T-08, T-09, T-91 | SPEC-03, SPEC-09 | L | `feat/SPEC-11-agent-runtime` |
-| SPEC-12 | Render service skeleton, job API and resource limits | M | R-29, NFR-12 | — | T-40 | SPEC-03, SPEC-05 | M | `feat/SPEC-12-render-skeleton` |
-| SPEC-13 | Walking skeleton: web → api → worker → agent → render, traced | X | NFR-09, NFR-13 | S-01 | T-03, T-41 | SPEC-07, SPEC-08, SPEC-10, SPEC-11, SPEC-12 | M | `feat/SPEC-13-walking-skeleton` |
-| SPEC-14 | Search API choice and SearchProvider adapter (Q-29) | A | R-08, NFR-11 | — | T-42 | SPEC-11 | M | `feat/SPEC-14-search-provider` |
+| SPEC-08 | Telemetry wiring, Collector redaction and health checks | X | NFR-09, NFR-06, NFR-15 | — | T-38 | SPEC-01a | M | `feat/SPEC-08-telemetry` |
+| SPEC-09a | Write path: idempotency, audit, outbox and workflow dispatch | B | NFR-01, R-50 | — | T-01 | SPEC-04, SPEC-03b, SPEC-08 | M | `feat/SPEC-09a-outbox` |
+| SPEC-09b | DBOS kill-and-resume spike: idempotent steps, retry ceilings, fault suite (ADR-003) | B | NFR-01, R-50, R-51 | — | T-04, T-12, T-90 | SPEC-09a | M | `feat/SPEC-09b-dbos-spike` |
+| SPEC-10 | AG-UI relay and project event stream (ADR-020) | B | R-50, R-61, NFR-04 | — | T-10, T-39, T-07 | SPEC-06, SPEC-09a, SPEC-03b | L | `feat/SPEC-10-agui-relay` |
+| SPEC-11a | Agent runtime, tool host, validation stages and fake model (ADR-021) | A | R-63, NFR-05, NFR-11 | — | T-02, T-08, T-09 | SPEC-03c, SPEC-09b | M | `feat/SPEC-11a-agent-runtime` |
+| SPEC-11b | OpenAI LlmProvider adapter, portability fixtures and the eval runner | A | NFR-11, R-63 | — | T-91 | SPEC-11a | M | `feat/SPEC-11b-openai-adapter` |
+| SPEC-12 | Render service skeleton, job API and resource limits | M | R-29, NFR-12 | — | T-40 | SPEC-03d, SPEC-05 | M | `feat/SPEC-12-render-skeleton` |
+| SPEC-13 | Walking skeleton: web → api → worker → agent → render, traced and deployed to staging | X | NFR-09, NFR-13 | S-01 | T-41, T-38, T-03, T-01, T-15 | SPEC-01b, SPEC-07, SPEC-08, SPEC-10, SPEC-11a, SPEC-12 | M | `feat/SPEC-13-walking-skeleton` |
+| SPEC-14 | Search API choice and SearchProvider adapter (Q-29) | A | R-08, NFR-11 | — | T-42 | SPEC-11a | M | `feat/SPEC-14-search-provider` |
 
 ### M1 Feasibility: the R0 sample
 
@@ -75,8 +83,8 @@ Media layer first, as PRD §22 asks: prove one mathematical visual story before 
 
 | Spec | Title | Layer | Requirements | Screens | Tests | Depends on | Size | Branch |
 |---|---|---|---|---|---|---|---|---|
-| SPEC-15 | Allowlisted demonstration functions | B | R-11, R-12 | — | T-43 | SPEC-03 | M | `feat/SPEC-15-demonstrations` |
-| SPEC-16 | Compiler I: schema, references, timing, capabilities, limits (TS + Python mirror) | M | R-18, R-21, R-07, NFR-05, NFR-12, NFR-16 | — | T-44, T-40 | SPEC-03, SPEC-12 | L | `feat/SPEC-16-compiler-core` |
+| SPEC-15 | Allowlisted demonstration functions | B | R-11, R-12 | — | T-43 | SPEC-03d | M | `feat/SPEC-15-demonstrations` |
+| SPEC-16 | Compiler I: schema, references, timing, capabilities, limits (TS + Python mirror) | M | R-18, R-21, R-07, NFR-05, NFR-12, NFR-16 | — | T-44, T-40 | SPEC-03d, SPEC-12 | L | `feat/SPEC-16-compiler-core` |
 | SPEC-17 | Compiler II: demonstration values, continuity, colour meaning, layout | M | R-12, R-20, R-22, R-23, R-27 | — | T-45 | SPEC-15, SPEC-16 | L | `feat/SPEC-17-compiler-semantics` |
 | SPEC-18 | House style brand kit v1 and fonts in media/scenes | M | R-23, R-02, R-55, NFR-08 | — | T-46 | SPEC-12 | M | `feat/SPEC-18-house-style` |
 | SPEC-19 | Scene families I: MathExpression, NumberSequence, CaptionAndTakeaway | M | R-19, R-20 | — | T-46 | SPEC-16, SPEC-18 | L | `feat/SPEC-19-families-1` |
@@ -193,7 +201,7 @@ Specs are numbered in a valid dependency order: every spec depends only on lower
 
 | Milestone | Groups in order (specs in braces can run in parallel) |
 |---|---|
-| M0 | {SPEC-01} → {SPEC-02, SPEC-03, SPEC-05, SPEC-08} → {SPEC-04, SPEC-12} → {SPEC-06, SPEC-09} → {SPEC-07, SPEC-10, SPEC-11} → {SPEC-13, SPEC-14} |
+| M0 | {SPEC-01a} → {SPEC-01b, SPEC-02, SPEC-03a, SPEC-05, SPEC-08} → {SPEC-03b, SPEC-03c, SPEC-03d, SPEC-04} → {SPEC-03e, SPEC-09a, SPEC-12} → {SPEC-06, SPEC-09b} → {SPEC-07, SPEC-10, SPEC-11a} → {SPEC-11b, SPEC-13, SPEC-14} |
 | M1 | {SPEC-15, SPEC-16, SPEC-18, SPEC-21} → {SPEC-17, SPEC-19, SPEC-22} → {SPEC-20, SPEC-23} → {SPEC-24} → {SPEC-25} |
 | M2 | {SPEC-26, SPEC-32, SPEC-34} → {SPEC-27, SPEC-28, SPEC-29} → {SPEC-30, SPEC-31, SPEC-35, SPEC-40} → {SPEC-33, SPEC-36, SPEC-37, SPEC-38} → {SPEC-39} |
 | M3 | {SPEC-41, SPEC-42, SPEC-44} → {SPEC-43, SPEC-46, SPEC-48} → {SPEC-45, SPEC-47, SPEC-49, SPEC-50} → {SPEC-51} → {SPEC-52} |
@@ -202,15 +210,16 @@ Specs are numbered in a valid dependency order: every spec depends only on lower
 | M6 | {SPEC-70, SPEC-73, SPEC-74} → {SPEC-71, SPEC-75} → {SPEC-72, SPEC-76} |
 | M7 | {SPEC-77, SPEC-78, SPEC-79, SPEC-80, SPEC-81} → {SPEC-82, SPEC-83} |
 
-**Critical path** (longest chain by size, 39 spec-days): SPEC-01 → SPEC-03 → SPEC-04 → SPEC-09 → SPEC-26 → SPEC-28 → SPEC-31 → SPEC-42 → SPEC-46 → SPEC-50 → SPEC-53 → SPEC-61 → SPEC-62 → SPEC-63 → SPEC-69 → SPEC-77 → SPEC-83. It runs through the data and workflow foundation, approvals, the script and storyboard APIs, preview and master, and revision. Slippage on these specs moves the milestone; work off this path has slack.
+**Critical path** (longest chain by size, 39 spec-days): SPEC-01a → SPEC-03a → SPEC-04 → SPEC-09a → SPEC-09b → SPEC-26 → SPEC-28 → SPEC-31 → SPEC-42 → SPEC-46 → SPEC-50 → SPEC-53 → SPEC-61 → SPEC-62 → SPEC-63 → SPEC-69 → SPEC-77 → SPEC-83. It runs through the data and workflow foundation, approvals, the script and storyboard APIs, preview and master, and revision. Slippage on these specs moves the milestone; work off this path has slack.
 
 ```mermaid
 flowchart LR
   subgraph M0
-    s01[SPEC-01 toolchain] --> s03[SPEC-03 contracts] --> s04[SPEC-04 database] --> s09[SPEC-09 outbox + DBOS]
-    s09 --> s10[SPEC-10 AG-UI relay]
-    s09 --> s11[SPEC-11 agent runtime]
-    s03 --> s12[SPEC-12 render skeleton]
+    s01[SPEC-01a toolchain] --> s03[SPEC-03a contracts pipeline] --> s04[SPEC-04 database] --> s09a[SPEC-09a write path] --> s09[SPEC-09b DBOS spike]
+    s03 --> s03d[SPEC-03d media contracts]
+    s09a --> s10[SPEC-10 AG-UI relay]
+    s09 --> s11[SPEC-11a agent runtime]
+    s03d --> s12[SPEC-12 render skeleton]
     s10 & s11 & s12 --> s13[SPEC-13 walking skeleton]
   end
   subgraph M1
@@ -248,7 +257,7 @@ There is one implementer (the owner) running Cursor, so tracks are about **what 
 
 | Track | Layers and paths | PRD §23 workstreams | Main specs |
 |---|---|---|---|
-| Platform | `Makefile`, `compose.yaml`, `docker/`, `infra/`, `.github/`, `contracts/` | Security and operations; Data and provenance | SPEC-01–05, 08, 13, 69, 76–83 |
+| Platform | `Makefile`, `compose.yaml`, `docker/`, `infra/`, `.github/`, `contracts/` | Security and operations; Data and provenance | SPEC-01a–05, 08, 13, 69, 76–83 |
 | Control | `backend/` api, domain, workflows | Workflow and control; Data and provenance | SPEC-06, 09, 10, 15, 26–31, 41, 42, 44, 46, 48, 50, 53–56, 60, 61, 63, 70, 71, 74 |
 | Agent | `agent/` | Agent tasks; Editorial and research | SPEC-11, 14, 32, 33, 43, 47, 62 |
 | Media | `media/scenes`, `media/audio` | Renderer and media; Brand and motion | SPEC-12, 16–24, 25 |
@@ -334,7 +343,7 @@ One spec per agent task (PROCESS.md, Stage 3). Each follows the ten steps in [Ad
 
 | Agent task | Spec | Maturity target (Q-33) | Reviewed at | Conformance |
 |---|---|---|---|---|
-| Runtime, tool host, fake model, OpenAI adapter | SPEC-11 | — | — | C02, C08 guard, C09 harness part |
+| Runtime, tool host, fake model, OpenAI adapter, eval runner | SPEC-11a, SPEC-11b | — | — | C02, C08 guard, C09 harness part (SPEC-11a) |
 | Research | SPEC-33 (fetcher SPEC-32, search SPEC-14) | L3, L4 reviewer assistance on S-05 | Claim review on S-05 | C02, C06, C09 |
 | Script | SPEC-43 | L3 | Gate B on S-06 | C09 |
 | Storyboard | SPEC-47 | L3 | Gate C on S-07 | C02, C09 |
@@ -391,14 +400,14 @@ When a spec turns out bigger than about 400 lines or 3 days, stop, split it in `
 
 | Milestone | Specs | Spec-days |
 |---|---|---|
-| M0 Foundation | 27 | 32 |
-| M1 Feasibility (R0) | 22 | 28 |
-| M2 Brief to evidence | 30 | 33 |
-| M3 Script to preview | 24 | 26 |
-| M4 Master to export | 16 | 19 |
-| M5 Revision and recovery (R1 exit) | 18 | 22 |
-| M6 Channel record (R2 features) | 14 | 13 |
-| M7 Hardening | 14 | 12 |
-| **Total** | **83** | **185** |
+| M0 Foundation | 21 | 39 |
+| M1 Feasibility (R0) | 11 | 28 |
+| M2 Brief to evidence | 15 | 33 |
+| M3 Script to preview | 12 | 26 |
+| M4 Master to export | 8 | 19 |
+| M5 Revision and recovery (R1 exit) | 9 | 22 |
+| M6 Channel record (R2 features) | 7 | 13 |
+| M7 Hardening | 7 | 12 |
+| **Total** | **90** | **192** |
 
 Owner discovery, UAT and content time are planned separately in [DELIVERY_PLAN.md](DELIVERY_PLAN.md#dates-demos-and-uat). The total is well above the PRD §22.1 allowance; the comparison and what to do about it are in DELIVERY_PLAN.md.

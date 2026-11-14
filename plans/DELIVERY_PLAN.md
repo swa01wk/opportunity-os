@@ -10,21 +10,21 @@ Every milestone is a vertical slice you can use end to end, closed by Gate G4 (P
 
 | Milestone | Release | At the end you can… | Accepted here | Screens built | Forecast window (indicative) |
 |---|---|---|---|---|---|
-| **M0 Foundation** | — | Sign in to an empty Studio and press a button whose run goes web → api → worker → agent (fake) → render → back to the Studio, traced, on a stack any fresh clone brings up | NFR-09, NFR-19 | S-01 (shell) | 23 Nov 2026 – 22 Jan 2027 |
-| **M1 Feasibility** | **R0** | Produce the narrated odd-squares sample from a command, with captions, verified values and a targeted revision that reuses unchanged scenes | NFR-03, NFR-11, NFR-12, NFR-16 | — | 25 Jan 2027 – 12 Mar 2027 |
-| **M2 Brief to evidence** | R1 | Create a project, set destination, brand, narrator and allowance, write a brief, pass preflight, approve Gate A, run research and review every claim in the Studio | R-01, R-05, R-06, R-08, R-10, R-43, R-50, R-61, NFR-05, NFR-07 | S-01 frame, S-02, S-03, S-04, S-05, S-13 (inspect, cancel) | 15 Mar 2027 – 7 May 2027 |
-| **M3 Script to preview** | R1 | Get a script from reviewed claims and approve Gate B, a storyboard checked by the compiler and approve Gate C, audition narration, and watch a draft preview | R-03, R-07, R-11, R-12, R-13, R-14, R-15, R-16, R-17, R-18, R-19, R-20, R-21, R-23, R-25, R-26, R-27, R-28, R-57, NFR-17 | S-06, S-07, S-08 | 10 May 2027 – 25 Jun 2027 |
-| **M4 Master to export** | R1 | Render the master, review QA, findings and the rubric, approve Gate D and download an export bundle marked "awaiting manual upload" | R-02, R-04, R-09, R-29, R-30, R-37, R-38, R-44, R-45, R-54, R-55, R-59, R-62 | S-11, S-15 | 28 Jun 2027 – 30 Jul 2027 |
-| **M5 Revision and recovery** | **R1 gate** | Ask for a change in words and have the agent redraft only that part, see its impact before any render, apply it, compare versions, recover failed runs, see cost and effort, export or delete project data | R-22, R-31, R-32, R-33, R-34, R-35, R-36, R-42, R-51, R-52, R-53, R-56, R-63, NFR-10 | S-09, S-10, S-13 (recovery), S-14, S-04 (data) | 2 Aug 2027 – 17 Sep 2027 |
-| **M6 Channel record** | R2 features | Approve Gate E, record a manual upload honestly with verification, propose corrections, enter manual metrics, track the 4/4/2/2 slate with variety flags, see the validation dashboard | R-39, R-40, R-41, R-46, R-47, R-48, R-49, R-58, R-60, R-72, NFR-18 | S-12, S-16, S-11 (disclosure) | 20 Sep 2027 – 15 Oct 2027 |
-| **M7 Hardening** | Go-live (G5) | Run the product for the public slate: NFRs verified, restore rehearsed, alerts and kill switches drilled, runbook ready | NFR-01, NFR-02, NFR-04, NFR-06, NFR-08, NFR-13, NFR-14, NFR-15 | — (accessibility pass on all) | 18 Oct 2027 – 5 Nov 2027 |
-| R2 validation slate | **R2 gate** | Publish the twelve originals (4/4/2/2) through the product with review, effort, cost, rights and publication records | KPI-01–KPI-06, KPI-14 evidence | — | 8 weeks after go-live, to about 31 Dec 2027 |
+| **M0 Foundation** | — | Sign in to an empty Studio and press a button whose run goes web → api → worker → agent (fake) → render → back to the Studio, traced, on a stack any fresh clone brings up | NFR-09, NFR-19 | S-01 (shell) | 23 Nov 2026 – 5 Feb 2027 |
+| **M1 Feasibility** | **R0** | Produce the narrated odd-squares sample from a command, with captions, verified values and a targeted revision that reuses unchanged scenes | NFR-03, NFR-11, NFR-12, NFR-16 | — | 8 Feb 2027 – 26 Mar 2027 |
+| **M2 Brief to evidence** | R1 | Create a project, set destination, brand, narrator and allowance, write a brief, pass preflight, approve Gate A, run research and review every claim in the Studio | R-01, R-05, R-06, R-08, R-10, R-43, R-50, R-61, NFR-05, NFR-07 | S-01 frame, S-02, S-03, S-04, S-05, S-13 (inspect, cancel) | 29 Mar 2027 – 21 May 2027 |
+| **M3 Script to preview** | R1 | Get a script from reviewed claims and approve Gate B, a storyboard checked by the compiler and approve Gate C, audition narration, and watch a draft preview | R-03, R-07, R-11, R-12, R-13, R-14, R-15, R-16, R-17, R-18, R-19, R-20, R-21, R-23, R-25, R-26, R-27, R-28, R-57, NFR-17 | S-06, S-07, S-08 | 24 May 2027 – 9 Jul 2027 |
+| **M4 Master to export** | R1 | Render the master, review QA, findings and the rubric, approve Gate D and download an export bundle marked "awaiting manual upload" | R-02, R-04, R-09, R-29, R-30, R-37, R-38, R-44, R-45, R-54, R-55, R-59, R-62 | S-11, S-15 | 12 Jul 2027 – 13 Aug 2027 |
+| **M5 Revision and recovery** | **R1 gate** | Ask for a change in words and have the agent redraft only that part, see its impact before any render, apply it, compare versions, recover failed runs, see cost and effort, export or delete project data | R-22, R-31, R-32, R-33, R-34, R-35, R-36, R-42, R-51, R-52, R-53, R-56, R-63, NFR-10 | S-09, S-10, S-13 (recovery), S-14, S-04 (data) | 16 Aug 2027 – 1 Oct 2027 |
+| **M6 Channel record** | R2 features | Approve Gate E, record a manual upload honestly with verification, propose corrections, enter manual metrics, track the 4/4/2/2 slate with variety flags, see the validation dashboard | R-39, R-40, R-41, R-46, R-47, R-48, R-49, R-58, R-60, R-72, NFR-18 | S-12, S-16, S-11 (disclosure) | 4 Oct 2027 – 29 Oct 2027 |
+| **M7 Hardening** | Go-live (G5) | Run the product for the public slate: NFRs verified, restore rehearsed, alerts and kill switches drilled, runbook ready | NFR-01, NFR-02, NFR-04, NFR-06, NFR-08, NFR-13, NFR-14, NFR-15 | — (accessibility pass on all) | 1 Nov 2027 – 19 Nov 2027 |
+| R2 validation slate | **R2 gate** | Publish the twelve originals (4/4/2/2) through the product with review, effort, cost, rights and publication records | KPI-01–KPI-06, KPI-14 evidence | — | 8 weeks after go-live, to about 14 Jan 2028 |
 
 "Accepted here" lists the requirements whose last spec lands in that milestone; the full map is [below](#requirements-to-milestones). Gate E parts of R-40, R-41 and R-46 land in M6; their Gate A–D parts are accepted for R1 at M5. NFRs are built from M0 and verified in M7.
 
 ### M0 Foundation
 
-**Slice.** The walking skeleton (PROCESS.md Milestones): repo, Makefile and Compose stack, CI with security scans, contracts 1.0.0 generated from Pydantic, database with migrations and RLS, the replacement object store, Keycloak sign-in and the app shell, telemetry, the outbox and DBOS workflows, the AG-UI project stream, the agent runtime with a fake model and tool host, the render service skeleton, and the search API choice. 14 specs, 32 spec-days.
+**Slice.** The walking skeleton (PROCESS.md Milestones): repo, Makefile and Compose stack, CI with security scans, contracts 1.0.0 generated from Pydantic, database with migrations and RLS, the replacement object store, Keycloak sign-in and the app shell, telemetry, the outbox and DBOS workflows, the AG-UI project stream, the agent runtime with a fake model and tool host, the render service skeleton, and the search API choice. 21 specs, 39 spec-days (four G3 specs split in Stage 4; [milestone.md](M0/milestone.md)). The trivial request is a diagnostic run behind a feature flag (A-43, accepted 14 Nov 2026).
 
 **Your tasks in M0** (about 24 hours, PRD M0 discovery; the extra hours from Strategy v1.0 come out of the M0 buffer):
 - twelve briefs across the four series and the first three topics, one mathematical first (Q-02, OOS-002), starting from the twelve candidates in Strategy §5.1 (Q-40); tag each against the six families and the PRD §9.1 expansion list, and mark briefs that need a specialist (Q-41);
@@ -94,7 +94,7 @@ Go-live (G5) starts the operate phase (PROCESS.md, Operate and support), with tw
 
 | Strategy v1.0 phase | Strategy timing | In this plan |
 |---|---|---|
-| Phase 0 Feasibility: M0 discovery, brand, the odd-squares sample, manual-effort comparison | Nov–Dec 2026 | M0 + M1 (R0), ending about 12 Mar 2027 at A-36 |
+| Phase 0 Feasibility: M0 discovery, brand, the odd-squares sample, manual-effort comparison | Nov–Dec 2026 | M0 + M1 (R0), ending about 26 Mar 2027 at A-36 |
 | Phase 1 Small channel launch: three to five originals, manual publication | January 2027 | **Not planned** (Q-03, confirmed by Q-38) |
 | Phase 2 Twelve-video quality gate (4/4/2/2) | PRD R2 | The R2 validation slate after go-live |
 | Phase 3 Conditional 90-day growth study: up to 48 originals, up to 96 uploads, 1,000,000-view stretch | After R2 | R3, conditional on A-18 (PRD §18, R-77, KPI-13); planned with M9 below |
@@ -115,22 +115,22 @@ Not specced and not dated. Each starts only on your decision, with its own estim
 
 | Milestone | Spec-days (+ owner days) | Weeks at 25 h | Forecast at 25 h/week | Weeks at 40 h | Forecast at 40 h/week |
 |---|---|---|---|---|---|
-| M0 | 32 (+4) | 9 | 23 Nov 2026 – 22 Jan 2027 | 6 | 23 Nov 2026 – 1 Jan 2027 |
-| M1 | 28 | 7 | 25 Jan 2027 – 12 Mar 2027 | 5 | 4 Jan 2027 – 5 Feb 2027 |
-| M2 | 33 | 8 | 15 Mar 2027 – 7 May 2027 | 5 | 8 Feb 2027 – 12 Mar 2027 |
-| M3 | 26 | 7 | 10 May 2027 – 25 Jun 2027 | 4 | 15 Mar 2027 – 9 Apr 2027 |
-| M4 | 19 | 5 | 28 Jun 2027 – 30 Jul 2027 | 3 | 12 Apr 2027 – 30 Apr 2027 |
-| M5 | 22 (+4) | 7 | 2 Aug 2027 – 17 Sep 2027 | 4 | 3 May 2027 – 28 May 2027 |
-| M6 | 13 | 4 | 20 Sep 2027 – 15 Oct 2027 | 2 | 31 May 2027 – 11 Jun 2027 |
-| M7 | 12 | 3 | 18 Oct 2027 – 5 Nov 2027 | 2 | 14 Jun 2027 – 25 Jun 2027 |
+| M0 | 39 (+4) | 11 | 23 Nov 2026 – 5 Feb 2027 | 7 | 23 Nov 2026 – 8 Jan 2027 |
+| M1 | 28 | 7 | 8 Feb 2027 – 26 Mar 2027 | 5 | 11 Jan 2027 – 12 Feb 2027 |
+| M2 | 33 | 8 | 29 Mar 2027 – 21 May 2027 | 5 | 15 Feb 2027 – 19 Mar 2027 |
+| M3 | 26 | 7 | 24 May 2027 – 9 Jul 2027 | 4 | 22 Mar 2027 – 16 Apr 2027 |
+| M4 | 19 | 5 | 12 Jul 2027 – 13 Aug 2027 | 3 | 19 Apr 2027 – 7 May 2027 |
+| M5 | 22 (+4) | 7 | 16 Aug 2027 – 1 Oct 2027 | 4 | 10 May 2027 – 4 Jun 2027 |
+| M6 | 13 | 4 | 4 Oct 2027 – 29 Oct 2027 | 2 | 7 Jun 2027 – 18 Jun 2027 |
+| M7 | 12 | 3 | 1 Nov 2027 – 19 Nov 2027 | 2 | 21 Jun 2027 – 2 Jul 2027 |
 
-At 25 h/week, go-live is about **5 Nov 2027** and the R2 gate about **31 Dec 2027**; at 40 h/week, about **25 Jun 2027** and **20 Aug 2027**.
+At 25 h/week, go-live is about **19 Nov 2027** and the R2 gate about **14 Jan 2028**; at 40 h/week, about **2 Jul 2027** and **27 Aug 2027**. Refreshed in Stage 4 (14 Nov 2026) when M0 grew from 32 to 39 spec-days ([plans/M0/milestone.md](M0/milestone.md#changes-made-while-preparing-m0)): every later window moved two weeks at 25 h/week and one week at 40 h/week.
 
 **After M1** the estimate is redone from measured M0–M1 velocity and the renderer is confirmed (PRD §22.1–22.2); the forecast is updated then and at every milestone exit.
 
 **Demos and UAT.** The last two working days of each window: a demo of the slice, then your UAT walkthrough from the milestone's acceptance criteria (T-89, `plans/Mx/uat.md`, drafted in Stage 5). G4 is signed the following working day. A short weekly update is generated from STATUS.md (PROCESS.md, Tracking).
 
-**Estimate against the PRD.** PRD §22.1 allows 228–364 engineering hours plus 60–120 content hours for a "narrow internal release". This plan is **185 spec-days, about 925 engineering hours**, plus about 40 hours of your discovery and UAT time and the PRD's 60–120 content hours: roughly two and a half times the PRD's upper bound. The difference is the baseline agreed in Stages 1–2: sixteen Studio screens with every state, the agent runtime, AG-UI stream and conformance suite (ADR-020, ADR-021), revision redraft through agents (Q-34), approval policy versions (Q-35), local staging and production environments (ADR-022) and the full test levels. Treat it as ±30% until M1 is measured.
+**Estimate against the PRD.** PRD §22.1 allows 228–364 engineering hours plus 60–120 content hours for a "narrow internal release". This plan is **192 spec-days, about 960 engineering hours**, plus about 40 hours of your discovery and UAT time and the PRD's 60–120 content hours: roughly two and a half times the PRD's upper bound. The difference is the baseline agreed in Stages 1–2: sixteen Studio screens with every state, the agent runtime, AG-UI stream and conformance suite (ADR-020, ADR-021), revision redraft through agents (Q-34), approval policy versions (Q-35), local staging and production environments (ADR-022) and the full test levels. Treat it as ±30% until M1 is measured.
 
 **If the calendar is too long**, the levers in order of effect are: more weekly capacity; fewer R1 extras (compare as a text diff only, a read-only S-14, a basic S-15: about 4 spec-days); and nothing else of size, because the remaining specs carry Must requirements. The PRD §22.1 smaller January launch stays off the table (Q-03).
 
@@ -249,7 +249,7 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 | Risk | Likelihood | Impact | Response | Watch |
 |---|---|---|---|---|
 | Effort is about 2.5× the PRD allowance, so the calendar runs long | High | High | No dates committed (Q-36); re-estimate at M1 exit; levers above if you ever want it sooner | Velocity per milestone in retros |
-| DBOS fails the kill-and-resume spike (ADR-003) | Low | High | SPEC-09 runs it first; if it fails, supersede ADR-003 before M1 depends on it | SPEC-09 result |
+| DBOS fails the kill-and-resume spike (ADR-003) | Low | High | SPEC-09b runs it early in M0; if it fails, supersede ADR-003 before M1 depends on it | SPEC-09b result |
 | Remotion cannot meet the output standard or render time (NFR-02, ADR-002) | Medium | High | Measured in M1; renderer confirmed before the Studio couples to it (PRD §22.2) | T-52 baseline |
 | Animation, typography and audio polish take longer than sized (PRD §22.1) | High | Medium | M1 is media-only so it shows early; families are small and reviewed | M1 velocity |
 | Agent output below the eval thresholds | Medium | Medium | Iterate prompts inside the spec; manual takeover remains (R-51); simplify the task | T-60 baselines at M2, M3 |
@@ -289,14 +289,14 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 | Q-36 weekly capacity | Closed 14 Nov 2026 | No dates; milestones close on exit criteria |
 | Q-29 search API | Open | Decided in SPEC-14 (M0) |
 | Q-05 budget limits | Parked | Set before the AWS move |
-| Contracts are 0.4.0 drafts | Expected | Regenerated as 1.0.0 by SPEC-03 |
+| Contracts are 0.4.0 drafts | Expected | Regenerated from Pydantic by SPEC-03a–03d; 1.0.0 cut by SPEC-03e |
 | Strategy v1.0 points Q-37–Q-42 | Closed 14 Nov 2026 | All assumptions accepted; plan unchanged |
 
 ### Dependencies
 
 | Dependency | Needed by | Owner |
 |---|---|---|
-| OpenAI and ElevenLabs keys for development, ElevenLabs training opt-out | SPEC-11, SPEC-21 (M0–M1) | You |
+| OpenAI and ElevenLabs keys for development, ElevenLabs training opt-out | SPEC-11b, SPEC-21 (M0–M1) | You |
 | Search API account | SPEC-14 (M0) | You, after the choice |
 | Twelve briefs, first three topics, motion and voice references, manual baseline | M0 | You |
 | UAT sessions at each milestone; the first three videos for the R1 gate | M1–M7 | You |

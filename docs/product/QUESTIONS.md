@@ -6,7 +6,7 @@ Running log of every open question and decision found in [PRD v2.0](../sources/P
 - Each question Q-n has one assumption A-n (same number). Work builds on A-n until the question is decided.
 - **Status:** Open (not yet reviewed) · Accepted (A-n confirmed as the decision) · Answered (decision differs from A-n) · Parked (deferred; the interim rule shown applies until it is decided).
 - Never delete a row. To change a decision, update its row, add a line to the change log and, after G1, follow change control.
-- New questions take the next number (Q-43 onward).
+- New questions take the next number (Q-44 onward).
 
 **Answerer key:** PO = product owner/client · TL = tech lead · SP = specialist reviewer (legal, privacy, copyright or subject) · PF = platform account preflight (PRD OOS-004). Today one person is PO and TL.
 
@@ -71,11 +71,17 @@ The owner added [Strategy v1.0](../sources/Strategy-v1.0.md) (Niche Opportunity 
 | Q-41 | Does every candidate brief need a specialist review of its simplifications and physical assumptions before scripting, as the strategy says, or only claims tagged "needs specialist" (A-04)? | Strategy §5.1, §6.2, §11; Q-04; PRD §2 | PO, SP | Accepted | A-41: A-04 stands, made explicit for physics: elementary maths and textbook science are self-reviewed with a cited derivation or reference. A What If or physics brief whose payoff depends on modelling beyond a textbook formula (for example #03 Moon vanishes, #05 faster rotation, #09 slower light, #11 Earth rings) is tagged "needs specialist" at preflight, which blocks Gate B and Gate D until a specialist signs (R-09). | A specialist reviewer must be found before such a brief is scheduled. |
 | Q-42 | Which metrics are entered manually at R2, besides the primary metric (A-09), and how are view-count definitions handled? | Strategy §9, §9.1; PRD §17.1, §18; Q-09; R-72 | PO | Accepted | A-42: Primary metric stays average percentage viewed over seven days (A-09). Optional secondary entries, each with its platform definition and capture date: shown in feed, viewed vs swiped away, views, engaged views, average view duration, subscribers gained, shares and saves where available. Views and engaged views are separate metrics because YouTube changed the Shorts view definition on 31 Mar 2025. Missing is never zero (R-72 AC2). Videos are compared only within the same platform, age window, format and duration band. Uses the existing "Enter metric" action on S-12; no screen change. | Applied in SPEC-71 and SPEC-76. |
 
+### Stage 4: M0 preparation (14 Nov 2026)
+
+| Q | Question | Source | Answerer | Status | Decision (or assumption in force) | Follow-up |
+|---|---|---|---|---|---|---|
+| Q-43 | What is the M0 walking skeleton's "trivial request" and the button that starts it? PROCESS.md (M0 exit) and DELIVERY_PLAN.md (M0: "press a button whose run goes web → api → worker → agent (fake) → render") need one, but no contract, agent task or approved screen element provides it. | PROCESS.md Milestones; DELIVERY_PLAN.md M0; found in Stage 4 | PO (an element not on the approved S-01 prototype), TL (contract) | Accepted | A-43: A **diagnostic run**, an operational check rather than a product feature: no R-xx, no KPI, and absent in production. Enabled only by `FEATURE_DIAGNOSTICS` (on in dev and staging, off in production). Contracts 1.0.0 add `POST /projects/{projectId}/diagnostic-runs` (owner or editor, `Idempotency-Key`), workflow type `diagnostic`, task `diagnostic_echo` (no tools, fake model by default, result kept on the attempt record only, never a draft or approval) and step names `diagnostic.echo`, `diagnostic.validate`, `diagnostic.join`; the render step uses the existing `validate` job kind on the odd-squares fixture. In the Studio, a **System check** entry beside the environment badge in the S-01 app shell opens a panel that starts the run and shows its steps from the AG-UI stream. | Accepted 14 Nov 2026 by the product owner, including the System check as a change to the approved S-01 screen (dev and staging only). SPEC-13 adds the note to the S-01 row in UI_DESIGN.md. |
+
 ## Still to do
 
 - **Parked:** Q-05 budget limits; development runs on free credits with costs recorded. Real limits are set before the AWS move.
 - **Specialist checks:** none outstanding. Q-14, Q-20, Q-25 and the narrator licence rule (Q-06) were decided by the tech lead on 2026-11-13 at the owner's request; these are engineering decisions, not legal advice.
-- **Open, low cost:** Q-29 search API, decided in the M0 research spec.
+- **Open, low cost:** Q-29 search API, decided in SPEC-14 (M0).
 
 ## Change log
 
@@ -96,3 +102,5 @@ The owner added [Strategy v1.0](../sources/Strategy-v1.0.md) (Niche Opportunity 
 | 2026-11-14 | Strategy v1.0 added as a companion source (`docs/sources/Strategy-v1.0.md`). Q-37–Q-42 raised; each assumption keeps the current baseline (Q-03, Q-07, Q-24, A-04, A-09 stand). Requirements unchanged. | Claude |
 | 2026-11-14 | Q-37–Q-42 accepted: no generative video at R0–R2, no January launch, Remotion only, strategy briefs as M0 candidates, specialist tag for physics What If briefs, secondary manual metrics at R2. | Product owner |
 | 2026-11-14 | Q-36 answered: no capacity commitment and no dates; milestones close on exit criteria. Forecast windows kept as indicative only. | Product owner |
+| 2026-11-14 | Stage 4 (prepare M0): Q-43 (walking-skeleton diagnostic run and the S-01 System check) raised with A-43. Requirements unchanged. | Claude |
+| 2026-11-14 | Q-43 accepted: the walking skeleton uses the diagnostic run of A-43 and the S-01 System check entry (dev and staging only). The Stage 4 M0 spec splits (39 spec-days) confirmed. | Product owner |
