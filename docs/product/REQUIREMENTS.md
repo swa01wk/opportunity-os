@@ -1,6 +1,6 @@
 # Requirements
 
-Baseline derived from [PRD v2.0](../sources/PRD-v2.0.md) (revised in discovery on 13 Nov 2026: §1.1 added). Revised in discovery on 14 Nov 2026 by product-owner decisions Q-34 (R-31 AC3) and Q-35 (R-41 AC3). On 14 Nov 2026 the owner added the companion [Strategy v1.0](../sources/Strategy-v1.0.md); it adds no requirement, is traced in [Companion source: Strategy v1.0](#companion-source-strategy-v10), and its open points are Q-37–Q-42. Status: **Draft for G1**. Baselined at G1; after that it changes only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)). Open gaps and the assumptions we build on live in [QUESTIONS.md](QUESTIONS.md).
+Baseline derived from [PRD v2.0](../sources/PRD-v2.0.md) (revised in discovery on 13 Nov 2026: §1.1 added). Revised in discovery on 14 Nov 2026 by product-owner decisions Q-34 (R-31 AC3) and Q-35 (R-41 AC3). On 14 Nov 2026 the owner added the companion [Strategy v1.0](../sources/Strategy-v1.0.md); it adds no requirement, is traced in [Companion source: Strategy v1.0](#companion-source-strategy-v10), and the points where it differed from this baseline were decided as Q-37–Q-42 (all assumptions accepted, so the baseline stands). Status: **Draft for G1**. Baselined at G1; after that it changes only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)). Open gaps and the assumptions we build on live in [QUESTIONS.md](QUESTIONS.md).
 
 ## Summary
 
@@ -683,7 +683,7 @@ From PRD §3 non-goals, R4/R5 scope and the project's hard limits:
 - Agent marketplace; more than the three bounded model tasks at launch (§3, §14.1).
 - Billing, customer workspaces, team roles, agency administration (§3; R-78–R-80).
 - Multilingual narration or dubbing (§3, §4).
-- Extensive generative video; generative illustrations beyond a budget-capped option (§3, §21.1). At R1/R2 no generative illustrations at all (Q-24); cinematic generative shots proposed in Strategy v1.0 §7 are open as Q-37.
+- Extensive generative video; generative illustrations beyond a budget-capped option (§3, §21.1). At R1/R2 no generative illustrations at all (Q-24); cinematic generative shots proposed in Strategy v1.0 §7 are not used at R0–R2 (Q-37).
 - Content repurposing (§3).
 - Automatic enterprise knowledge synchronisation (§6.10).
 - Commercial pricing, subscription and licensing the library as an API (§21.2).
@@ -807,7 +807,7 @@ From PRD §3 non-goals, R4/R5 scope and the project's hard limits:
 
 ## Companion source: Strategy v1.0
 
-[Strategy v1.0](../sources/Strategy-v1.0.md) (Niche Opportunity and Audience Traction Strategy, 14 Nov 2026) is a companion to the PRD added by the owner. It refines channel strategy and states that it does not supersede requirements, gates or the architecture. It adds **no R-xx, NFR-xx or KPI-xx**. Where it goes beyond or against a decision already taken, the point is a question (Q-37–Q-42) and its assumption keeps this baseline.
+[Strategy v1.0](../sources/Strategy-v1.0.md) (Niche Opportunity and Audience Traction Strategy, 14 Nov 2026) is a companion to the PRD added by the owner. It refines channel strategy and states that it does not supersede requirements, gates or the architecture. It adds **no R-xx, NFR-xx or KPI-xx**. Where it went beyond or against a decision already taken, the point was raised as Q-37–Q-42; the owner accepted all six assumptions on 14 Nov 2026, so this baseline stands.
 
 | Strategy section | Covered by |
 |---|---|

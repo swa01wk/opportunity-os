@@ -12,7 +12,7 @@ All gates are signed by the product owner / tech lead (same person).
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
 | 2 Design | G2 Design review and screens | Done: 2a, 2b, 2c merged (HTML prototypes S-01–S-16 merged in #7); all G2 checks pass; **your G2 signature is not yet recorded** | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5, #7 |
-| 3 Plan | G3 Milestone scope and dates | Plan merged (#8). Strategy v1.0 intake in review (Q-37–Q-42); G3 waits for your answers to Q-36–Q-42 | | docs/stage-3-plan, #8 · docs/strategy-v1-intake, #9 |
+| 3 Plan | G3 Milestone scope and dates | Plan merged (#8). Strategy v1.0 intake in review; Q-37–Q-42 accepted. G3 waits for Q-36 (capacity, dates) and your G2 signature | | docs/stage-3-plan, #8 · docs/strategy-v1-intake, #9 |
 
 | Milestone | Scope | Status | Exit date |
 |---|---|---|---|
@@ -125,7 +125,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 - [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-35 (DEC-01–12 are Q-01–Q-12).
 - Open: **Q-36** weekly capacity (A-36: 25 h/week), needed to commit dates at G3.
-- Open, from [Strategy v1.0](../docs/sources/Strategy-v1.0.md): **Q-37** cinematic generative shots (A-37: no, Q-24 stands), **Q-38** January 2027 small launch (A-38: no, Q-03 stands), **Q-39** Manim comparison (A-39: Remotion only, Q-07 stands), **Q-40** strategy's twelve briefs as candidates, with families beyond the six estimated as R-24 work, **Q-41** specialist review for physics What If briefs, **Q-42** secondary manual metrics at R2.
+- Decided 14 Nov 2026, from [Strategy v1.0](../docs/sources/Strategy-v1.0.md): Q-37–Q-42 accepted (no generative video at R0–R2, no January launch, Remotion only, strategy briefs as M0 candidates, specialist tag for physics What If briefs, secondary manual metrics at R2).
 - Risk: several strategy briefs need animation families beyond the six; tagged in M0 and estimated before M6 (DELIVERY_PLAN.md RAID).
 - Issue: G2 signature not recorded (checks pass).
 - Risk: the plan is about 925 engineering hours, roughly 2.5× PRD §22.1's 228–364; at A-36 go-live is about 5 Nov 2027 and the R2 gate about 31 Dec 2027 (DELIVERY_PLAN.md).
@@ -141,6 +141,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Recent decisions
 
+- 2026-11-14: Q-37–Q-42 accepted by the product owner; baseline and dates unchanged.
 - 2026-11-14: Strategy v1.0 added as a companion source (`docs/sources/Strategy-v1.0.md`). No requirement added; coverage traced in REQUIREMENTS.md; Q-37–Q-42 raised with assumptions that keep the baseline; DELIVERY_PLAN (M0 tasks, phase map, R2 gate outcomes, RAID), DEVELOPMENT_PLAN (strategy inputs → specs) and TEST_STRATEGY (eval topics, tracked beat timing) updated.
 
 - 2026-11-14: Stage 3 (tech lead, for you to confirm at G3): milestones M0 Foundation → M1 R0 feasibility (media first, PRD §22) → M2–M5 R1 slices → M6 R2 features → M7 hardening → R2 slate; re-estimate and renderer check after M1 (PRD §22.1–22.2). ADR-022: CI verifies, your machine builds each release once, staging and production are local Compose projects promoted by digest. ADR-019 amended (k6, OWASP ZAP, diff-cover). Eval thresholds set (hard gates zero; rates provisional, calibrated at M2 and M3). Conformance C05–C11 due at M2 exit, not M1 (M1 has no approvals, agent runs or budgets). Q-36 raised.
