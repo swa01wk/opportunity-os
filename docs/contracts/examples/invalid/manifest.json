@@ -128,6 +128,13 @@
       "note": "additionalProperties is false on AnalyticsEvent."
     },
     {
+      "file": "string-metric-value.analytics-event.json",
+      "contract": "analytics/events.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "MetricRecorded value must be a JSON number, not a string (JsonNumber)."
+    },
+    {
       "file": "bad-seq.diagnostic-run.stream.jsonl",
       "contract": "agui/stream.json",
       "level": "stream",

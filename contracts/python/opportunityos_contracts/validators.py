@@ -24,6 +24,20 @@ def _json_int(value: object) -> object:
 JsonInt = Annotated[StrictInt, BeforeValidator(_json_int)]
 
 
+def _json_number(value: object) -> float:
+    if isinstance(value, (bool, str)):
+        raise ValueError("must be a JSON number")
+    if isinstance(value, int):
+        return float(value)
+    if isinstance(value, float):
+        return value
+    msg = "must be a JSON number"
+    raise ValueError(msg)
+
+
+JsonNumber = Annotated[float, BeforeValidator(_json_number)]
+
+
 def reject_explicit_null_keys(data: Any, field_names: frozenset[str]) -> Any:
     """Reject JSON null on optional fields; omission remains allowed (NFR-19)."""
     if not isinstance(data, dict):

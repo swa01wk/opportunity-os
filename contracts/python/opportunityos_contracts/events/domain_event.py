@@ -372,7 +372,23 @@ _TYPED_PAYLOAD: dict[EventType, type[ContractModel | WorkflowRequest]] = {
 
 
 class DomainEvent(ContractModel):
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    """Outbox event (ADR-010).
+
+    Written in the same transaction as the change it reports. Events are facts for projection,
+    Studio updates and audit; they never carry authority. Consumers are idempotent by eventId
+    and re-read current state before acting.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+        json_schema_extra={
+            "$comment": (
+                "The if/then block above is for the JSON Schema draft only. The Pydantic source "
+                "(ADR-008) models this as a discriminated union on `type`."
+            ),
+        },
+    )
 
     event_id: Annotated[Uuid, Field(alias="eventId")]
     type: EventType
@@ -430,3 +446,29 @@ DOMAIN_DEF_MODELS: dict[str, type] = {
     "PublicationRecorded": PublicationRecorded,
     "PolicyVersions": PolicyVersions,
 }
+
+
+def domain_payload_schema_ref(model: type) -> str:
+    if model is WorkflowRequest:
+        return "workflow-request.schema.json"
+    for def_name, def_model in DOMAIN_DEF_MODELS.items():
+        if def_model is model:
+            return f"#/$defs/{def_name}"
+    msg = f"no schema ref for payload model {model!r}"
+    raise ValueError(msg)
+
+
+def domain_payload_dispatch_rules() -> list[tuple[list[str], str]]:
+    type_order = {member.value: index for index, member in enumerate(EventType)}
+    groups: dict[type, list[str]] = {}
+    for event_type, model in _TYPED_PAYLOAD.items():
+        groups.setdefault(model, []).append(event_type.value)
+    rules = [
+        (
+            sorted(types, key=lambda value: type_order[value]),
+            domain_payload_schema_ref(model),
+        )
+        for model, types in groups.items()
+    ]
+    rules.sort(key=lambda item: type_order[item[0][0]])
+    return rules

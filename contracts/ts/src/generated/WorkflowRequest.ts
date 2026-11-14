@@ -1,29 +1,35 @@
 /* eslint-disable */
 
+export type Uuid = string;
 /**
- * Durable request written by the API in the same transaction as the command (ADR-003). The dispatcher starts a DBOS workflow whose ID equals requestId, so lost acknowledgements and duplicate dispatch start at most one workflow.
+ * Lowercase hex SHA-256 of canonical JSON (RFC 8785) or of file bytes.
  */
+export type Sha256 = string;
+/**
+ * Stable, human-readable ID unique within its document (objects, elements, scenes, beats, phrases).
+ */
+export type LocalId = string;
+/**
+ * Absolute UTC timestamp (RFC 3339). Display timezone is a destination setting (R-04).
+ */
+export type Timestamp = string;
+
 export interface WorkflowRequest {
   input: {
     contractRef?: VersionRef;
     estimatedCost?: Money;
     packageRef?: VersionRef;
-    revisionId?: string;
+    revisionId?: Uuid;
     /**
      * @maxItems 24
-     *
-     * Items: Stable, human-readable ID unique within its document (objects, elements, scenes, beats, phrases).
      */
-    sceneIds?: string[];
+    sceneIds?: LocalId[];
     scriptRef?: VersionRef;
     storyboardRef?: VersionRef;
   };
-  /**
-   * Absolute UTC timestamp (RFC 3339). Display timezone is a destination setting (R-04).
-   */
-  notBefore?: string;
-  projectId: string;
-  requestId: string;
+  notBefore?: Timestamp;
+  projectId: Uuid;
+  requestId: Uuid;
   requestedBy: Actor;
   workflowType:
     | "research"
@@ -45,16 +51,10 @@ export interface WorkflowRequest {
  * Pointer to one immutable version of a record. Approvals and manifests bind to these.
  */
 export interface VersionRef {
-  id: string;
-  /**
-   * Lowercase hex SHA-256 of canonical JSON (RFC 8785) or of file bytes.
-   */
-  sha256: string;
+  id: Uuid;
+  sha256: Sha256;
   version: number;
 }
-/**
- * Run estimate checked against the remaining allowance at request time (R-07). Each task still reserves its own cost before dispatch (R-34).
- */
 export interface Money {
   /**
    * Amount in minor units (paise, cents).

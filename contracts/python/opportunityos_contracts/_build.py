@@ -14,9 +14,19 @@ from opportunityos_contracts.agui.stream import (
     STEP_NAME_PATTERN,
     agui_x_block,
 )
-from opportunityos_contracts.analytics.events import ANALYTICS_DEF_MODELS
+from opportunityos_contracts.analytics.events import (
+    ANALYTICS_DEF_MODELS,
+    AnalyticsEvent,
+    AnalyticsEventName,
+    analytics_property_dispatch_rules,
+)
 from opportunityos_contracts.common import COMMON_DEF_ALIASES, COMMON_DEF_MODELS
-from opportunityos_contracts.events.domain_event import DOMAIN_DEF_MODELS
+from opportunityos_contracts.events.domain_event import (
+    DOMAIN_DEF_MODELS,
+    DomainEvent,
+    DomainEventSubject,
+    domain_payload_dispatch_rules,
+)
 from opportunityos_contracts.events.workflow_request import WorkflowRequest
 from opportunityos_contracts.validators import TIMESTAMP_PATTERN
 
@@ -52,6 +62,24 @@ COMMON_META: dict[str, Any] = {
         "Shared primitives used by every OpportunityOS contract. "
         "Canonical source from M0: Pydantic (ADR-008)."
     ),
+}
+
+DOMAIN_EVENT_META: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": DOMAIN_EVENT_SCHEMA_ID,
+    "x-version": "0.4.0",
+    "title": "DomainEvent",
+    "type": "object",
+    "additionalProperties": False,
+}
+
+ANALYTICS_EVENT_META: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": ANALYTICS_SCHEMA_ID,
+    "x-version": "0.2.0",
+    "title": "AnalyticsEvent",
+    "type": "object",
+    "additionalProperties": False,
 }
 
 WORKFLOW_META: dict[str, Any] = {
@@ -227,52 +255,94 @@ def _load_baseline(name: str) -> dict[str, Any]:
     return loaded
 
 
-def _looks_like_money(node: dict[str, Any]) -> bool:
-    props = node.get("properties")
-    if not isinstance(props, dict):
-        return False
-    return "amountMinor" in props and "currency" in props
+def _model_description(model: type) -> str:
+    doc = (model.__doc__ or "").strip()
+    return " ".join(part.strip() for part in doc.splitlines() if part.strip())
 
 
-def _looks_like_version_ref(node: dict[str, Any]) -> bool:
-    props = node.get("properties")
-    if not isinstance(props, dict):
-        return False
-    required = node.get("required")
-    if not isinstance(required, list):
-        return False
-    keys = {"id", "version", "sha256"}
-    return keys.issubset(set(props)) and keys.issubset(set(required))
+def _build_if_then_dispatch(
+    rules: list[tuple[list[str], str]],
+    *,
+    discriminator: str,
+    target_property: str,
+) -> list[dict[str, Any]]:
+    blocks: list[dict[str, Any]] = []
+    for values, ref in rules:
+        type_schema: dict[str, Any] = {"const": values[0]} if len(values) == 1 else {"enum": values}
+        blocks.append(
+            {
+                "if": {"properties": {discriminator: type_schema}},
+                "then": {"properties": {target_property: {"$ref": ref}}},
+            }
+        )
+    return blocks
 
 
-def _collapse_inlined_common(node: Any, *, external: bool) -> Any:
-    if isinstance(node, dict):
-        if _looks_like_money(node):
-            return _common_ref("Money", external=external)
-        if _looks_like_version_ref(node):
-            return _common_ref("VersionRef", external=external)
-        if isinstance(node.get("enum"), list) and node.get("enum") == [
-            "retryable_provider",
-            "invalid_content",
-            "render_defect",
-            "uncertain_external",
-            "resource_limit",
-            "authorization",
-            "conflict",
-            "internal",
-        ]:
-            ref = _common_ref("ErrorClass", external=external)
-            description = node.get("description")
-            if description:
-                ref = dict(ref)
-                ref["description"] = description
-            return ref
-        return {
-            key: _collapse_inlined_common(value, external=external) for key, value in node.items()
+def _export_inline_model(
+    model: type[BaseModel],
+    *,
+    external: bool,
+    preserve: frozenset[str],
+) -> dict[str, Any]:
+    raw = model.model_json_schema(mode="serialization", ref_template="#/$defs/{model}")
+    local_defs = dict(raw.pop("$defs", {}))
+    body = _inline_local_refs(raw, local_defs, preserve=preserve)
+    polished = _polish_schema(_rewrite_common_refs(body, external=external))
+    if not isinstance(polished, dict):
+        msg = f"expected dict schema for {model}"
+        raise TypeError(msg)
+    return polished
+
+
+def _export_root_envelope(
+    model: type[BaseModel],
+    *,
+    meta: dict[str, Any],
+    external: bool,
+    preserve: frozenset[str],
+    property_overrides: dict[str, Any],
+    comment: str | None = None,
+) -> dict[str, Any]:
+    raw = model.model_json_schema(mode="serialization", ref_template="#/$defs/{model}")
+    local_defs = dict(raw.pop("$defs", {}))
+    properties: dict[str, Any] = {}
+    for key, value in raw.get("properties", {}).items():
+        if key in property_overrides:
+            continue
+        inlined = _inline_local_refs(value, local_defs, preserve=preserve)
+        properties[key] = _polish_schema(_rewrite_common_refs(inlined, external=external))
+    properties.update(property_overrides)
+    for key in ("requestId", "projectId", "workspaceId", "eventId", "sourceEventId", "memberId"):
+        if key in properties:
+            properties[key] = _common_ref("Uuid", external=external)
+    if "occurredAt" in properties:
+        properties["occurredAt"] = _common_ref("Timestamp", external=external)
+    if "requestedBy" in properties:
+        properties["requestedBy"] = _common_ref("Actor", external=external)
+    if "actor" in properties:
+        properties["actor"] = _common_ref("Actor", external=external)
+    if "correlationId" in properties and isinstance(properties["correlationId"], dict):
+        properties["correlationId"] = {
+            **_common_ref("Uuid", external=external),
+            "description": "Run or request that this event belongs to.",
         }
-    if isinstance(node, list):
-        return [_collapse_inlined_common(item, external=external) for item in node]
-    return node
+    if "causationId" in properties and isinstance(properties["causationId"], dict):
+        properties["causationId"] = {
+            **_common_ref("Uuid", external=external),
+            "description": "Event or command that caused this one.",
+        }
+    document: dict[str, Any] = {
+        **meta,
+        "description": _model_description(model),
+        "required": list(raw.get("required", [])),
+        "properties": properties,
+    }
+    if comment:
+        document["$comment"] = comment
+    extra = model.model_config.get("json_schema_extra")
+    if isinstance(extra, dict) and "$comment" in extra and comment is None:
+        document["$comment"] = extra["$comment"]
+    return document
 
 
 def _export_registry_defs(
@@ -280,7 +350,7 @@ def _export_registry_defs(
     *,
     external: bool,
 ) -> dict[str, Any]:
-    preserve = frozenset(models)
+    preserve = frozenset(models) | COMMON_NAMES
     defs: dict[str, Any] = {}
     for name, model in models.items():
         if isinstance(model, type) and issubclass(model, StrEnum):
@@ -288,14 +358,12 @@ def _export_registry_defs(
             continue
         if not isinstance(model, type) or not issubclass(model, BaseModel):
             schema = TypeAdapter(model).json_schema(ref_template="#/$defs/{model}")
-            polished = _polish_schema(_rewrite_common_refs(schema, external=external))
-            defs[name] = _collapse_inlined_common(polished, external=external)
+            defs[name] = _polish_schema(_rewrite_common_refs(schema, external=external))
             continue
         raw = model.model_json_schema(mode="serialization", ref_template="#/$defs/{model}")
         local_defs = dict(raw.pop("$defs", {}))
         body = _inline_local_refs(raw, local_defs, preserve=preserve)
-        polished = _polish_schema(_rewrite_common_refs(body, external=external))
-        defs[name] = _collapse_inlined_common(polished, external=external)
+        defs[name] = _polish_schema(_rewrite_common_refs(body, external=external))
     return defs
 
 
@@ -306,29 +374,69 @@ def _merge_baseline_document(baseline_name: str, defs: dict[str, Any]) -> dict[s
 
 
 def _build_domain_event_document() -> dict[str, Any]:
+    preserve = frozenset(DOMAIN_DEF_MODELS) | COMMON_NAMES
     defs = _export_registry_defs(DOMAIN_DEF_MODELS, external=True)
-    task_attempt = defs.get("TaskAttempt")
-    if isinstance(task_attempt, dict):
-        properties = task_attempt.get("properties")
-        if isinstance(properties, dict) and "errorClass" in properties:
-            properties["errorClass"] = {"$ref": "../common.schema.json#/$defs/ErrorClass"}
-    return _merge_baseline_document("domain-event.0.4.0.json", defs)
+    subject = _export_inline_model(DomainEventSubject, external=True, preserve=preserve)
+    overrides = {
+        "type": {"$ref": "#/$defs/EventType"},
+        "eventVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Payload version for this type.",
+        },
+        "subject": subject,
+        "payload": {"type": "object"},
+    }
+    envelope = _export_root_envelope(
+        DomainEvent,
+        meta=DOMAIN_EVENT_META,
+        external=True,
+        preserve=preserve,
+        property_overrides=overrides,
+    )
+    envelope["allOf"] = _build_if_then_dispatch(
+        domain_payload_dispatch_rules(),
+        discriminator="type",
+        target_property="payload",
+    )
+    envelope["$defs"] = defs
+    return envelope
+
+
+def _strip_nullable_default(defs: dict[str, Any], def_name: str, property_name: str) -> None:
+    definition = defs.get(def_name)
+    if not isinstance(definition, dict):
+        return
+    properties = definition.get("properties")
+    if not isinstance(properties, dict):
+        return
+    field = properties.get(property_name)
+    if isinstance(field, dict):
+        field.pop("default", None)
 
 
 def _build_analytics_document() -> dict[str, Any]:
+    preserve = frozenset(ANALYTICS_DEF_MODELS) | COMMON_NAMES
     defs = _export_registry_defs(ANALYTICS_DEF_MODELS, external=True)
-    defs = _polish_metric_recorded_value(defs)
-    return _merge_baseline_document("analytics.0.2.0.json", defs)
-
-
-def _polish_metric_recorded_value(defs: dict[str, Any]) -> dict[str, Any]:
-    metric = defs.get("metric_recorded")
-    if not isinstance(metric, dict):
-        return defs
-    properties = metric.get("properties")
-    if isinstance(properties, dict) and "value" in properties:
-        properties["value"] = {"type": ["number", "null"]}
-    return defs
+    _strip_nullable_default(defs, "metric_recorded", "value")
+    overrides = {
+        "eventName": {"enum": [member.value for member in AnalyticsEventName]},
+        "properties": {"type": "object"},
+    }
+    envelope = _export_root_envelope(
+        AnalyticsEvent,
+        meta=ANALYTICS_EVENT_META,
+        external=True,
+        preserve=preserve,
+        property_overrides=overrides,
+    )
+    envelope["allOf"] = _build_if_then_dispatch(
+        analytics_property_dispatch_rules(),
+        discriminator="eventName",
+        target_property="properties",
+    )
+    envelope["$defs"] = defs
+    return envelope
 
 
 def _build_agui_stream_document() -> dict[str, Any]:
@@ -353,14 +461,9 @@ def _build_agui_stream_document() -> dict[str, Any]:
             }
     step_name = defs.get("StepName")
     if isinstance(step_name, dict):
-        step_name.clear()
-        step_name.update(
-            {
-                "type": "string",
-                "description": "Workflow step names shown in the run indicator and S-13.",
-                "pattern": STEP_NAME_PATTERN,
-            }
-        )
+        step_name["pattern"] = STEP_NAME_PATTERN
+        if step_name.get("type") is None:
+            step_name["type"] = "string"
     active_run = defs.get("ProjectRunState", {}).get("properties", {}).get("activeRuns", {})
     items: dict[str, Any] = {}
     if isinstance(active_run, dict):

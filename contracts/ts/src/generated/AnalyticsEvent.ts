@@ -1,9 +1,12 @@
 /* eslint-disable */
 
+export type Uuid = string;
 /**
- * KPI analytics event (ADR-017). Written only by the outbox relay into analytics.event from a delivered DomainEvent; never written directly. Properties carry no free text and no personal data beyond the member UUID. Event names and KPIs: OBSERVABILITY.md. R3 adds recommendation.decided.
+ * Absolute UTC timestamp (RFC 3339). Display timezone is a destination setting (R-04).
  */
-export type AnalyticsEvent = {
+export type Timestamp = string;
+
+export interface AnalyticsEvent {
   eventName:
     | "video.approved"
     | "video.published"
@@ -16,13 +19,10 @@ export type AnalyticsEvent = {
     | "finding.resolved"
     | "metric.recorded";
   eventVersion: number;
-  memberId?: string;
-  /**
-   * Absolute UTC timestamp (RFC 3339). Display timezone is a destination setting (R-04).
-   */
-  occurredAt: string;
-  projectId?: string;
+  memberId?: Uuid;
+  occurredAt: Timestamp;
+  projectId?: Uuid;
   properties: {};
-  sourceEventId: string;
-  workspaceId: string;
-};
+  sourceEventId: Uuid;
+  workspaceId: Uuid;
+}

@@ -3,11 +3,11 @@
 from enum import StrEnum
 from typing import Annotated, Any, Final, Self
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, WithJsonSchema, model_validator
 
 from opportunityos_contracts._schema import ContractModel
 from opportunityos_contracts.common import Sha256, Timestamp, Uuid
-from opportunityos_contracts.validators import JsonInt, reject_explicit_null_keys
+from opportunityos_contracts.validators import JsonInt, JsonNumber, reject_explicit_null_keys
 
 ANALYTICS_OPTIONAL_FIELDS: Final = frozenset({"projectId", "memberId"})
 
@@ -229,7 +229,7 @@ class CostSettledProperties(ContractModel):
     estimated_minor: Annotated[JsonInt, Field(alias="estimatedMinor", ge=0)]
     actual_minor: Annotated[JsonInt, Field(alias="actualMinor", ge=0)]
     currency: Annotated[str, Field(pattern=r"^[A-Z]{3}$")]
-    fx_rate: Annotated[float | None, Field(default=None, alias="fxRate", gt=0)] = None
+    fx_rate: Annotated[JsonNumber | None, Field(default=None, alias="fxRate", gt=0)] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -285,7 +285,11 @@ class MetricRecordedProperties(ContractModel):
 
     publication_id: Annotated[Uuid, Field(alias="publicationId")]
     measure: Annotated[str, Field(max_length=80)]
-    value: float | None = None
+    value: Annotated[
+        JsonNumber | None,
+        Field(default=None),
+        WithJsonSchema({"type": ["number", "null"]}),
+    ] = None
     availability: MetricAvailability
     window_start: Annotated[Timestamp, Field(alias="windowStart")]
     window_end: Annotated[Timestamp, Field(alias="windowEnd")]
@@ -297,6 +301,13 @@ class MetricRecordedProperties(ContractModel):
     @classmethod
     def validate_no_null_denominator(cls, data: Any) -> Any:
         return reject_explicit_null_keys(data, frozenset({"denominator"}))
+
+
+def analytics_property_dispatch_rules() -> list[tuple[list[str], str]]:
+    return [
+        ([event_name.value], f"#/$defs/{event_name.value.replace('.', '_')}")
+        for event_name in AnalyticsEventName
+    ]
 
 
 _PROPERTY_MODELS: dict[AnalyticsEventName, type[ContractModel]] = {
@@ -314,7 +325,23 @@ _PROPERTY_MODELS: dict[AnalyticsEventName, type[ContractModel]] = {
 
 
 class AnalyticsEvent(ContractModel):
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    """KPI analytics event (ADR-017).
+
+    Written only by the outbox relay into analytics.event from a delivered DomainEvent;
+    never written directly. Properties carry no free text and no personal data beyond the
+    member UUID. Event names and KPIs: OBSERVABILITY.md. R3 adds recommendation.decided.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+        json_schema_extra={
+            "$comment": (
+                "if/then is for the JSON Schema draft; the Pydantic source models a "
+                "discriminated union on eventName (ADR-008)."
+            ),
+        },
+    )
 
     source_event_id: Annotated[Uuid, Field(alias="sourceEventId")]
     event_name: Annotated[AnalyticsEventName, Field(alias="eventName")]

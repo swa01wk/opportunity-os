@@ -21,58 +21,107 @@ const analytics = JSON.parse(await readFile(analyticsPath, "utf8"));
 await rm(outDir, { recursive: true, force: true });
 await mkdir(outDir, { recursive: true });
 
-function schemaWithDefs(name, def, extraDefs = {}) {
+const EXTERNAL_REF_RE =
+  /^\.\.\/(?:common\.schema\.json|events\/domain-event\.schema\.json)#\/\$defs\/([A-Za-z0-9_]+)$/;
+
+function sortObject(obj) {
+  if (Array.isArray(obj)) {
+    return obj.map(sortObject);
+  }
+  if (obj && typeof obj === "object") {
+    return Object.fromEntries(
+      Object.keys(obj)
+        .sort()
+        .map((key) => [key, sortObject(obj[key])]),
+    );
+  }
+  return obj;
+}
+
+function resolveRefs(node, defs) {
+  if (Array.isArray(node)) {
+    return node.map((item) => resolveRefs(item, defs));
+  }
+  if (!node || typeof node !== "object") {
+    return node;
+  }
+  if (typeof node.$ref === "string") {
+    const external = node.$ref.match(EXTERNAL_REF_RE);
+    if (external) {
+      return { $ref: `#/$defs/${external[1]}` };
+    }
+    if (node.$ref.startsWith("#/$defs/")) {
+      return { $ref: node.$ref };
+    }
+  }
+  return Object.fromEntries(
+    Object.entries(node).map(([key, value]) => [key, resolveRefs(value, defs)]),
+  );
+}
+
+function buildDefsBundle() {
+  const raw = {
+    ...common.$defs,
+    ...domain.$defs,
+    ...agui.$defs,
+  };
+  if (agui.$defs?.RunErrorCode?.$ref) {
+    raw.RunErrorCode = { ...common.$defs.ErrorClass };
+  }
+  const resolved = {};
+  for (const name of Object.keys(raw).sort()) {
+    resolved[name] = resolveRefs(raw[name], raw);
+  }
+  return sortObject(resolved);
+}
+
+function schemaForCompile(title, schemaFragment) {
+  const defs = buildDefsBundle();
   return {
     $schema: "https://json-schema.org/draft/2020-12/schema",
-    title: name,
-    $defs: { ...common.$defs, ...extraDefs },
-    ...def,
+    $id: `https://opportunityos.invalid/contracts/ts/${title}`,
+    title,
+    $defs: defs,
+    ...resolveRefs(schemaFragment, defs),
   };
 }
 
-const exports = [];
-for (const [name, def] of Object.entries(common.$defs).sort(([a], [b]) => a.localeCompare(b))) {
-  const ts = await compile(schemaWithDefs(name, def), name, {
-    cwd: path.dirname(commonPath),
-    bannerComment: "/* eslint-disable */",
-    additionalProperties: false,
-  });
-  const file = path.join(outDir, `${name}.ts`);
-  await writeFile(file, ts, "utf8");
-  exports.push(`export type { ${name} } from "./generated/${name}.ts";`);
-}
+const COMPILE_OPTS = {
+  cwd: repoRoot,
+  bannerComment: "/* eslint-disable */",
+  additionalProperties: false,
+};
 
-async function compileRoot(schema, name, cwd) {
-  const ts = await compile(
-    {
-      ...schema,
-      title: name,
-      $defs: { ...common.$defs, ...(schema.$defs ?? {}) },
-    },
-    name,
-    {
-      cwd,
-      bannerComment: "/* eslint-disable */",
-      additionalProperties: false,
-    },
-  );
+const exports = [];
+
+for (const [name, def] of Object.entries(common.$defs).sort(([a], [b]) => a.localeCompare(b))) {
+  const ts = await compile(schemaForCompile(name, def), name, COMPILE_OPTS);
   await writeFile(path.join(outDir, `${name}.ts`), ts, "utf8");
   exports.push(`export type { ${name} } from "./generated/${name}.ts";`);
 }
 
-await compileRoot(workflow, "WorkflowRequest", path.dirname(workflowPath));
-await compileRoot(domain, "DomainEvent", path.dirname(domainPath));
-await compileRoot(analytics, "AnalyticsEvent", path.dirname(analyticsPath));
+async function compileRoot(schema, name) {
+  const defs = buildDefsBundle();
+  const bundled = schemaForCompile(name, {
+    type: schema.type,
+    additionalProperties: schema.additionalProperties,
+    required: schema.required,
+    properties: resolveRefs(schema.properties ?? {}, defs),
+  });
+  const ts = await compile(bundled, name, COMPILE_OPTS);
+  await writeFile(path.join(outDir, `${name}.ts`), ts, "utf8");
+  exports.push(`export type { ${name} } from "./generated/${name}.ts";`);
+}
+
+await compileRoot(workflow, "WorkflowRequest");
+await compileRoot(domain, "DomainEvent");
+await compileRoot(analytics, "AnalyticsEvent");
 
 for (const [name, def] of Object.entries(agui.$defs).sort(([a], [b]) => a.localeCompare(b))) {
-  if (typeof def.$ref === "string") {
+  if (typeof def?.$ref === "string") {
     continue;
   }
-  const ts = await compile(schemaWithDefs(name, def, { ...domain.$defs, ...agui.$defs }), name, {
-    cwd: path.dirname(aguiPath),
-    bannerComment: "/* eslint-disable */",
-    additionalProperties: false,
-  });
+  const ts = await compile(schemaForCompile(name, def), name, COMPILE_OPTS);
   await writeFile(path.join(outDir, `${name}.ts`), ts, "utf8");
   exports.push(`export type { ${name} } from "./generated/${name}.ts";`);
 }
