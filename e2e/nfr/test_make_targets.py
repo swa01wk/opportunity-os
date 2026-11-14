@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 
 LATER = {
-    "contracts": "SPEC-03a",
     "r0-sample": "SPEC-25",
     "release": "SPEC-01b",
     "deploy": "SPEC-01b",

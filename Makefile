@@ -18,7 +18,7 @@ TS := $(COMPOSE) run --rm --no-deps ts-tools
 CHECK_STEPS ?= py-lint py-format py-types py-test ts-lint ts-format ts-types ts-test
 
 .PHONY: help setup up down migrate seed lint fmt test test-int test-e2e eval check \
-	contracts r0-sample release deploy promote
+	contracts contracts-check r0-sample release deploy promote
 
 help: ## List the targets
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | sed -E 's/^[^:]*:([a-z0-9-]+):.*## /\1\t/; s/^([a-z0-9-]+):.*## /\1\t/' \
@@ -91,9 +91,14 @@ _step-ts-test: ; $(TS) pnpm test
 _step-selftest-pass: ; @true
 _step-selftest-fail: ; @false
 
-# Targets owned by later specs (AC5).
-contracts: ## Regenerate JSON Schema and TS types (SPEC-03a)
-	@echo "make contracts: not implemented yet; SPEC-03a implements it"; exit 1
+contracts: .env ## Regenerate JSON Schema and TypeScript types from Pydantic (SPEC-03a)
+	$(PY) python -m opportunityos_contracts._build
+	$(TS) pnpm --filter @oos/contracts run generate
+
+contracts-check: contracts ## Fail when generated contracts drift from the repo
+	@drift=$$(git diff --name-only -- docs/contracts/common.schema.json \
+		docs/contracts/events/workflow-request.schema.json contracts/ts/src/); \
+	if [ -n "$$drift" ]; then echo "make contracts-check: drift in:$$drift"; exit 1; fi
 r0-sample: ## The R0 odd-squares pipeline (SPEC-25)
 	@echo "make r0-sample: not implemented yet; SPEC-25 implements it"; exit 1
 release: ## Build every image once and write the release record (SPEC-01b)
