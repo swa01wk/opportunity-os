@@ -1,5 +1,5 @@
 # STATUS: OpportunityOS        Updated: 2026-11-14
-Current stage: 4 Build M0 (SPEC-01a in review, PR #13) | Next gate: G4 M0 exit
+Current stage: 4 Build M0 (SPEC-01a merged #13; next SPEC-03a and SPEC-02) | Next gate: G4 M0 exit
 
 Release target: R0 -> R1 -> R2 (PRD Section 4). R3 conditional; R4/R5 out of scope.
 
@@ -13,11 +13,11 @@ All gates are signed by the product owner / tech lead (same person).
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
 | 2 Design | G2 Design review and screens | Signed: 2a, 2b, 2c merged (HTML prototypes S-01–S-16 in #7); all G2 checks pass | 2026-11-14 | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5, #7 |
 | 3 Plan | G3 Milestone scope and dates | Signed: plan (#8), Strategy v1.0 intake (#9, #10); Q-36–Q-42 decided; all G3 checks pass; milestones not dated (Q-36) | 2026-11-14 | docs/stage-3-plan, #8 · docs/strategy-v1-intake, #9 |
-| 4 Prepare M0 | — (Definition of Ready per spec; G4 at M0 exit) | Prepared and merged 2026-11-14: [plans/M0/milestone.md](M0/milestone.md) and 21 specs with prompts; Q-43 accepted; splits confirmed. Building: SPEC-01a in review (#13) | — | docs/m0-specs, #12 · feat/SPEC-01a-toolchain, #13 |
+| 4 Prepare M0 | — (Definition of Ready per spec; G4 at M0 exit) | Prepared and merged 2026-11-14: [plans/M0/milestone.md](M0/milestone.md) and 21 specs with prompts; Q-43 accepted; splits confirmed. Building: SPEC-01a merged (#13) | — | docs/m0-specs, #12 · feat/SPEC-01a-toolchain, #13 |
 
 | Milestone | Scope | Status | Exit date |
 |---|---|---|---|
-| M0 | Foundation: walking skeleton: 21 specs, 39 spec-days | In progress: SPEC-01a in review | Not dated (Q-36); forecast 5 Feb 2027 |
+| M0 | Foundation: walking skeleton: 21 specs, 39 spec-days | In progress: 1 of 21 specs merged (SPEC-01a) | Not dated (Q-36); forecast 5 Feb 2027 |
 | M1 | Feasibility (R0): 11 specs, 28 spec-days | Planned | Not dated (Q-36); forecast 26 Mar 2027 |
 | M2 | Brief to evidence (R1): 15 specs, 33 spec-days | Planned | Not dated (Q-36); forecast 21 May 2027 |
 | M3 | Script to preview (R1): 12 specs, 26 spec-days | Planned | Not dated (Q-36); forecast 9 Jul 2027 |
@@ -35,12 +35,12 @@ M0, prepared in Stage 4: [plans/M0/milestone.md](M0/milestone.md) (dependency gr
 
 | Spec | Requirements | Screens | Branch / PR | Status | Owner |
 |---|---|---|---|---|---|
-| [SPEC-01a Repo toolchain, Makefile and Compose stack](M0/specs/SPEC-01a/spec.md) | NFR-13 | — | `feat/SPEC-01a-toolchain`, [#13](https://github.com/swa01wk/opportunity-os/pull/13) | In review: T-31 passed locally (14 Nov 2026) | Owner (Claude) |
-| [SPEC-01b Release host: make release and deploy to local staging](M0/specs/SPEC-01b/spec.md) | NFR-13 | — | `feat/SPEC-01b-release-host` | Draft: needs SPEC-01a | Owner (Cursor) |
-| [SPEC-02 CI pipeline, security scans and branch rules](M0/specs/SPEC-02/spec.md) | NFR-05, NFR-06, NFR-13, NFR-18 | — | `feat/SPEC-02-ci-pipeline` | Draft: needs SPEC-01a | Owner (Cursor) |
-| [SPEC-03a Contracts I: pipeline, drift, dual-runtime fixtures, common, workflow requests](M0/specs/SPEC-03a/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03a-contracts-pipeline` | Draft: needs SPEC-01a | Owner (Cursor) |
-| [SPEC-05 Object store choice and BlobStore adapter (ADR-015 amendment)](M0/specs/SPEC-05/spec.md) | R-30, NFR-04 | — | `feat/SPEC-05-object-store` | Draft: needs SPEC-01a | Owner (Cursor) |
-| [SPEC-08 Telemetry wiring, Collector redaction and health checks](M0/specs/SPEC-08/spec.md) | NFR-09, NFR-06, NFR-15 | — | `feat/SPEC-08-telemetry` | Draft: needs SPEC-01a | Owner (Cursor) |
+| [SPEC-01a Repo toolchain, Makefile and Compose stack](M0/specs/SPEC-01a/spec.md) | NFR-13 | — | `feat/SPEC-01a-toolchain`, [#13](https://github.com/swa01wk/opportunity-os/pull/13) | Done (merged 2026-11-14; T-31 passed) | Owner (Claude) |
+| [SPEC-01b Release host: make release and deploy to local staging](M0/specs/SPEC-01b/spec.md) | NFR-13 | — | `feat/SPEC-01b-release-host` | Ready | Owner (Cursor) |
+| [SPEC-02 CI pipeline, security scans and branch rules](M0/specs/SPEC-02/spec.md) | NFR-05, NFR-06, NFR-13, NFR-18 | — | `feat/SPEC-02-ci-pipeline` | Ready | Owner (Cursor) |
+| [SPEC-03a Contracts I: pipeline, drift, dual-runtime fixtures, common, workflow requests](M0/specs/SPEC-03a/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03a-contracts-pipeline` | Ready | Owner (Cursor) |
+| [SPEC-05 Object store choice and BlobStore adapter (ADR-015 amendment)](M0/specs/SPEC-05/spec.md) | R-30, NFR-04 | — | `feat/SPEC-05-object-store` | Ready | Owner (Cursor) |
+| [SPEC-08 Telemetry wiring, Collector redaction and health checks](M0/specs/SPEC-08/spec.md) | NFR-09, NFR-06, NFR-15 | — | `feat/SPEC-08-telemetry` | Ready | Owner (Cursor) |
 | [SPEC-03b Contracts II: domain events, AG-UI stream, analytics](M0/specs/SPEC-03b/spec.md) | NFR-19, R-50 | — | `feat/SPEC-03b-contracts-events` | Draft: needs SPEC-03a | Owner (Cursor) |
 | [SPEC-03c Contracts III: agent task, execution and tool contracts](M0/specs/SPEC-03c/spec.md) | NFR-19, R-63 | — | `feat/SPEC-03c-contracts-agent` | Draft: needs SPEC-03a | Owner (Cursor) |
 | [SPEC-03d Contracts IV: media contracts](M0/specs/SPEC-03d/spec.md) | NFR-19, R-18 | — | `feat/SPEC-03d-contracts-media` | Draft: needs SPEC-03a | Owner (Cursor) |
@@ -149,6 +149,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Recent decisions
 
+- 2026-11-14: **SPEC-01a merged** (#13) by the product owner, including the source-built interim object store (ADR-015 amendment line to be added by SPEC-05) and configurable host ports. SPEC-01b, SPEC-02, SPEC-03a, SPEC-05 and SPEC-08 are Ready. Next: SPEC-03a (critical path) and SPEC-02 (CI), within the two-open-specs limit.
 - 2026-11-14: **SPEC-01a in review** (PR #13). T-31 passed on your machine: fresh clone → 9 services healthy → `make check` green (8 steps) → `make down` keeps volumes, `CLEAN=1` removes them. Tech lead decisions, for your confirmation: the interim object store is built from MinIO CE's final source tag (`RELEASE.2025-10-15T17-29-55Z`, includes the CVE-2025-62506 fix) on a pinned base, because MinIO withdrew its official images (ADR-015 needs an amendment line); host ports are configurable in `.env`, Keycloak on 8180. Size about 1,700 lines against the spec's 400 (mostly config and tests); not split.
 - 2026-11-14: Product owner accepted **Q-43** (A-43: diagnostic run behind `FEATURE_DIAGNOSTICS`, off in production; System check entry in the S-01 app shell as an approved screen change, dev and staging only) and confirmed the **M0 splits and size** (21 specs, 39 spec-days).
 - 2026-11-14: **Stage 4, M0 prepared** (PR #12, for your review): [milestone.md](M0/milestone.md) and spec.md plus prompt.md for 21 specs. Tech lead decisions: SPEC-01, SPEC-03, SPEC-09 and SPEC-11 split into lettered parts to meet the Definition of Ready (M0 32 → 39 spec-days; critical path unchanged at 39; indicative forecast moves two weeks at 25 h/week); SPEC-04 creates only M0 tables; SPEC-07 calls the API through a Next.js route handler; SPEC-10 maps AG-UI on read from the outbox; T-98 added. Q-43 raised (walking-skeleton diagnostic run, A-43). DEVELOPMENT_PLAN effort table corrected (its spec counts were wrong). Spec template gains the Agent line and the media layer, as in PROCESS.md.
