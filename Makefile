@@ -12,10 +12,11 @@ export HOST_GID := $(shell id -g)
 
 COMPOSE := docker compose --project-name $(COMPOSE_PROJECT) --env-file infra/images.env --env-file .env
 PY := $(COMPOSE) run --rm --no-deps py-tools
+PY_FUNC := $(COMPOSE) run --rm --no-deps py-functional
 TS := $(COMPOSE) run --rm --no-deps ts-tools
 
 # Steps `make check` runs, in order; CI calls the same target (SPEC-02).
-CHECK_STEPS ?= py-lint py-format py-types py-test ts-lint ts-format ts-types ts-test
+CHECK_STEPS ?= py-lint py-format py-types py-test py-functional ts-lint ts-format ts-types ts-test
 
 .PHONY: help setup up down migrate seed lint fmt test test-int test-e2e eval check \
 	contracts contracts-check _contracts-drift r0-sample release deploy promote
@@ -48,8 +49,8 @@ down: .env ## Stop the stack, keeping named volumes; CLEAN=1 also removes them
 migrate: .env ## Apply database migrations (Alembic upgrade head)
 	$(COMPOSE) run --rm migrate
 
-seed: ## Load synthetic fixtures (no-op until SPEC-04)
-	@echo "make seed: no fixtures yet (SPEC-04)"
+seed: .env ## Load synthetic fixtures (dev and staging only; refuses in production)
+	$(COMPOSE) run --rm seed
 
 lint: .env ## Lint, format check and type check every layer
 	@$(MAKE) --no-print-directory check CHECK_STEPS="py-lint py-format py-types ts-lint ts-format ts-types"
@@ -82,7 +83,8 @@ check: ## Everything the PR checks run; names every failing step
 _step-py-lint: ; $(PY) ruff check .
 _step-py-format: ; $(PY) ruff format --check .
 _step-py-types: ; $(PY) mypy
-_step-py-test: ; $(PY) pytest
+_step-py-test: ; $(PY) pytest -m "not functional"
+_step-py-functional: ; $(PY_FUNC) pytest -m functional
 _step-ts-lint: ; $(TS) pnpm lint
 _step-ts-format: ; $(TS) pnpm format:check
 _step-ts-types: ; $(TS) pnpm typecheck
