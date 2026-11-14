@@ -1,83 +1,446 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opportunityos.invalid/contracts/events/domain-event.schema.json",
-  "x-version": "0.4.0",
-  "title": "DomainEvent",
-  "description": "Outbox event (ADR-010). Written in the same transaction as the change it reports. Events are facts for projection, Studio updates and audit; they never carry authority. Consumers are idempotent by eventId and re-read current state before acting.",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "eventId",
-    "type",
-    "eventVersion",
-    "occurredAt",
-    "workspaceId",
-    "actor",
-    "subject",
-    "correlationId",
-    "payload"
-  ],
-  "properties": {
-    "eventId": {
-      "$ref": "../common.schema.json#/$defs/Uuid"
-    },
-    "type": {
-      "$ref": "#/$defs/EventType"
-    },
-    "eventVersion": {
-      "type": "integer",
-      "minimum": 1,
-      "description": "Payload version for this type."
-    },
-    "occurredAt": {
-      "$ref": "../common.schema.json#/$defs/Timestamp"
-    },
-    "workspaceId": {
-      "$ref": "../common.schema.json#/$defs/Uuid"
-    },
-    "projectId": {
-      "$ref": "../common.schema.json#/$defs/Uuid"
-    },
-    "actor": {
-      "$ref": "../common.schema.json#/$defs/Actor"
-    },
-    "subject": {
-      "type": "object",
+  "$comment": "The if/then block above is for the JSON Schema draft only. The Pydantic source (ADR-008) models this as a discriminated union on `type`.",
+  "$defs": {
+    "ApprovalInvalidated": {
       "additionalProperties": false,
-      "required": [
-        "type",
-        "id"
-      ],
       "properties": {
-        "type": {
-          "type": "string",
-          "pattern": "^[a-z_]{2,40}$"
-        },
-        "id": {
+        "approvalId": {
           "$ref": "../common.schema.json#/$defs/Uuid"
         },
-        "version": {
-          "type": "integer",
-          "minimum": 1
+        "causeSubject": {
+          "maxLength": 100,
+          "type": "string"
+        },
+        "gate": {
+          "$ref": "#/$defs/Gate"
+        },
+        "reason": {
+          "enum": [
+            "target_changed",
+            "new_claim",
+            "material_visual_change",
+            "master_changed",
+            "metadata_changed",
+            "destination_changed",
+            "schedule_changed",
+            "revoked_by_member",
+            "policy_changed",
+            "release_time_lapsed"
+          ],
+          "type": "string"
         }
-      }
+      },
+      "required": [
+        "approvalId",
+        "gate",
+        "reason"
+      ],
+      "type": "object"
     },
-    "correlationId": {
-      "$ref": "../common.schema.json#/$defs/Uuid",
-      "description": "Run or request that this event belongs to."
+    "ApprovalRecorded": {
+      "additionalProperties": false,
+      "properties": {
+        "approvalId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "decision": {
+          "enum": [
+            "approved",
+            "returned"
+          ],
+          "type": "string"
+        },
+        "destinationId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "gate": {
+          "$ref": "#/$defs/Gate"
+        },
+        "lapsesAt": {
+          "$ref": "../common.schema.json#/$defs/Timestamp"
+        },
+        "policyVersions": {
+          "$ref": "#/$defs/PolicyVersions"
+        },
+        "scope": {
+          "maxLength": 200,
+          "type": "string"
+        },
+        "target": {
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "$ref": "../common.schema.json#/$defs/VersionRef"
+            },
+            "type": {
+              "enum": [
+                "contract",
+                "script",
+                "demonstration",
+                "storyboard",
+                "package",
+                "release_instruction"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "ref"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "approvalId",
+        "gate",
+        "decision",
+        "target",
+        "scope"
+      ],
+      "type": "object"
     },
-    "causationId": {
-      "$ref": "../common.schema.json#/$defs/Uuid",
-      "description": "Event or command that caused this one."
+    "BudgetChange": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "$ref": "../common.schema.json#/$defs/Money"
+        },
+        "attemptId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "budgetId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "remaining": {
+          "$ref": "../common.schema.json#/$defs/Money"
+        },
+        "reservationId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        }
+      },
+      "required": [
+        "budgetId",
+        "amount",
+        "remaining"
+      ],
+      "type": "object"
     },
-    "traceparent": {
-      "type": "string",
-      "pattern": "^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$"
+    "EventType": {
+      "enum": [
+        "project.state_changed",
+        "contract.version_created",
+        "claim.created",
+        "claim.status_changed",
+        "demonstration.version_created",
+        "script.version_created",
+        "storyboard.version_created",
+        "narration.take_created",
+        "approval.recorded",
+        "approval.invalidated",
+        "workflow.requested",
+        "run.state_changed",
+        "run.cancelled",
+        "task_attempt.started",
+        "task_attempt.finished",
+        "budget.reserved",
+        "budget.settled",
+        "budget.released",
+        "budget.exhausted",
+        "render.completed",
+        "revision.redraft_ready",
+        "revision.applied",
+        "finding.raised",
+        "finding.resolved",
+        "rubric.scored",
+        "package.version_created",
+        "package.exported",
+        "publication.recorded",
+        "publication.verified",
+        "correction.proposed",
+        "metric.snapshot_recorded",
+        "asset.registered",
+        "effort.recorded",
+        "project.archived",
+        "project.deletion_requested",
+        "project.deleted",
+        "kpi.baseline_recorded"
+      ]
     },
-    "payload": {
+    "Gate": {
+      "enum": [
+        "A_brief",
+        "B_explanation_script",
+        "C_storyboard",
+        "D_final_package",
+        "E_public_release"
+      ]
+    },
+    "PolicyVersions": {
+      "additionalProperties": false,
+      "description": "Policy versions in force when an approval was recorded (R-41 AC3, Q-35).",
+      "properties": {
+        "brandKit": {
+          "$ref": "../common.schema.json#/$defs/VersionRef"
+        },
+        "contentPolicy": {
+          "maxLength": 40,
+          "type": "string"
+        },
+        "rubric": {
+          "maxLength": 40,
+          "type": "string"
+        }
+      },
+      "required": [
+        "brandKit",
+        "rubric",
+        "contentPolicy"
+      ],
+      "type": "object"
+    },
+    "ProductionState": {
+      "enum": [
+        "DRAFT",
+        "RESEARCHING",
+        "SCRIPT_REVIEW",
+        "STORYBOARD_REVIEW",
+        "PRODUCING",
+        "QA",
+        "FINAL_REVIEW",
+        "APPROVED_EXPORT",
+        "BLOCKED",
+        "FAILED",
+        "REVISION_REQUIRED",
+        "CANCELLED"
+      ]
+    },
+    "ProjectStateChanged": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/ProductionState"
+        },
+        "reason": {
+          "maxLength": 500,
+          "type": "string"
+        },
+        "to": {
+          "$ref": "#/$defs/ProductionState"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "type": "object"
+    },
+    "PublicationRecorded": {
+      "additionalProperties": false,
+      "properties": {
+        "packageMismatch": {
+          "type": "boolean"
+        },
+        "packageRef": {
+          "$ref": "../common.schema.json#/$defs/VersionRef"
+        },
+        "publicationId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "route": {
+          "enum": [
+            "manual",
+            "connected"
+          ],
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "PACKAGE_APPROVED",
+            "AWAITING_MANUAL_UPLOAD",
+            "UPLOAD_REQUESTED",
+            "UPLOADING",
+            "UPLOADED_PRIVATE",
+            "READY_TO_RELEASE",
+            "RELEASE_REQUESTED",
+            "SCHEDULED",
+            "PUBLISHED",
+            "PUBLICATION_UNKNOWN",
+            "BLOCKED",
+            "FAILED",
+            "CANCELLED"
+          ],
+          "type": "string"
+        },
+        "verification": {
+          "enum": [
+            "NOT_CHECKED",
+            "PASSED",
+            "PARTIAL",
+            "FAILED"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "publicationId",
+        "packageRef",
+        "route",
+        "state"
+      ],
+      "type": "object"
+    },
+    "RenderCompleted": {
+      "additionalProperties": false,
+      "properties": {
+        "checksFailed": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "manifestSha256": {
+          "$ref": "../common.schema.json#/$defs/Sha256"
+        },
+        "outputKind": {
+          "enum": [
+            "preview",
+            "master"
+          ],
+          "type": "string"
+        },
+        "renderId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "scenesRebuilt": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "scenesReused": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "renderId",
+        "outputKind",
+        "manifestSha256",
+        "scenesRebuilt",
+        "scenesReused"
+      ],
+      "type": "object"
+    },
+    "RevisionApplied": {
+      "additionalProperties": false,
+      "properties": {
+        "durationDeltaFrames": {
+          "type": "integer"
+        },
+        "rebuilt": {
+          "items": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "reopenedGates": {
+          "items": {
+            "$ref": "#/$defs/Gate"
+          },
+          "type": "array"
+        },
+        "reused": {
+          "items": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "revisionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        }
+      },
+      "required": [
+        "revisionId",
+        "rebuilt",
+        "reused",
+        "reopenedGates"
+      ],
+      "type": "object"
+    },
+    "TaskAttempt": {
+      "additionalProperties": false,
+      "properties": {
+        "actualCost": {
+          "$ref": "../common.schema.json#/$defs/Money"
+        },
+        "attempt": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "attemptId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "durationMs": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "errorClass": {
+          "$ref": "../common.schema.json#/$defs/ErrorClass"
+        },
+        "estimatedCost": {
+          "$ref": "../common.schema.json#/$defs/Money"
+        },
+        "runId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "status": {
+          "enum": [
+            "started",
+            "succeeded",
+            "failed",
+            "timed_out",
+            "cancelled",
+            "taken_over"
+          ],
+          "type": "string"
+        },
+        "taskId": {
+          "maxLength": 100,
+          "type": "string"
+        },
+        "taskType": {
+          "enum": [
+            "research",
+            "script",
+            "storyboard",
+            "demonstration",
+            "narration",
+            "timing",
+            "captions",
+            "render_validate",
+            "render_clip",
+            "render_preview",
+            "render_master",
+            "media_qa",
+            "package_build",
+            "export_build"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "runId",
+        "taskId",
+        "attemptId",
+        "taskType",
+        "attempt",
+        "status"
+      ],
       "type": "object"
     }
   },
+  "$id": "https://opportunityos.invalid/contracts/events/domain-event.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
   "allOf": [
     {
       "if": {
@@ -232,434 +595,80 @@
       }
     }
   ],
-  "$comment": "The if/then block above is for the JSON Schema draft only. The Pydantic source (ADR-008) models this as a discriminated union on `type`.",
-  "$defs": {
-    "EventType": {
-      "enum": [
-        "project.state_changed",
-        "contract.version_created",
-        "claim.created",
-        "claim.status_changed",
-        "demonstration.version_created",
-        "script.version_created",
-        "storyboard.version_created",
-        "narration.take_created",
-        "approval.recorded",
-        "approval.invalidated",
-        "workflow.requested",
-        "run.state_changed",
-        "run.cancelled",
-        "task_attempt.started",
-        "task_attempt.finished",
-        "budget.reserved",
-        "budget.settled",
-        "budget.released",
-        "budget.exhausted",
-        "render.completed",
-        "revision.redraft_ready",
-        "revision.applied",
-        "finding.raised",
-        "finding.resolved",
-        "rubric.scored",
-        "package.version_created",
-        "package.exported",
-        "publication.recorded",
-        "publication.verified",
-        "correction.proposed",
-        "metric.snapshot_recorded",
-        "asset.registered",
-        "effort.recorded",
-        "project.archived",
-        "project.deletion_requested",
-        "project.deleted",
-        "kpi.baseline_recorded"
-      ]
+  "description": "Outbox event (ADR-010). Written in the same transaction as the change it reports. Events are facts for projection, Studio updates and audit; they never carry authority. Consumers are idempotent by eventId and re-read current state before acting.",
+  "properties": {
+    "actor": {
+      "$ref": "../common.schema.json#/$defs/Actor"
     },
-    "ProductionState": {
-      "enum": [
-        "DRAFT",
-        "RESEARCHING",
-        "SCRIPT_REVIEW",
-        "STORYBOARD_REVIEW",
-        "PRODUCING",
-        "QA",
-        "FINAL_REVIEW",
-        "APPROVED_EXPORT",
-        "BLOCKED",
-        "FAILED",
-        "REVISION_REQUIRED",
-        "CANCELLED"
-      ]
+    "causationId": {
+      "$ref": "../common.schema.json#/$defs/Uuid",
+      "description": "Event or command that caused this one."
     },
-    "ProjectStateChanged": {
-      "type": "object",
+    "correlationId": {
+      "$ref": "../common.schema.json#/$defs/Uuid",
+      "description": "Run or request that this event belongs to."
+    },
+    "eventId": {
+      "$ref": "../common.schema.json#/$defs/Uuid"
+    },
+    "eventVersion": {
+      "description": "Payload version for this type.",
+      "minimum": 1,
+      "type": "integer"
+    },
+    "occurredAt": {
+      "$ref": "../common.schema.json#/$defs/Timestamp"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "projectId": {
+      "$ref": "../common.schema.json#/$defs/Uuid"
+    },
+    "subject": {
       "additionalProperties": false,
-      "required": [
-        "from",
-        "to"
-      ],
       "properties": {
-        "from": {
-          "$ref": "#/$defs/ProductionState"
-        },
-        "to": {
-          "$ref": "#/$defs/ProductionState"
-        },
-        "reason": {
-          "type": "string",
-          "maxLength": 500
-        }
-      }
-    },
-    "Gate": {
-      "enum": [
-        "A_brief",
-        "B_explanation_script",
-        "C_storyboard",
-        "D_final_package",
-        "E_public_release"
-      ]
-    },
-    "ApprovalRecorded": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "approvalId",
-        "gate",
-        "decision",
-        "target",
-        "scope"
-      ],
-      "properties": {
-        "approvalId": {
+        "id": {
           "$ref": "../common.schema.json#/$defs/Uuid"
         },
-        "gate": {
-          "$ref": "#/$defs/Gate"
+        "type": {
+          "pattern": "^[a-z_]{2,40}$",
+          "type": "string"
         },
-        "decision": {
-          "enum": [
-            "approved",
-            "returned"
-          ]
-        },
-        "target": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "type",
-            "ref"
-          ],
-          "properties": {
-            "type": {
-              "enum": [
-                "contract",
-                "script",
-                "demonstration",
-                "storyboard",
-                "package",
-                "release_instruction"
-              ]
-            },
-            "ref": {
-              "$ref": "../common.schema.json#/$defs/VersionRef"
-            }
-          }
-        },
-        "scope": {
-          "type": "string",
-          "maxLength": 200
-        },
-        "destinationId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
-        },
-        "policyVersions": {
-          "$ref": "#/$defs/PolicyVersions"
-        },
-        "lapsesAt": {
-          "$ref": "../common.schema.json#/$defs/Timestamp"
-        }
-      }
-    },
-    "ApprovalInvalidated": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "approvalId",
-        "gate",
-        "reason"
-      ],
-      "properties": {
-        "approvalId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
-        },
-        "gate": {
-          "$ref": "#/$defs/Gate"
-        },
-        "reason": {
-          "enum": [
-            "target_changed",
-            "new_claim",
-            "material_visual_change",
-            "master_changed",
-            "metadata_changed",
-            "destination_changed",
-            "schedule_changed",
-            "revoked_by_member",
-            "policy_changed",
-            "release_time_lapsed"
-          ]
-        },
-        "causeSubject": {
-          "type": "string",
-          "maxLength": 100
-        }
-      }
-    },
-    "TaskAttempt": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "runId",
-        "taskId",
-        "attemptId",
-        "taskType",
-        "attempt",
-        "status"
-      ],
-      "properties": {
-        "runId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
-        },
-        "taskId": {
-          "type": "string",
-          "maxLength": 100
-        },
-        "attemptId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
-        },
-        "taskType": {
-          "enum": [
-            "research",
-            "script",
-            "storyboard",
-            "demonstration",
-            "narration",
-            "timing",
-            "captions",
-            "render_validate",
-            "render_clip",
-            "render_preview",
-            "render_master",
-            "media_qa",
-            "package_build",
-            "export_build"
-          ]
-        },
-        "attempt": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "status": {
-          "enum": [
-            "started",
-            "succeeded",
-            "failed",
-            "timed_out",
-            "cancelled",
-            "taken_over"
-          ]
-        },
-        "errorClass": {
-          "$ref": "../common.schema.json#/$defs/ErrorClass"
-        },
-        "estimatedCost": {
-          "$ref": "../common.schema.json#/$defs/Money"
-        },
-        "actualCost": {
-          "$ref": "../common.schema.json#/$defs/Money"
-        },
-        "durationMs": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
-    },
-    "BudgetChange": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "budgetId",
-        "amount",
-        "remaining"
-      ],
-      "properties": {
-        "budgetId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
-        },
-        "reservationId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
-        },
-        "attemptId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
-        },
-        "amount": {
-          "$ref": "../common.schema.json#/$defs/Money"
-        },
-        "remaining": {
-          "$ref": "../common.schema.json#/$defs/Money"
-        }
-      }
-    },
-    "RenderCompleted": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "renderId",
-        "outputKind",
-        "manifestSha256",
-        "scenesRebuilt",
-        "scenesReused"
-      ],
-      "properties": {
-        "renderId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
-        },
-        "outputKind": {
-          "enum": [
-            "preview",
-            "master"
-          ]
-        },
-        "manifestSha256": {
-          "$ref": "../common.schema.json#/$defs/Sha256"
-        },
-        "scenesRebuilt": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "scenesReused": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "checksFailed": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
-    },
-    "RevisionApplied": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "revisionId",
-        "rebuilt",
-        "reused",
-        "reopenedGates"
-      ],
-      "properties": {
-        "revisionId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
-        },
-        "rebuilt": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "maxLength": 100
-          }
-        },
-        "reused": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "maxLength": 100
-          }
-        },
-        "reopenedGates": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/Gate"
-          }
-        },
-        "durationDeltaFrames": {
+        "version": {
+          "minimum": 1,
           "type": "integer"
         }
-      }
-    },
-    "PublicationRecorded": {
-      "type": "object",
-      "additionalProperties": false,
+      },
       "required": [
-        "publicationId",
-        "packageRef",
-        "route",
-        "state"
+        "type",
+        "id"
       ],
-      "properties": {
-        "publicationId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
-        },
-        "packageRef": {
-          "$ref": "../common.schema.json#/$defs/VersionRef"
-        },
-        "route": {
-          "enum": [
-            "manual",
-            "connected"
-          ]
-        },
-        "state": {
-          "enum": [
-            "PACKAGE_APPROVED",
-            "AWAITING_MANUAL_UPLOAD",
-            "UPLOAD_REQUESTED",
-            "UPLOADING",
-            "UPLOADED_PRIVATE",
-            "READY_TO_RELEASE",
-            "RELEASE_REQUESTED",
-            "SCHEDULED",
-            "PUBLISHED",
-            "PUBLICATION_UNKNOWN",
-            "BLOCKED",
-            "FAILED",
-            "CANCELLED"
-          ]
-        },
-        "verification": {
-          "enum": [
-            "NOT_CHECKED",
-            "PASSED",
-            "PARTIAL",
-            "FAILED"
-          ]
-        },
-        "packageMismatch": {
-          "type": "boolean"
-        }
-      }
+      "type": "object"
     },
-    "PolicyVersions": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "brandKit",
-        "rubric",
-        "contentPolicy"
-      ],
-      "description": "Policy versions in force when an approval was recorded (R-41 AC3, Q-35).",
-      "properties": {
-        "brandKit": {
-          "$ref": "../common.schema.json#/$defs/VersionRef"
-        },
-        "rubric": {
-          "type": "string",
-          "maxLength": 40
-        },
-        "contentPolicy": {
-          "type": "string",
-          "maxLength": 40
-        }
-      }
+    "traceparent": {
+      "pattern": "^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$",
+      "type": "string"
+    },
+    "type": {
+      "$ref": "#/$defs/EventType"
+    },
+    "workspaceId": {
+      "$ref": "../common.schema.json#/$defs/Uuid"
     }
-  }
+  },
+  "required": [
+    "eventId",
+    "type",
+    "eventVersion",
+    "occurredAt",
+    "workspaceId",
+    "actor",
+    "subject",
+    "correlationId",
+    "payload"
+  ],
+  "title": "DomainEvent",
+  "type": "object",
+  "x-version": "0.4.0"
 }

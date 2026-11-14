@@ -29,7 +29,9 @@ def _build_schema_registry() -> Registry:
         return _REGISTRY
 
     resources: list[tuple[str, Resource]] = []
-    for path in sorted(CONTRACTS_DIR.rglob("*.schema.json")):
+    json_paths = sorted(CONTRACTS_DIR.rglob("*.schema.json"))
+    json_paths.extend(sorted(p for p in CONTRACTS_DIR.rglob("*.json") if p.name == "stream.json"))
+    for path in json_paths:
         rel = path.relative_to(CONTRACTS_DIR).as_posix()
         doc = json.loads(path.read_text(encoding="utf-8"))
         _SCHEMAS_BY_CONTRACT[rel] = doc

@@ -1,0 +1,2 @@
+{"seq": "301", "data": {"type": "STATE_SNAPSHOT", "snapshot": {"projectId": "00000000-0000-4000-8000-0000000000c1", "asOfSeq": 301, "productionState": "DRAFT", "activeRuns": [], "blockers": []}}}
+{"seq": "300", "data": {"type": "RUN_STARTED", "threadId": "00000000-0000-4000-8000-0000000000c1", "runId": "00000000-0000-4000-8000-0000000000d2"}}

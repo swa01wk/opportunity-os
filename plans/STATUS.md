@@ -41,7 +41,7 @@ M0, prepared in Stage 4: [plans/M0/milestone.md](M0/milestone.md) (dependency gr
 | [SPEC-03a Contracts I: pipeline, drift, dual-runtime fixtures, common, workflow requests](M0/specs/SPEC-03a/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03a-contracts-pipeline`, [#15](https://github.com/swa01wk/opportunity-os/pull/15) | Done (merged 2026-11-15; T-33 passed) | Owner (Cursor) |
 | [SPEC-05 Object store choice and BlobStore adapter (ADR-015 amendment)](M0/specs/SPEC-05/spec.md) | R-30, NFR-04 | — | `feat/SPEC-05-object-store` | Ready | Owner (Cursor) |
 | [SPEC-08 Telemetry wiring, Collector redaction and health checks](M0/specs/SPEC-08/spec.md) | NFR-09, NFR-06, NFR-15 | — | `feat/SPEC-08-telemetry` | In progress | Owner (Cursor) |
-| [SPEC-03b Contracts II: domain events, AG-UI stream, analytics](M0/specs/SPEC-03b/spec.md) | NFR-19, R-50 | — | `feat/SPEC-03b-contracts-events` | In progress | Owner (Cursor) |
+| [SPEC-03b Contracts II: domain events, AG-UI stream, analytics](M0/specs/SPEC-03b/spec.md) | NFR-19, R-50 | — | `feat/SPEC-03b-contracts-events` | In review | Owner (Cursor) |
 | [SPEC-03c Contracts III: agent task, execution and tool contracts](M0/specs/SPEC-03c/spec.md) | NFR-19, R-63 | — | `feat/SPEC-03c-contracts-agent` | Ready | Owner (Cursor) |
 | [SPEC-03d Contracts IV: media contracts](M0/specs/SPEC-03d/spec.md) | NFR-19, R-18 | — | `feat/SPEC-03d-contracts-media` | Ready | Owner (Cursor) |
 | [SPEC-04 Database baseline, migrations, service roles and RLS](M0/specs/SPEC-04/spec.md) | R-01, NFR-04, NFR-13 | — | `feat/SPEC-04-database`, [#17](https://github.com/swa01wk/opportunity-os/pull/17) | Done (merged 2026-11-15; T-34, T-07 passed) | Owner (Cursor) |

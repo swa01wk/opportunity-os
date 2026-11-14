@@ -107,11 +107,39 @@
       "note": "Unknown gate. (An agent actor on an approval is refused by the API, R-43; schema cannot express that.)"
     },
     {
+      "file": "extra-domain-property.event.json",
+      "contract": "events/domain-event.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "additionalProperties is false on DomainEvent."
+    },
+    {
       "file": "bad-series.analytics-event.json",
       "contract": "analytics/events.schema.json",
       "level": "schema",
       "expected": "SCHEMA",
       "note": "Event properties are typed per event name (ADR-017)."
+    },
+    {
+      "file": "extra-analytics-property.analytics-event.json",
+      "contract": "analytics/events.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "additionalProperties is false on AnalyticsEvent."
+    },
+    {
+      "file": "bad-seq.diagnostic-run.stream.jsonl",
+      "contract": "agui/stream.json",
+      "level": "stream",
+      "expected": "SEQ",
+      "note": "Recorded AG-UI streams require strictly increasing seq."
+    },
+    {
+      "file": "unknown-snapshot-field.stream.jsonl",
+      "contract": "agui/stream.json",
+      "level": "stream",
+      "expected": "SCHEMA",
+      "note": "ProjectRunState snapshots forbid unknown properties."
     }
   ]
 }
