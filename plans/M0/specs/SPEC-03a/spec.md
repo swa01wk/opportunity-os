@@ -1,5 +1,5 @@
 # SPEC-03a: Contracts I: Pydantic pipeline, drift and dual-runtime fixtures, common types and workflow requests
-Milestone: M0 | Status: Draft (ready when SPEC-01a merges and A-43 is accepted) | Layer: cross-cutting
+Milestone: M0 | Status: Draft (ready when SPEC-01a merges) | Layer: cross-cutting
 Agent (if any): —
 Requirements: NFR-19, NFR-11 | Feature: F-06 (contract foundation) | ADRs: ADR-008, ADR-003, ADR-019
 Screens: — | Branch: `feat/SPEC-03a-contracts-pipeline`
@@ -38,4 +38,4 @@ Out: events, AG-UI and analytics (SPEC-03b); agent contracts (SPEC-03c); media (
 None at runtime. The `contracts` CI job prints which schemas drifted.
 
 ## Dependencies
-SPEC-01a. A-43 accepted (diagnostic workflow type). Contracts: from 0.4.0. Size M (2 spec-days).
+SPEC-01a. A-43 (accepted 14 Nov 2026) sets the diagnostic workflow type. Contracts: from 0.4.0. Size M (2 spec-days).

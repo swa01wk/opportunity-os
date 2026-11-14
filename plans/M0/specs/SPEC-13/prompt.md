@@ -20,5 +20,5 @@ Screens: match the screen's layout, copy and empty / loading / error states.
 Rebuild it with the app's components and tokens; never copy its HTML.
 Tests: write the tests under "Tests" first, make them pass, run make check.
 Rules: AGENTS.md and .cursor/rules apply; flag any new dependency; no secrets in code.
-Screen addition: the System check entry and panel are not in the S-01 prototype; build them only as A-43 describes, with the shell's components and tokens, and stop if A-43 is not accepted.
+Screen addition: the System check entry and panel are not in the S-01 prototype; build them only as A-43 describes, with the shell's components and tokens (approved as a screen change through Q-43, 14 Nov 2026).
 Report: changes made, tests added, any deviation from the spec and why.

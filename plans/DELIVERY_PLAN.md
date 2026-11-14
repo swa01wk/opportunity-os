@@ -24,7 +24,7 @@ Every milestone is a vertical slice you can use end to end, closed by Gate G4 (P
 
 ### M0 Foundation
 
-**Slice.** The walking skeleton (PROCESS.md Milestones): repo, Makefile and Compose stack, CI with security scans, contracts 1.0.0 generated from Pydantic, database with migrations and RLS, the replacement object store, Keycloak sign-in and the app shell, telemetry, the outbox and DBOS workflows, the AG-UI project stream, the agent runtime with a fake model and tool host, the render service skeleton, and the search API choice. 21 specs, 39 spec-days (four G3 specs split in Stage 4; [milestone.md](M0/milestone.md)). The trivial request is a diagnostic run behind a feature flag (A-43, Q-43 open).
+**Slice.** The walking skeleton (PROCESS.md Milestones): repo, Makefile and Compose stack, CI with security scans, contracts 1.0.0 generated from Pydantic, database with migrations and RLS, the replacement object store, Keycloak sign-in and the app shell, telemetry, the outbox and DBOS workflows, the AG-UI project stream, the agent runtime with a fake model and tool host, the render service skeleton, and the search API choice. 21 specs, 39 spec-days (four G3 specs split in Stage 4; [milestone.md](M0/milestone.md)). The trivial request is a diagnostic run behind a feature flag (A-43, accepted 14 Nov 2026).
 
 **Your tasks in M0** (about 24 hours, PRD M0 discovery; the extra hours from Strategy v1.0 come out of the M0 buffer):
 - twelve briefs across the four series and the first three topics, one mathematical first (Q-02, OOS-002), starting from the twelve candidates in Strategy §5.1 (Q-40); tag each against the six families and the PRD §9.1 expansion list, and mark briefs that need a specialist (Q-41);

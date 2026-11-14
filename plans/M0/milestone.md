@@ -10,7 +10,7 @@ At the end you can sign in to an empty Studio and press **Run system check**: on
 
 ## Changes made while preparing M0
 
-**Specs split to meet the Definition of Ready** (tech lead decision; cheap to reverse). Four G3 specs were expected well over about 400 changed lines. Each part keeps its parent number with a letter, so the dependency order and every later spec ID are unchanged. A later spec that depends on a split spec depends on all its parts.
+**Specs split to meet the Definition of Ready** (tech lead decision, confirmed by you 14 Nov 2026). Four G3 specs were expected well over about 400 changed lines. Each part keeps its parent number with a letter, so the dependency order and every later spec ID are unchanged. A later spec that depends on a split spec depends on all its parts.
 
 | G3 spec | Size | Split into | Size | Why |
 |---|---|---|---|---|
@@ -21,7 +21,7 @@ At the end you can sign in to an empty Studio and press **Run system check**: on
 
 M0 grows from 14 specs and 32 spec-days to **21 specs and 39 spec-days**. The critical path is unchanged at 39 spec-days (SPEC-01a → SPEC-03a → SPEC-04 → SPEC-09a → SPEC-09b → SPEC-26 → …). Plan totals become 90 specs and 192 spec-days.
 
-**Gap raised: Q-43, with A-43 in force for planning.** The M0 exit needs a trivial request and a button, but no contract, task or approved screen element provides one. A-43: a `diagnostic` run behind `FEATURE_DIAGNOSTICS` (on in dev and staging, off in production), added to contracts 1.0.0 by SPEC-03a–03e, with a **System check** entry in the S-01 app shell (SPEC-13). It adds no requirement. SPEC-03a and SPEC-13 wait for your answer ([QUESTIONS.md](../../docs/product/QUESTIONS.md)).
+**Gap raised and decided: Q-43, A-43 accepted 14 Nov 2026** (including the System check as a change to the approved S-01 screen). The M0 exit needs a trivial request and a button, but no contract, task or approved screen element provides one. A-43: a `diagnostic` run behind `FEATURE_DIAGNOSTICS` (on in dev and staging, off in production), added to contracts 1.0.0 by SPEC-03a–03e, with a **System check** entry in the S-01 app shell (SPEC-13). It adds no requirement ([QUESTIONS.md](../../docs/product/QUESTIONS.md)). The splits and the 39 spec-day size were confirmed by you the same day.
 
 **Other choices made in the specs** (tech lead; say so in review if you disagree):
 - SPEC-04 creates only the tables M0 uses; each later spec adds its tables from the `db/schema.sql` draft with its own migration.
@@ -40,7 +40,7 @@ Specs in the same group have all their dependencies in earlier groups and can be
 | 1 | [SPEC-01a](specs/SPEC-01a/spec.md) | Repo toolchain, Makefile and Compose stack | X | NFR-13 | — | T-31 | — | M | `feat/SPEC-01a-toolchain` |
 | 2 | [SPEC-01b](specs/SPEC-01b/spec.md) | Release host: make release and deploy to local staging | X | NFR-13 | — | T-98 | SPEC-01a | S | `feat/SPEC-01b-release-host` |
 | 2 | [SPEC-02](specs/SPEC-02/spec.md) | CI pipeline, security scans and branch rules | X | NFR-05, NFR-06, NFR-13, NFR-18 | — | T-32 | SPEC-01a | M | `feat/SPEC-02-ci-pipeline` |
-| 2 | [SPEC-03a](specs/SPEC-03a/spec.md) | Contracts I: pipeline, drift and dual-runtime fixtures, common, workflow requests | X | NFR-19, NFR-11 | — | T-33 | SPEC-01a; A-43 | M | `feat/SPEC-03a-contracts-pipeline` |
+| 2 | [SPEC-03a](specs/SPEC-03a/spec.md) | Contracts I: pipeline, drift and dual-runtime fixtures, common, workflow requests | X | NFR-19, NFR-11 | — | T-33 | SPEC-01a | M | `feat/SPEC-03a-contracts-pipeline` |
 | 2 | [SPEC-05](specs/SPEC-05/spec.md) | Object store choice and BlobStore adapter (ADR-015 amendment) | B | R-30, NFR-04 | — | T-35 | SPEC-01a | M | `feat/SPEC-05-object-store` |
 | 2 | [SPEC-08](specs/SPEC-08/spec.md) | Telemetry wiring, Collector redaction and health checks | X | NFR-09, NFR-06, NFR-15 | — | T-38 | SPEC-01a | M | `feat/SPEC-08-telemetry` |
 | 3 | [SPEC-03b](specs/SPEC-03b/spec.md) | Contracts II: domain events, AG-UI stream, analytics | X | NFR-19, R-50 | — | T-33 | SPEC-03a | S | `feat/SPEC-03b-contracts-events` |
@@ -56,7 +56,7 @@ Specs in the same group have all their dependencies in earlier groups and can be
 | 6 | [SPEC-10](specs/SPEC-10/spec.md) | AG-UI relay and project event stream (ADR-020) | B | R-50, R-61, NFR-04 | — | T-10, T-39, T-07 | SPEC-06, SPEC-09a, SPEC-03b | L | `feat/SPEC-10-agui-relay` |
 | 6 | [SPEC-11a](specs/SPEC-11a/spec.md) | Agent runtime, tool host, validation stages and fake model (ADR-021) | A | R-63, NFR-05, NFR-11 | — | T-02, T-08, T-09 | SPEC-03c, SPEC-09b | M | `feat/SPEC-11a-agent-runtime` |
 | 7 | [SPEC-11b](specs/SPEC-11b/spec.md) | OpenAI LlmProvider adapter, portability fixtures and eval runner | A | NFR-11, R-63 | — | T-91 | SPEC-11a | M | `feat/SPEC-11b-openai-adapter` |
-| 7 | [SPEC-13](specs/SPEC-13/spec.md) | Walking skeleton, traced and deployed to staging | X | NFR-09, NFR-13 | S-01 | T-41, T-38, T-03, T-01, T-15 | SPEC-01b, SPEC-07, SPEC-08, SPEC-10, SPEC-11a, SPEC-12; A-43 | M | `feat/SPEC-13-walking-skeleton` |
+| 7 | [SPEC-13](specs/SPEC-13/spec.md) | Walking skeleton, traced and deployed to staging | X | NFR-09, NFR-13 | S-01 | T-41, T-38, T-03, T-01, T-15 | SPEC-01b, SPEC-07, SPEC-08, SPEC-10, SPEC-11a, SPEC-12 | M | `feat/SPEC-13-walking-skeleton` |
 | 7 | [SPEC-14](specs/SPEC-14/spec.md) | Search API choice and SearchProvider adapter (Q-29) | A | R-08, NFR-11 | — | T-42 | SPEC-11a | M | `feat/SPEC-14-search-provider` |
 
 Layer: X cross-cutting, B backend, A agent, M media, W web (DEVELOPMENT_PLAN.md). Sizes: S 1, M 2, L 3 spec-days; total 39.
@@ -90,11 +90,11 @@ Checked against [TEST_STRATEGY.md](../TEST_STRATEGY.md#definition-of-ready) on 1
 | SPEC-01a | ✓ | ✓ none | n/a | ✓ | n/a | ✓ none | ✓ ~400 (config) | ✓ | **Ready** |
 | SPEC-01b | ✓ | ✓ none | n/a | ✓ T-98 added | n/a | ◐ SPEC-01a | ✓ ~250 | ✓ | Draft |
 | SPEC-02 | ✓ | ✓ none | n/a | ✓ | n/a | ◐ SPEC-01a | ✓ ~350 | ✓ | Draft |
-| SPEC-03a | ✓ | ◐ 0.4.0 → generated; addition needs A-43 | n/a | ✓ | n/a | ◐ SPEC-01a | ✓ ~400 | ✓ | Draft (A-43) |
-| SPEC-03b | ✓ | ◐ addition needs A-43 | n/a | ✓ | n/a | ◐ SPEC-03a | ✓ ~350 | ✓ | Draft |
-| SPEC-03c | ✓ | ◐ addition needs A-43 | n/a | ✓ | ✓ contracts only | ◐ SPEC-03a | ✓ ~380 | ✓ | Draft |
+| SPEC-03a | ✓ | ✓ 0.4.0 → generated; A-43 addition | n/a | ✓ | n/a | ◐ SPEC-01a | ✓ ~400 | ✓ | Draft |
+| SPEC-03b | ✓ | ✓ A-43 addition | n/a | ✓ | n/a | ◐ SPEC-03a | ✓ ~350 | ✓ | Draft |
+| SPEC-03c | ✓ | ✓ A-43 addition | n/a | ✓ | ✓ contracts only | ◐ SPEC-03a | ✓ ~380 | ✓ | Draft |
 | SPEC-03d | ✓ | ✓ 0.4.0, no shape change | n/a | ✓ | n/a | ◐ SPEC-03a | ✓ ~380 | ✓ | Draft |
-| SPEC-03e | ✓ | ◐ cuts 1.0.0; addition needs A-43 | n/a | ✓ | n/a | ◐ SPEC-03b–03d | ✓ ~400 | ✓ | Draft |
+| SPEC-03e | ✓ | ✓ cuts 1.0.0; A-43 addition | n/a | ✓ | n/a | ◐ SPEC-03b–03d | ✓ ~400 | ✓ | Draft |
 | SPEC-04 | ✓ | ✓ db/schema.sql draft; M0 tables only | n/a | ✓ | n/a | ◐ SPEC-01a, 03a | ✓ ~380 | ✓ | Draft |
 | SPEC-05 | ✓ | ✓ `BlobRef` | n/a | ✓ | n/a | ◐ SPEC-01a | ✓ ~350 | ✓ | Draft |
 | SPEC-06 | ✓ | ◐ 1.0.0 (SPEC-03e) | n/a | ✓ | n/a | ◐ SPEC-04, 03e | ✓ ~380 | ✓ | Draft |
@@ -106,10 +106,10 @@ Checked against [TEST_STRATEGY.md](../TEST_STRATEGY.md#definition-of-ready) on 1
 | SPEC-11a | ✓ | ◐ 1.0.0 agent-tools | n/a | ✓ | ✓ | ◐ SPEC-03c, 09b | ✓ ~420 incl. tests | ✓ | Draft |
 | SPEC-11b | ✓ | ✓ 1.0.0 | n/a | ✓ | ✓ | ◐ SPEC-11a | ✓ ~350 | ✓ | Draft |
 | SPEC-12 | ✓ | ◐ 1.0.0 media | n/a | ✓ | n/a | ◐ SPEC-03d, 05 | ✓ ~380 | ✓ | Draft |
-| SPEC-13 | ✓ | ✓ 1.0.0, no change | ◐ S-01 plus the A-43 System check | ✓ | ✓ | ◐ six specs | ✓ ~400 | ✓ | Draft (A-43) |
+| SPEC-13 | ✓ | ✓ 1.0.0, no change | ✓ S-01 plus the System check (Q-43) | ✓ | ✓ | ◐ six specs | ✓ ~400 | ✓ | Draft |
 | SPEC-14 | ✓ | ✓ 1.0.0 `tools.schema.json` | n/a | ✓ | ✓ | ◐ SPEC-11a | ✓ ~300 + ADR | ✓ | Draft |
 
-Result: **SPEC-01a is Ready now.** Every other spec is complete and becomes Ready when its dependencies merge; SPEC-03a and SPEC-13 also need Q-43 answered. No spec fails a content check.
+Result: **SPEC-01a is Ready now.** Every other spec is complete and becomes Ready when its dependencies merge (Q-43 accepted 14 Nov 2026). No spec fails a content check.
 
 ## Conformance due at M0 exit
 

@@ -51,7 +51,7 @@ Milestones are defined in [DELIVERY_PLAN.md](DELIVERY_PLAN.md#milestones). Each 
 
 ### M0 Foundation: walking skeleton
 
-Prepared in Stage 4: [plans/M0/milestone.md](M0/milestone.md), with each spec's `spec.md` and `prompt.md` in `plans/M0/specs/`. Contracts first: SPEC-03a–03e regenerate contracts 0.4.0 from Pydantic, part by part, and SPEC-03e cuts 1.0.0 before any layer codes against it (ADR-008). SPEC-09b is the DBOS kill-and-resume spike; if it fails, ADR-003 is superseded before M1 work depends on it. SPEC-05 replaces the interim MinIO image (ADR-015). SPEC-14 decides Q-29. SPEC-13's trivial request is the diagnostic run of A-43 (Q-43 open). The owner's discovery tasks run alongside (see [DELIVERY_PLAN.md](DELIVERY_PLAN.md#m0-foundation)).
+Prepared in Stage 4: [plans/M0/milestone.md](M0/milestone.md), with each spec's `spec.md` and `prompt.md` in `plans/M0/specs/`. Contracts first: SPEC-03a–03e regenerate contracts 0.4.0 from Pydantic, part by part, and SPEC-03e cuts 1.0.0 before any layer codes against it (ADR-008). SPEC-09b is the DBOS kill-and-resume spike; if it fails, ADR-003 is superseded before M1 work depends on it. SPEC-05 replaces the interim MinIO image (ADR-015). SPEC-14 decides Q-29. SPEC-13's trivial request is the diagnostic run of A-43 (Q-43 accepted). The owner's discovery tasks run alongside (see [DELIVERY_PLAN.md](DELIVERY_PLAN.md#m0-foundation)).
 
 | Spec | Title | Layer | Requirements | Screens | Tests | Depends on | Size | Branch |
 |---|---|---|---|---|---|---|---|---|
