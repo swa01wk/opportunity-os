@@ -18,6 +18,7 @@ dev = [
     "pytest>=8.4,<10",
     "pyyaml>=6.0,<7",
     "ruff>=0.14,<1",
+    "testcontainers[postgres]>=4.9,<5",
 ]
 
 [tool.uv]
@@ -51,6 +52,7 @@ known-first-party = [
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S101"]
+"backend/tests/functional/support.py" = ["S608"]
 "e2e/**" = ["S101", "S603", "S607"]
 
 [tool.mypy]
@@ -66,7 +68,7 @@ strict = true
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib --strict-markers"
-pythonpath = ["e2e/nfr", "contracts/tests"]
+pythonpath = ["e2e/nfr", "contracts/tests", "backend/migrations", "backend/tests/functional"]
 testpaths = [
     "backend/tests",
     "agent/tests",
@@ -74,4 +76,7 @@ testpaths = [
     "contracts/tests",
     "e2e/nfr",
 ]
-markers = ["t(id): T-xx catalogue ID (plans/TEST_STRATEGY.md)"]
+markers = [
+    "t(id): T-xx catalogue ID (plans/TEST_STRATEGY.md)",
+    "functional: needs Docker (Testcontainers); run via py-functional (SPEC-04)",
+]

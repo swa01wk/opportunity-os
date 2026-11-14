@@ -44,7 +44,7 @@ M0, prepared in Stage 4: [plans/M0/milestone.md](M0/milestone.md) (dependency gr
 | [SPEC-03b Contracts II: domain events, AG-UI stream, analytics](M0/specs/SPEC-03b/spec.md) | NFR-19, R-50 | — | `feat/SPEC-03b-contracts-events` | Ready | Owner (Cursor) |
 | [SPEC-03c Contracts III: agent task, execution and tool contracts](M0/specs/SPEC-03c/spec.md) | NFR-19, R-63 | — | `feat/SPEC-03c-contracts-agent` | Ready | Owner (Cursor) |
 | [SPEC-03d Contracts IV: media contracts](M0/specs/SPEC-03d/spec.md) | NFR-19, R-18 | — | `feat/SPEC-03d-contracts-media` | Ready | Owner (Cursor) |
-| [SPEC-04 Database baseline, migrations, service roles and RLS](M0/specs/SPEC-04/spec.md) | R-01, NFR-04, NFR-13 | — | `feat/SPEC-04-database` | In progress | Owner (Cursor) |
+| [SPEC-04 Database baseline, migrations, service roles and RLS](M0/specs/SPEC-04/spec.md) | R-01, NFR-04, NFR-13 | — | `feat/SPEC-04-database` | In review | Owner (Cursor) |
 | [SPEC-03e Contracts V: Studio API models, OpenAPI drift, TS client, contracts 1.0.0](M0/specs/SPEC-03e/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03e-contracts-api` | Draft: needs SPEC-03b–03d | Owner (Cursor) |
 | [SPEC-09a Write path: idempotency, audit, outbox and workflow dispatch](M0/specs/SPEC-09a/spec.md) | NFR-01, R-50 | — | `feat/SPEC-09a-outbox` | Draft: needs SPEC-04, SPEC-03b, SPEC-08 | Owner (Cursor) |
 | [SPEC-12 Render service skeleton, job API and resource limits](M0/specs/SPEC-12/spec.md) | R-29, NFR-12 | — | `feat/SPEC-12-render-skeleton` | Draft: needs SPEC-03d, SPEC-05 | Owner (Cursor) |

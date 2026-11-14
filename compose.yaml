@@ -182,6 +182,32 @@ services:
     command: ["alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
     environment:
       MIGRATE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:?set in .env}:${POSTGRES_PASSWORD:?set in .env}@postgres:5432/${POSTGRES_DB}
+      DB_PASSWORD_API: ${DB_PASSWORD_API:?set in .env}
+      DB_PASSWORD_WORKER: ${DB_PASSWORD_WORKER:?set in .env}
+      DB_PASSWORD_RENDER: ${DB_PASSWORD_RENDER:?set in .env}
+      DB_PASSWORD_RETENTION: ${DB_PASSWORD_RETENTION:?set in .env}
+      DB_PASSWORD_ANALYTICS_RO: ${DB_PASSWORD_ANALYTICS_RO:?set in .env}
+    networks: [private]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  seed:
+    profiles: [tools]
+    image: oos/py-tools:dev
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: dev
+      args: *python-build
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    working_dir: /repo
+    volumes: [".:/repo"]
+    command: ["python", "-m", "infra.seed.load"]
+    environment:
+      HOME: /tmp
+      PYTHONPATH: /repo
+      APP_ENV: ${APP_ENV:?set in .env}
+      DATABASE_URL: postgresql+psycopg://oos_api:${DB_PASSWORD_API:?set in .env}@postgres:5432/${POSTGRES_DB:?set in .env}
     networks: [private]
     depends_on:
       postgres: { condition: service_healthy }
@@ -200,6 +226,25 @@ services:
     working_dir: /repo
     volumes: [".:/repo"]
     network_mode: none
+
+  py-functional:
+    profiles: [tools]
+    image: oos/py-functional:dev
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: dev
+      args: *python-build
+    user: root
+    environment:
+      HOME: /tmp
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+    working_dir: /repo
+    volumes:
+      - .:/repo
+      - /var/run/docker.sock:/var/run/docker.sock
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   ts-tools:
     profiles: [tools]
