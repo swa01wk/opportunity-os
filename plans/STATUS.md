@@ -1,5 +1,5 @@
 # STATUS: OpportunityOS        Updated: 2026-11-14
-Current stage: 3 Plan, complete | Next: your G2 and G3 signatures, then Stage 4 (M0 specs)
+Current stage: 4 Prepare M0 (next) | Next gate: G4 M0 exit
 
 Release target: R0 -> R1 -> R2 (PRD Section 4). R3 conditional; R4/R5 out of scope.
 
@@ -11,8 +11,8 @@ All gates are signed by the product owner / tech lead (same person).
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
-| 2 Design | G2 Design review and screens | Done: 2a, 2b, 2c merged (HTML prototypes S-01–S-16 merged in #7); all G2 checks pass; ready for your signature | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5, #7 |
-| 3 Plan | G3 Milestone scope and dates | Done: plan merged (#8); Strategy v1.0 intake (#9); Q-36–Q-42 decided. All G3 checks pass; ready for your signature | | docs/stage-3-plan, #8 · docs/strategy-v1-intake, #9 |
+| 2 Design | G2 Design review and screens | Signed: 2a, 2b, 2c merged (HTML prototypes S-01–S-16 in #7); all G2 checks pass | 2026-11-14 | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5, #7 |
+| 3 Plan | G3 Milestone scope and dates | Signed: plan (#8), Strategy v1.0 intake (#9, #10); Q-36–Q-42 decided; all G3 checks pass; milestones not dated (Q-36) | 2026-11-14 | docs/stage-3-plan, #8 · docs/strategy-v1-intake, #9 |
 
 | Milestone | Scope | Status | Exit date |
 |---|---|---|---|
@@ -103,7 +103,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 | Each layer can mock the others | Pass: mocking guide in contracts README; synthetic odd-squares fixtures |
 | No open choice blocks M0 | Pass: ADR-011–014 accepted; Remotion free individual licence; development runs on free credits (Q-05). |
 | Nothing designed that no requirement asks for | Pass: R3 planned only; R-64, R-65, R-78–R-82 not designed |
-| Threat model reviewed | Pass for TH-01–TH-30, agent risks and accepted risks (accepted 2026-11-13, owner delegated to the tech lead). TH-31–TH-34 (AG-UI stream, stale agent results, out-of-scope redrafts) added 2026-11-14, to review at G2 |
+| Threat model reviewed | Pass for TH-01–TH-30, agent risks and accepted risks (accepted 2026-11-13, owner delegated to the tech lead). TH-31–TH-34 (AG-UI stream, stale agent results, out-of-scope redrafts) added 2026-11-14, reviewed and accepted with the G2 sign-off (2026-11-14) |
 | Agent review checklist (PROCESS.md) | Pass: owners, lifecycle, approval binding (with policy versions, Q-35), schemas, idempotency, reconnect and blocked-state explanation documented in AGENT_ARCHITECTURE.md; maturity per workflow recorded (Q-33); conformance C01–C14 mapped (C08, C13 not applicable) |
 | Screens approved | Pass: canvas approved 2026-11-14 (S-01–S-16, journey by journey). HTML prototypes match the canvas: built from the same generators; each switches between sample data and its UI_DESIGN empty, loading and error states; checked headless (78 states, no script errors, no network requests, every link resolves). |
 | Every key journey has an SLO | Pass: SLO-01–SLO-10, provisional, calibrate after R0 (A-15) |
@@ -141,6 +141,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Recent decisions
 
+- 2026-11-14: **G2 and G3 signed** by the product owner. Architecture, agent architecture, UI design, tech stack, security, observability and the approved screens are baselined (change control from here). Development plan, test strategy and delivery plan agreed; ADR-022 confirmed. Next: Stage 4 prepares the M0 specs.
 - 2026-11-14: Q-36 answered: no capacity commitment and no milestone dates; milestones close on exit criteria (in line with Q-03). Forecast windows kept as indicative only.
 - 2026-11-14: Q-37–Q-42 accepted by the product owner; baseline and dates unchanged.
 - 2026-11-14: Strategy v1.0 added as a companion source (`docs/sources/Strategy-v1.0.md`). No requirement added; coverage traced in REQUIREMENTS.md; Q-37–Q-42 raised with assumptions that keep the baseline; DELIVERY_PLAN (M0 tasks, phase map, R2 gate outcomes, RAID), DEVELOPMENT_PLAN (strategy inputs → specs) and TEST_STRATEGY (eval topics, tracked beat timing) updated.

@@ -1,6 +1,6 @@
 # Agent architecture
 
-Status: **Draft for G2** (Stage 2c addendum, 14 Nov 2026; Q-33–Q-35 decided). Applies the [Agent architecture](../PROCESS.md#agent-architecture) section of PROCESS.md to OpportunityOS. Baselined at G2; after that it changes only through change control.
+Status: **Baselined at G2** (signed 14 Nov 2026) (Stage 2c addendum, 14 Nov 2026; Q-33–Q-35 decided). Applies the [Agent architecture](../PROCESS.md#agent-architecture) section of PROCESS.md to OpportunityOS. Baselined at G2; after that it changes only through change control.
 
 Owners of related facts: containers, components, write path and revision graph [ARCHITECTURE.md](ARCHITECTURE.md) · task contracts [tasks.json](../contracts/agent-tools/tasks.json), [task-io.schema.json](../contracts/agent-tools/task-io.schema.json), [execution.schema.json](../contracts/agent-tools/execution.schema.json) · tools [tools.schema.json](../contracts/agent-tools/tools.schema.json) · AG-UI stream [agui/stream.json](../contracts/agui/stream.json) · threats [SECURITY.md](SECURITY.md#agent-risks-prompt-injection-excessive-agency-generated-code) · telemetry [OBSERVABILITY.md](OBSERVABILITY.md) · decisions ADR-003 (durable workflows), ADR-009 (adapters), ADR-010 (outbox), ADR-014 (model), [ADR-020](../adr/ADR-020-ag-ui-event-stream.md) (AG-UI), [ADR-021](../adr/ADR-021-agent-runtime-contract.md) (agent runtime) · owner decisions Q-33, Q-34, Q-35 ([QUESTIONS.md](../product/QUESTIONS.md)).
 

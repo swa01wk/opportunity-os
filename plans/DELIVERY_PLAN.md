@@ -1,6 +1,6 @@
 # Delivery plan
 
-Status: **Draft for G3** (Stage 3, 14 Nov 2026). Agreed at G3, then living: dates are re-baselined at M1 exit and whenever change control moves scope. Client view of the plan. The specs behind each milestone are in [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md); test cadence and exit checks in [TEST_STRATEGY.md](TEST_STRATEGY.md); progress in [STATUS.md](STATUS.md).
+Status: **Agreed at G3** (signed 14 Nov 2026). Living from here: the forecast is refreshed at each milestone exit, and scope moves only through change control. Client view of the plan. The specs behind each milestone are in [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md); test cadence and exit checks in [TEST_STRATEGY.md](TEST_STRATEGY.md); progress in [STATUS.md](STATUS.md).
 
 Scope is R0 → R1 → R2 (PRD §4). R3 is planned in outline and starts only after you sign the R2 gate and promote it (A-18). R4/R5 are out of scope. Milestones M0–M7 here are PROCESS.md milestones; the PRD's own are written "PRD M0–M6". The companion [Strategy v1.0](../docs/sources/Strategy-v1.0.md) phases map onto these milestones as shown in [Strategy v1.0 phases](#strategy-v10-phases); where it differed from this plan, Q-37–Q-42 decided in favour of this plan.
 

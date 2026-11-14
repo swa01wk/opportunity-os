@@ -1,6 +1,6 @@
 # Development plan
 
-Status: **Draft for G3** (Stage 3, 14 Nov 2026). A living doc: specs are added, split or reordered as milestones are prepared (Stage 4), and this file is updated in the same PR. Engineering view of the plan; the client view (milestones, dates, RAID) is [DELIVERY_PLAN.md](DELIVERY_PLAN.md) and the test levels, T-xx catalogue and Definition of Done are in [TEST_STRATEGY.md](TEST_STRATEGY.md).
+Status: **Agreed at G3** (signed 14 Nov 2026). A living doc: specs are added, split or reordered as milestones are prepared (Stage 4), and this file is updated in the same PR. Engineering view of the plan; the client view (milestones, dates, RAID) is [DELIVERY_PLAN.md](DELIVERY_PLAN.md) and the test levels, T-xx catalogue and Definition of Done are in [TEST_STRATEGY.md](TEST_STRATEGY.md).
 
 Owners of related facts: requirements [REQUIREMENTS.md](../docs/product/REQUIREMENTS.md) · screens [UI_DESIGN.md](../docs/product/UI_DESIGN.md) and [docs/design/screens/](../docs/design/screens/) · components [ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md) · agents [AGENT_ARCHITECTURE.md](../docs/architecture/AGENT_ARCHITECTURE.md) · tools [TECH_STACK.md](../docs/architecture/TECH_STACK.md) · decisions [ADRs](../docs/adr/README.md) · contracts [docs/contracts](../docs/contracts/README.md) · coding rules [AGENTS.md](../AGENTS.md) and [.cursor/rules/](../.cursor/rules/).
 
