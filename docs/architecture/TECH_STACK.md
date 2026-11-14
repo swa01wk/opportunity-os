@@ -1,6 +1,6 @@
 # Tech stack
 
-Status: **Draft for G2** (Stage 2b). Living summary: the reason for every choice is in its ADR; this file owns only the tool, the version line and the cost estimate. Layers follow ADR-001: **backend** (api, worker), **agent**, **media** (render service and `media/audio`), **web** (Studio).
+Status: **Baselined at G2** (signed 14 Nov 2026) (Stage 2b). Living summary: the reason for every choice is in its ADR; this file owns only the tool, the version line and the cost estimate. Layers follow ADR-001: **backend** (api, worker), **agent**, **media** (render service and `media/audio`), **web** (Studio).
 
 **Versions.** The table gives the version line to use. Exact patch versions are pinned in the lockfiles (`uv.lock`, `pnpm-lock.yaml`) and image digests by the M0 repo spec, which also runs the dependency licence check (ADR-019). Lines marked ✓ were checked against the vendor's release page on 2026-11-13; the rest are the current stable line as known at writing and are confirmed at M0.
 

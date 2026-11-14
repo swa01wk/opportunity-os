@@ -1,6 +1,6 @@
 # Architecture
 
-Status: **Draft for G2** (Stage 2a). Baselined at G2; after that it changes only through change control. Requirements: [REQUIREMENTS.md](../product/REQUIREMENTS.md). Decisions: [ADRs](../adr/README.md). Contracts: [docs/contracts](../contracts/README.md). Agents, maturity and the AG-UI stream: [AGENT_ARCHITECTURE.md](AGENT_ARCHITECTURE.md). Security, observability, UI and tech stack: [SECURITY.md](SECURITY.md), [OBSERVABILITY.md](OBSERVABILITY.md), [UI_DESIGN.md](../product/UI_DESIGN.md), [TECH_STACK.md](TECH_STACK.md) (Stage 2b); screens in Stage 2c.
+Status: **Baselined at G2** (signed 14 Nov 2026) (Stage 2a). Baselined at G2; after that it changes only through change control. Requirements: [REQUIREMENTS.md](../product/REQUIREMENTS.md). Decisions: [ADRs](../adr/README.md). Contracts: [docs/contracts](../contracts/README.md). Agents, maturity and the AG-UI stream: [AGENT_ARCHITECTURE.md](AGENT_ARCHITECTURE.md). Security, observability, UI and tech stack: [SECURITY.md](SECURITY.md), [OBSERVABILITY.md](OBSERVABILITY.md), [UI_DESIGN.md](../product/UI_DESIGN.md), [TECH_STACK.md](TECH_STACK.md) (Stage 2b); screens in Stage 2c.
 
 Scope: R0 → R1 → R2 (one workspace, one owner, one house brand, English, one narrator, 1080×1920 at 30 fps, manual publication and manual metrics). R3 components are shown as **planned** (dashed) and are built only after A-18. R4/R5 are not designed.
 

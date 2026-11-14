@@ -1,6 +1,6 @@
 # Test strategy
 
-Status: **Draft for G3** (Stage 3, 14 Nov 2026). Owns the test levels, what runs when, eval thresholds, the conformance and QA mappings, the T-xx catalogue, the Definition of Ready and Done, the pipeline and the environments. A living doc: specs add T-xx and scenarios here in the same PR. Specs and their order: [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md). Milestones and exit dates: [DELIVERY_PLAN.md](DELIVERY_PLAN.md). Tools and versions: [TECH_STACK.md](../docs/architecture/TECH_STACK.md) (ADR-019). Delivery pipeline and environments: [ADR-022](../docs/adr/ADR-022-delivery-pipeline-local-hosting.md).
+Status: **Agreed at G3** (signed 14 Nov 2026). Owns the test levels, what runs when, eval thresholds, the conformance and QA mappings, the T-xx catalogue, the Definition of Ready and Done, the pipeline and the environments. A living doc: specs add T-xx and scenarios here in the same PR. Specs and their order: [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md). Milestones and exit dates: [DELIVERY_PLAN.md](DELIVERY_PLAN.md). Tools and versions: [TECH_STACK.md](../docs/architecture/TECH_STACK.md) (ADR-019). Delivery pipeline and environments: [ADR-022](../docs/adr/ADR-022-delivery-pipeline-local-hosting.md).
 
 ## Principles
 

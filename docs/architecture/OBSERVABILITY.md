@@ -1,6 +1,6 @@
 # Observability
 
-Status: **Draft for G2** (Stage 2b); a living doc after G2 for signals, and change-controlled for SLO targets. Every spec that adds a flow adds its spans, log events and dashboard panel here and in code (PROCESS Definition of Done). Stack: OpenTelemetry everywhere, one Collector, Grafana LGTM locally (ADR-016). KPI analytics events are a PostgreSQL projection (ADR-017). Requirements: NFR-09, NFR-15, NFR-06 (redaction), KPI-01–KPI-14.
+Status: **Baselined at G2** (signed 14 Nov 2026) (Stage 2b); a living doc after G2 for signals, and change-controlled for SLO targets. Every spec that adds a flow adds its spans, log events and dashboard panel here and in code (PROCESS Definition of Done). Stack: OpenTelemetry everywhere, one Collector, Grafana LGTM locally (ADR-016). KPI analytics events are a PostgreSQL projection (ADR-017). Requirements: NFR-09, NFR-15, NFR-06 (redaction), KPI-01–KPI-14.
 
 ## Conventions
 
