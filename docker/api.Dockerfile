@@ -25,6 +25,12 @@ RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --all-packages
 FROM base AS runtime
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable --package opportunityos
+# SPEC-02 B15 deviation: patch zlib in the Debian layer; drop pip/ensurepip from runtime.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends zlib1g \
+    && rm -rf /var/lib/apt/lists/* \
+    && /usr/local/bin/python -m pip uninstall -y pip \
+    && rm -rf /usr/local/lib/python3.13/ensurepip
 ARG GIT_SHA=unknown
 ENV APP_VERSION=${GIT_SHA} PORT=8000
 RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin app
