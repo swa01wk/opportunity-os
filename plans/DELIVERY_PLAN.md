@@ -6,9 +6,9 @@ Scope is R0 → R1 → R2 (PRD §4). R3 is planned in outline and starts only af
 
 ## Milestones
 
-Every milestone is a vertical slice you can use end to end, closed by Gate G4 (PROCESS.md exit checklist plus the criteria below). Windows are **proposals** at the capacity in A-36 (Q-36, open); see [Dates, demos and UAT](#dates-demos-and-uat).
+Every milestone is a vertical slice you can use end to end, closed by Gate G4 (PROCESS.md exit checklist plus the criteria below). Milestones are **not dated** (Q-03, Q-36): each closes when its exit criteria pass. The windows are an indicative forecast only; see [Dates, demos and UAT](#dates-demos-and-uat).
 
-| Milestone | Release | At the end you can… | Accepted here | Screens built | Proposed window |
+| Milestone | Release | At the end you can… | Accepted here | Screens built | Forecast window (indicative) |
 |---|---|---|---|---|---|
 | **M0 Foundation** | — | Sign in to an empty Studio and press a button whose run goes web → api → worker → agent (fake) → render → back to the Studio, traced, on a stack any fresh clone brings up | NFR-09, NFR-19 | S-01 (shell) | 23 Nov 2026 – 22 Jan 2027 |
 | **M1 Feasibility** | **R0** | Produce the narrated odd-squares sample from a command, with captions, verified values and a targeted revision that reuses unchanged scenes | NFR-03, NFR-11, NFR-12, NFR-16 | — | 25 Jan 2027 – 12 Mar 2027 |
@@ -111,9 +111,9 @@ Not specced and not dated. Each starts only on your decision, with its own estim
 
 ## Dates, demos and UAT
 
-**Capacity is not fixed** (Q-03), so the windows above are computed, not committed. Q-36 asks for your weekly capacity; A-36 assumes **25 hours a week**, a spec-day of about 5 hours, and a 20% buffer per milestone for review, demos, UAT, holidays and surprises. Start: Monday 23 Nov 2026, after G3 and the M0 spec preparation.
+**No dates are committed** (Q-03, Q-36): the product is built the right way and each milestone closes when its exit criteria pass. The windows below are a forecast for orientation only, at an assumed **25 hours a week**, a spec-day of about 5 hours and a 20% buffer per milestone. They are refreshed from measured velocity at each milestone exit. Forecast start: Monday 23 Nov 2026.
 
-| Milestone | Spec-days (+ owner days) | Weeks at 25 h | Proposed window at 25 h/week (A-36) | Weeks at 40 h | Window at 40 h/week |
+| Milestone | Spec-days (+ owner days) | Weeks at 25 h | Forecast at 25 h/week | Weeks at 40 h | Forecast at 40 h/week |
 |---|---|---|---|---|---|
 | M0 | 32 (+4) | 9 | 23 Nov 2026 – 22 Jan 2027 | 6 | 23 Nov 2026 – 1 Jan 2027 |
 | M1 | 28 | 7 | 25 Jan 2027 – 12 Mar 2027 | 5 | 4 Jan 2027 – 5 Feb 2027 |
@@ -126,7 +126,7 @@ Not specced and not dated. Each starts only on your decision, with its own estim
 
 At 25 h/week, go-live is about **5 Nov 2027** and the R2 gate about **31 Dec 2027**; at 40 h/week, about **25 Jun 2027** and **20 Aug 2027**.
 
-**What to agree at G3:** the capacity (Q-36) and the M0 and M1 windows. M2–M7 are indicative until the re-estimate at M1 exit, because PRD §22.2 ties calendar commitments to the measured spike.
+**After M1** the estimate is redone from measured M0–M1 velocity and the renderer is confirmed (PRD §22.1–22.2); the forecast is updated then and at every milestone exit.
 
 **Demos and UAT.** The last two working days of each window: a demo of the slice, then your UAT walkthrough from the milestone's acceptance criteria (T-89, `plans/Mx/uat.md`, drafted in Stage 5). G4 is signed the following working day. A short weekly update is generated from STATUS.md (PROCESS.md, Tracking).
 
@@ -248,7 +248,7 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 
 | Risk | Likelihood | Impact | Response | Watch |
 |---|---|---|---|---|
-| Effort is about 2.5× the PRD allowance, so the calendar runs long | High | High | Re-estimate at M1 exit; agree capacity (Q-36); levers above | Velocity per milestone in retros |
+| Effort is about 2.5× the PRD allowance, so the calendar runs long | High | High | No dates committed (Q-36); re-estimate at M1 exit; levers above if you ever want it sooner | Velocity per milestone in retros |
 | DBOS fails the kill-and-resume spike (ADR-003) | Low | High | SPEC-09 runs it first; if it fails, supersede ADR-003 before M1 depends on it | SPEC-09 result |
 | Remotion cannot meet the output standard or render time (NFR-02, ADR-002) | Medium | High | Measured in M1; renderer confirmed before the Studio couples to it (PRD §22.2) | T-52 baseline |
 | Animation, typography and audio polish take longer than sized (PRD §22.1) | High | Medium | M1 is media-only so it shows early; families are small and reviewed | M1 velocity |
@@ -273,7 +273,7 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 
 | Assumption | Source | If wrong |
 |---|---|---|
-| 25 hours a week, 5 hours per spec-day, 20% buffer | A-36 (Q-36 open) | Dates move proportionally |
+| Forecast only: 25 hours a week, 5 hours per spec-day, 20% buffer | Q-36 (no commitment) | The forecast moves; nothing is committed |
 | One implementer (you) with Cursor; Claude reviews; you approve | Project instructions, A-23 | Tracks allow more in parallel |
 | Development runs on free provider credits; costs recorded | Q-05 | Eval cadence drops; limits set earlier |
 | The `main` ruleset is enforced (GitHub Pro or Team) with enough Actions minutes | PROCESS.md CI/CD practices | Required checks become advisory; fewer nightly runs |
@@ -286,7 +286,7 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 | Issue | Status | Action |
 |---|---|---|
 | G2 sign-off is not recorded in STATUS.md (all checks pass; screens approved 14 Nov) | Open | You record the G2 signature |
-| Q-36 weekly capacity | Open | You answer at G3 |
+| Q-36 weekly capacity | Closed 14 Nov 2026 | No dates; milestones close on exit criteria |
 | Q-29 search API | Open | Decided in SPEC-14 (M0) |
 | Q-05 budget limits | Parked | Set before the AWS move |
 | Contracts are 0.4.0 drafts | Expected | Regenerated as 1.0.0 by SPEC-03 |
