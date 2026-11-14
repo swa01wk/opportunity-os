@@ -1,2 +1,235 @@
-# Stub. Local stack (every service plus database) is defined in M0.
-services: {}
+# Local stack, Compose project oos-dev (ADR-022). Run through make; images and bases come
+# from infra/images.env (pinned by digest, AC4). Only web, api, Keycloak, Grafana and the
+# object store's signed-URL endpoint publish ports, all on 127.0.0.1 (SPEC-01a, NFR-12).
+name: oos-dev
+
+x-health: &health
+  interval: 5s
+  timeout: 3s
+  retries: 30
+  start_period: 10s
+
+x-python-build: &python-build
+  PYTHON_IMAGE: ${PYTHON_IMAGE:?pinned in infra/images.env}
+  UV_IMAGE: ${UV_IMAGE:?pinned in infra/images.env}
+  GIT_SHA: ${GIT_SHA:-unknown}
+
+x-app-env: &app-env
+  APP_ENV: ${APP_ENV:?set in .env}
+  FEATURE_DIAGNOSTICS: ${FEATURE_DIAGNOSTICS:-0}
+
+x-node-build: &node-build
+  NODE_IMAGE: ${NODE_IMAGE:?pinned in infra/images.env}
+  GIT_SHA: ${GIT_SHA:-unknown}
+
+x-python-health: &python-health
+  test: ["CMD", "python", "-c", "import os,urllib.request as u; [u.urlopen(f'http://127.0.0.1:{os.environ[\"PORT\"]}{p}', timeout=3) for p in ('/healthz', '/readyz')]"]
+
+x-node-health: &node-health
+  test: ["CMD", "node", "-e", "Promise.all(['/healthz','/readyz'].map(p=>fetch('http://127.0.0.1:'+process.env.PORT+p).then(r=>{if(!r.ok)throw r.status}))).then(()=>process.exit(0),()=>process.exit(1))"]
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:?pinned in infra/images.env}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set in .env}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    networks: [private]
+    healthcheck:
+      <<: *health
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+
+  objectstore:
+    image: oos/objectstore:interim
+    build:
+      context: .
+      dockerfile: docker/objectstore.Dockerfile
+      args:
+        GOLANG_IMAGE: ${GOLANG_IMAGE:?pinned in infra/images.env}
+        BUSYBOX_IMAGE: ${BUSYBOX_IMAGE:?pinned in infra/images.env}
+        MINIO_SOURCE_REF: ${MINIO_SOURCE_REF:?pinned in infra/images.env}
+    environment:
+      MINIO_ROOT_USER: ${OBJECTSTORE_ROOT_USER:?set in .env}
+      MINIO_ROOT_PASSWORD: ${OBJECTSTORE_ROOT_PASSWORD:?set in .env}
+    volumes: [objects:/data]
+    ports: ["127.0.0.1:9000:9000"]
+    networks: [private, edge]
+    healthcheck:
+      <<: *health
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9000/minio/health/ready"]
+
+  keycloak:
+    image: ${KEYCLOAK_IMAGE:?pinned in infra/images.env}
+    command: ["start-dev"]
+    environment:
+      KC_HEALTH_ENABLED: "true"
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:?set in .env}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set in .env}
+    volumes: [keycloak:/opt/keycloak/data]
+    ports: ["127.0.0.1:8080:8080"]
+    networks: [private, edge]
+    healthcheck:
+      <<: *health
+      start_period: 60s
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"status\": \"UP\"' <&3"]
+
+  otel-collector:
+    image: oos/otel-collector:dev
+    build:
+      context: .
+      dockerfile: docker/otel-collector.Dockerfile
+      args:
+        OTEL_COLLECTOR_IMAGE: ${OTEL_COLLECTOR_IMAGE:?pinned in infra/images.env}
+        BUSYBOX_IMAGE: ${BUSYBOX_IMAGE:?pinned in infra/images.env}
+    networks: [private]
+    depends_on:
+      lgtm: { condition: service_healthy }
+    healthcheck:
+      <<: *health
+      test: ["CMD", "/bin/busybox", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:13133/"]
+
+  lgtm:
+    image: ${LGTM_IMAGE:?pinned in infra/images.env}
+    volumes: [lgtm:/data]
+    ports: ["127.0.0.1:3001:3000"]
+    networks: [private, edge]
+    healthcheck:
+      <<: *health
+      start_period: 60s
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:3000/api/health"]
+
+  api:
+    image: oos/api:dev
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: runtime
+      args: *python-build
+    environment:
+      <<: *app-env
+      PORT: "8000"
+      DATABASE_URL: postgresql+psycopg://oos_api:${DB_PASSWORD_API:?set in .env}@postgres:5432/${POSTGRES_DB:?set in .env}
+    ports: ["127.0.0.1:8000:8000"]
+    networks: [private, edge]
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      <<: [*health, *python-health]
+
+  worker:
+    image: oos/worker:dev
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+      args: *python-build
+    environment:
+      <<: *app-env
+      PORT: "8001"
+      DATABASE_URL: postgresql+psycopg://oos_worker:${DB_PASSWORD_WORKER:?set in .env}@postgres:5432/${POSTGRES_DB}
+      OBJECTSTORE_ENDPOINT: http://objectstore:9000
+    networks: [private]
+    depends_on:
+      postgres: { condition: service_healthy }
+      objectstore: { condition: service_healthy }
+    healthcheck:
+      <<: [*health, *python-health]
+
+  render:
+    image: oos/render:dev
+    build:
+      context: .
+      dockerfile: docker/render.Dockerfile
+      args: *node-build
+    environment:
+      <<: *app-env
+      PORT: "8002"
+      OBJECTSTORE_ENDPOINT: http://objectstore:9000
+    networks: [private]
+    depends_on:
+      objectstore: { condition: service_healthy }
+    healthcheck:
+      <<: [*health, *node-health]
+
+  web:
+    image: oos/web:dev
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      target: runtime
+      args: *node-build
+    environment:
+      <<: *app-env
+      PORT: "3000"
+    ports: ["127.0.0.1:3000:3000"]
+    networks: [private, edge]
+    depends_on:
+      api: { condition: service_healthy }
+    healthcheck:
+      <<: [*health, *node-health]
+
+  # One-off and toolchain containers (profile "tools", never started by `up`).
+  migrate: # make migrate: the api image with the bootstrap owner, so api never holds it
+    profiles: [tools]
+    image: oos/api:dev
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: runtime
+      args: *python-build
+    command: ["alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
+    environment:
+      MIGRATE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:?set in .env}:${POSTGRES_PASSWORD:?set in .env}@postgres:5432/${POSTGRES_DB}
+    networks: [private]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  py-tools:
+    profiles: [tools]
+    image: oos/py-tools:dev
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: dev
+      args: *python-build
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    environment:
+      HOME: /tmp
+    working_dir: /repo
+    volumes: [".:/repo"]
+    network_mode: none
+
+  ts-tools:
+    profiles: [tools]
+    image: oos/ts-tools:dev
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      target: dev
+      args: *node-build
+    working_dir: /repo
+    entrypoint: ["sh", "-c", "pnpm install --frozen-lockfile --reporter=silent && exec \"$$@\"", "--"]
+    volumes:
+      - .:/repo
+      - node_modules:/repo/node_modules
+      - web_node_modules:/repo/web/node_modules
+      - scenes_node_modules:/repo/media/scenes/node_modules
+      - contracts_ts_node_modules:/repo/contracts/ts/node_modules
+      - pnpm_store:/pnpm/store
+
+networks:
+  private:
+    internal: true
+  edge: {}
+
+volumes:
+  pgdata: {}
+  objects: {}
+  keycloak: {}
+  lgtm: {}
+  node_modules: {}
+  web_node_modules: {}
+  scenes_node_modules: {}
+  contracts_ts_node_modules: {}
+  pnpm_store: {}
