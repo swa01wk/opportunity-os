@@ -315,6 +315,19 @@ PRD §24 seed cards (OOS-xxx) are inputs to specs, not specs (project rule). The
 | OOS-026 Publication verification | SPEC-70 (manual); connected verification is R3 |
 | OOS-027 Full lifecycle demonstration | T-86 at M6 exit (manual route); repeated through the adapter at R3 |
 
+## Strategy v1.0 inputs → specs
+
+[Strategy v1.0](../docs/sources/Strategy-v1.0.md) adds no requirement ([coverage](../docs/product/REQUIREMENTS.md#companion-source-strategy-v10)); these sections are inputs the named specs use. Generative video (Q-37) and Manim (Q-39) feed no spec: both were decided out for R0–R2.
+
+| Strategy section | Used by |
+|---|---|
+| §3 Audience segments | SPEC-30 and SPEC-38: suggested values for the contract's audience field (R-06) |
+| §5.1 Twelve candidate briefs | M0 owner task (Q-40); topics for the eval golden scenarios in SPEC-33, SPEC-43, SPEC-47 (synthetic sources) |
+| §6.1 Narrative beats and durations | SPEC-43 script prompt and evals; SPEC-47 storyboard pacing. Starting parameters; masters retime from measured narration (R-26) |
+| §6.2 Creative rules | SPEC-18 brand kit v1 (original first frame, no long logo, dark canvas with accessible contrast, persistent colour); SPEC-54 rubric guidance |
+| §9 Measurement guardrails | SPEC-71 and SPEC-76: secondary manual metrics with their definitions (Q-42) |
+| §10 Preflight gates | SPEC-30 preflight (R-07) and the Gate A checklist in SPEC-35 and SPEC-38 (editorial feasibility items) |
+
 ## Agent tasks → specs
 
 One spec per agent task (PROCESS.md, Stage 3). Each follows the ten steps in [Adding an agent task](../docs/architecture/AGENT_ARCHITECTURE.md#adding-an-agent-task) and lands with its eval scenarios, mocked tests, applicable conformance scenarios and a recorded AG-UI stream.

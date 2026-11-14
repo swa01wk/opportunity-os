@@ -2,13 +2,13 @@
 
 Status: **Draft for G3** (Stage 3, 14 Nov 2026). Agreed at G3, then living: dates are re-baselined at M1 exit and whenever change control moves scope. Client view of the plan. The specs behind each milestone are in [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md); test cadence and exit checks in [TEST_STRATEGY.md](TEST_STRATEGY.md); progress in [STATUS.md](STATUS.md).
 
-Scope is R0 → R1 → R2 (PRD §4). R3 is planned in outline and starts only after you sign the R2 gate and promote it (A-18). R4/R5 are out of scope. Milestones M0–M7 here are PROCESS.md milestones; the PRD's own are written "PRD M0–M6".
+Scope is R0 → R1 → R2 (PRD §4). R3 is planned in outline and starts only after you sign the R2 gate and promote it (A-18). R4/R5 are out of scope. Milestones M0–M7 here are PROCESS.md milestones; the PRD's own are written "PRD M0–M6". The companion [Strategy v1.0](../docs/sources/Strategy-v1.0.md) phases map onto these milestones as shown in [Strategy v1.0 phases](#strategy-v10-phases); where it differed from this plan, Q-37–Q-42 decided in favour of this plan.
 
 ## Milestones
 
-Every milestone is a vertical slice you can use end to end, closed by Gate G4 (PROCESS.md exit checklist plus the criteria below). Windows are **proposals** at the capacity in A-36 (Q-36, open); see [Dates, demos and UAT](#dates-demos-and-uat).
+Every milestone is a vertical slice you can use end to end, closed by Gate G4 (PROCESS.md exit checklist plus the criteria below). Milestones are **not dated** (Q-03, Q-36): each closes when its exit criteria pass. The windows are an indicative forecast only; see [Dates, demos and UAT](#dates-demos-and-uat).
 
-| Milestone | Release | At the end you can… | Accepted here | Screens built | Proposed window |
+| Milestone | Release | At the end you can… | Accepted here | Screens built | Forecast window (indicative) |
 |---|---|---|---|---|---|
 | **M0 Foundation** | — | Sign in to an empty Studio and press a button whose run goes web → api → worker → agent (fake) → render → back to the Studio, traced, on a stack any fresh clone brings up | NFR-09, NFR-19 | S-01 (shell) | 23 Nov 2026 – 22 Jan 2027 |
 | **M1 Feasibility** | **R0** | Produce the narrated odd-squares sample from a command, with captions, verified values and a targeted revision that reuses unchanged scenes | NFR-03, NFR-11, NFR-12, NFR-16 | — | 25 Jan 2027 – 12 Mar 2027 |
@@ -26,8 +26,11 @@ Every milestone is a vertical slice you can use end to end, closed by Gate G4 (P
 
 **Slice.** The walking skeleton (PROCESS.md Milestones): repo, Makefile and Compose stack, CI with security scans, contracts 1.0.0 generated from Pydantic, database with migrations and RLS, the replacement object store, Keycloak sign-in and the app shell, telemetry, the outbox and DBOS workflows, the AG-UI project stream, the agent runtime with a fake model and tool host, the render service skeleton, and the search API choice. 14 specs, 32 spec-days.
 
-**Your tasks in M0** (about 20 hours, PRD M0 discovery):
-- twelve briefs across the four series and the first three topics, one mathematical first (Q-02, OOS-002);
+**Your tasks in M0** (about 24 hours, PRD M0 discovery; the extra hours from Strategy v1.0 come out of the M0 buffer):
+- twelve briefs across the four series and the first three topics, one mathematical first (Q-02, OOS-002), starting from the twelve candidates in Strategy §5.1 (Q-40); tag each against the six families and the PRD §9.1 expansion list, and mark briefs that need a specialist (Q-41);
+- the renderer and tools evaluation from Strategy §12 as a desk matrix (output quality, factual reliability, editability, cost, rights): Remotion only, with Manim considered only if Remotion fails the M1 check (Q-39), and the generative tools as an evaluation only, with no adapter (Q-37);
+- optional: a short review of live creator catalogues and the terms of the tools in Strategy §4, to keep the brand original;
+- the launch measurement sheet: primary metric (A-09) and the secondary manual metrics with their definitions (Q-42);
 - motion and voice references for brand kit v1 (A-31, OOS-003);
 - rights and access preflight: font licences into the ledger, ElevenLabs "improve the models" opt-out on every account before the first real call, the YouTube destination account noted for R2 (OOS-004, Q-08, SECURITY.md);
 - the manual effort baseline: time one comparable Short made with your current tools (Q-13, KPI-04);
@@ -85,6 +88,17 @@ Go-live (G5) starts the operate phase (PROCESS.md, Operate and support), with tw
 
 **R2 gate (PRD §19.3).** Twelve reviewed originals across the four series, with actual public records, rights, effort, cost and quality results; effort compared with the M0 manual baseline (KPI-04); production reliability reported against the adopted threshold of 10 of 12 without code-level repair (KPI-02, Q-04); every rubric dimension ≥ 4 with no unresolved material error or rights blocker (KPI-03); moat hypotheses 1–3 checked against their PRD §1.1 proof (Q-32). Content time: the PRD's 60–120 hours.
 
+**Gate outcomes** (Strategy §12): **GO** when the product makes distinct, accurate, enjoyable videos without routine code fixes; **ITERATE** when style or narration underperforms but the workflow is recoverable; **STOP or rescope** when claims cannot be verified, licensing is unclear, or costs stay outside the approved cap (Q-05).
+
+### Strategy v1.0 phases
+
+| Strategy v1.0 phase | Strategy timing | In this plan |
+|---|---|---|
+| Phase 0 Feasibility: M0 discovery, brand, the odd-squares sample, manual-effort comparison | Nov–Dec 2026 | M0 + M1 (R0), ending about 12 Mar 2027 at A-36 |
+| Phase 1 Small channel launch: three to five originals, manual publication | January 2027 | **Not planned** (Q-03, confirmed by Q-38) |
+| Phase 2 Twelve-video quality gate (4/4/2/2) | PRD R2 | The R2 validation slate after go-live |
+| Phase 3 Conditional 90-day growth study: up to 48 originals, up to 96 uploads, 1,000,000-view stretch | After R2 | R3, conditional on A-18 (PRD §18, R-77, KPI-13); planned with M9 below |
+
 ### Conditional, after the R2 gate
 
 Not specced and not dated. Each starts only on your decision, with its own estimate.
@@ -93,13 +107,13 @@ Not specced and not dated. Each starts only on your decision, with its own estim
 |---|---|---|
 | AWS Mumbai move | R2 gate signed (Q-21, ADR-011) | Terraform, ECS Fargate, RDS, S3 Object Lock, Secrets Manager, Cognito (ADR-012); real budget limits set from measured per-video cost (Q-05) |
 | M8 Connected channel (R3) | You promote R3 (A-18) | R-66–R-71: YouTube connection and Instagram eligibility, private upload, release and reconciliation, scheduling, connected verification; S-17, S-18; QA-07. PRD §22.1 says this suite needs its own estimate |
-| M9 Learning loop (R3) | After M8 | R-72–R-77: metric import and dictionary, Opportunity Lab, experiments, diagnostic recommendations; S-19, S-20; KPI-07–KPI-13 |
+| M9 Learning loop (R3) | After M8 | R-72–R-77: metric import and dictionary, Opportunity Lab, experiments, diagnostic recommendations; S-19, S-20; KPI-07–KPI-13. The 90-day growth study (PRD §18, Strategy Phase 3) runs on it |
 
 ## Dates, demos and UAT
 
-**Capacity is not fixed** (Q-03), so the windows above are computed, not committed. Q-36 asks for your weekly capacity; A-36 assumes **25 hours a week**, a spec-day of about 5 hours, and a 20% buffer per milestone for review, demos, UAT, holidays and surprises. Start: Monday 23 Nov 2026, after G3 and the M0 spec preparation.
+**No dates are committed** (Q-03, Q-36): the product is built the right way and each milestone closes when its exit criteria pass. The windows below are a forecast for orientation only, at an assumed **25 hours a week**, a spec-day of about 5 hours and a 20% buffer per milestone. They are refreshed from measured velocity at each milestone exit. Forecast start: Monday 23 Nov 2026.
 
-| Milestone | Spec-days (+ owner days) | Weeks at 25 h | Proposed window at 25 h/week (A-36) | Weeks at 40 h | Window at 40 h/week |
+| Milestone | Spec-days (+ owner days) | Weeks at 25 h | Forecast at 25 h/week | Weeks at 40 h | Forecast at 40 h/week |
 |---|---|---|---|---|---|
 | M0 | 32 (+4) | 9 | 23 Nov 2026 – 22 Jan 2027 | 6 | 23 Nov 2026 – 1 Jan 2027 |
 | M1 | 28 | 7 | 25 Jan 2027 – 12 Mar 2027 | 5 | 4 Jan 2027 – 5 Feb 2027 |
@@ -112,7 +126,7 @@ Not specced and not dated. Each starts only on your decision, with its own estim
 
 At 25 h/week, go-live is about **5 Nov 2027** and the R2 gate about **31 Dec 2027**; at 40 h/week, about **25 Jun 2027** and **20 Aug 2027**.
 
-**What to agree at G3:** the capacity (Q-36) and the M0 and M1 windows. M2–M7 are indicative until the re-estimate at M1 exit, because PRD §22.2 ties calendar commitments to the measured spike.
+**After M1** the estimate is redone from measured M0–M1 velocity and the renderer is confirmed (PRD §22.1–22.2); the forecast is updated then and at every milestone exit.
 
 **Demos and UAT.** The last two working days of each window: a demo of the slice, then your UAT walkthrough from the milestone's acceptance criteria (T-89, `plans/Mx/uat.md`, drafted in Stage 5). G4 is signed the following working day. A short weekly update is generated from STATUS.md (PROCESS.md, Tracking).
 
@@ -234,7 +248,7 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 
 | Risk | Likelihood | Impact | Response | Watch |
 |---|---|---|---|---|
-| Effort is about 2.5× the PRD allowance, so the calendar runs long | High | High | Re-estimate at M1 exit; agree capacity (Q-36); levers above | Velocity per milestone in retros |
+| Effort is about 2.5× the PRD allowance, so the calendar runs long | High | High | No dates committed (Q-36); re-estimate at M1 exit; levers above if you ever want it sooner | Velocity per milestone in retros |
 | DBOS fails the kill-and-resume spike (ADR-003) | Low | High | SPEC-09 runs it first; if it fails, supersede ADR-003 before M1 depends on it | SPEC-09 result |
 | Remotion cannot meet the output standard or render time (NFR-02, ADR-002) | Medium | High | Measured in M1; renderer confirmed before the Studio couples to it (PRD §22.2) | T-52 baseline |
 | Animation, typography and audio polish take longer than sized (PRD §22.1) | High | Medium | M1 is media-only so it shows early; families are small and reviewed | M1 velocity |
@@ -250,12 +264,16 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 | Generic or repeated output across the slate (PRD §25) | Medium | Medium | Variety check before Gate D (R-39), rubric | S-16 flags |
 | Provider terms, prices or the Remotion licence change | Low | Medium | Adapters (ADR-009); terms re-checked at first real call and on change | SECURITY.md provider table |
 | Three Compose stacks exhaust one machine | Medium | Low | Staging runs only during release-candidate checks; production from G5 | Host memory |
+| The twelve slate briefs need animation families beyond the six (Strategy §5.1) | High | Medium | Capability tags in M0 (Q-40); first three topics chosen to fit the six; any added family (R-24) estimated and re-planned before M6 | M0 capability tags |
+| What If and physics briefs need a specialist who is not yet identified (Q-41) | Medium | Medium | Tag at preflight; such briefs block Gates B and D until reviewed; schedule them only once a reviewer is found | Briefs tagged "needs specialist" |
+| Platform metric definitions change, as YouTube's Shorts views did on 31 Mar 2025 | Medium | Low | Store each metric with its platform definition and capture date; keep views and engaged views apart (Q-42, R-72) | Platform changelogs |
+| One strong video is read as a trend (Strategy §11) | Medium | Medium | R2 tests production and quality, not audience optimisation (PRD §17.3); compare within platform, window, format and duration band; medians at R3 | Slate review |
 
 ### Assumptions
 
 | Assumption | Source | If wrong |
 |---|---|---|
-| 25 hours a week, 5 hours per spec-day, 20% buffer | A-36 (Q-36 open) | Dates move proportionally |
+| Forecast only: 25 hours a week, 5 hours per spec-day, 20% buffer | Q-36 (no commitment) | The forecast moves; nothing is committed |
 | One implementer (you) with Cursor; Claude reviews; you approve | Project instructions, A-23 | Tracks allow more in parallel |
 | Development runs on free provider credits; costs recorded | Q-05 | Eval cadence drops; limits set earlier |
 | The `main` ruleset is enforced (GitHub Pro or Team) with enough Actions minutes | PROCESS.md CI/CD practices | Required checks become advisory; fewer nightly runs |
@@ -268,10 +286,11 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 | Issue | Status | Action |
 |---|---|---|
 | G2 sign-off is not recorded in STATUS.md (all checks pass; screens approved 14 Nov) | Open | You record the G2 signature |
-| Q-36 weekly capacity | Open | You answer at G3 |
+| Q-36 weekly capacity | Closed 14 Nov 2026 | No dates; milestones close on exit criteria |
 | Q-29 search API | Open | Decided in SPEC-14 (M0) |
 | Q-05 budget limits | Parked | Set before the AWS move |
 | Contracts are 0.4.0 drafts | Expected | Regenerated as 1.0.0 by SPEC-03 |
+| Strategy v1.0 points Q-37–Q-42 | Closed 14 Nov 2026 | All assumptions accepted; plan unchanged |
 
 ### Dependencies
 
@@ -284,3 +303,4 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 | Paid ElevenLabs plan; public channel identity (Q-01); YouTube destination account (Q-08) | Go-live, before the first public upload | You |
 | Pinned versions: DBOS, Remotion 4.0.x, AG-UI SDKs, Keycloak | M0 | Tech lead |
 | Open-licence fonts in the rights ledger | SPEC-18 (M1) | You |
+| A subject specialist for briefs tagged "needs specialist" (Q-41) | Before such a brief is scheduled (M3 onward) | You |

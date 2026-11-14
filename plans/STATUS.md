@@ -1,5 +1,5 @@
 # STATUS: OpportunityOS        Updated: 2026-11-14
-Current stage: 3 Plan | Next gate: G3 Milestone scope and dates (after you record G2)
+Current stage: 3 Plan, complete | Next: your G2 and G3 signatures, then Stage 4 (M0 specs)
 
 Release target: R0 -> R1 -> R2 (PRD Section 4). R3 conditional; R4/R5 out of scope.
 
@@ -11,20 +11,20 @@ All gates are signed by the product owner / tech lead (same person).
 |---|---|---|---|---|
 | 0 Bootstrap | — | Done (merged 2026-11-12) | — | chore/bootstrap, #1 |
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
-| 2 Design | G2 Design review and screens | Done: 2a, 2b, 2c merged (HTML prototypes S-01–S-16 merged in #7); all G2 checks pass; **your G2 signature is not yet recorded** | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5, #7 |
-| 3 Plan | G3 Milestone scope and dates | In review: DEVELOPMENT_PLAN, TEST_STRATEGY, DELIVERY_PLAN, AGENTS.md, CLAUDE.md, Cursor rules, ADR-022 | | docs/stage-3-plan, #8 |
+| 2 Design | G2 Design review and screens | Done: 2a, 2b, 2c merged (HTML prototypes S-01–S-16 merged in #7); all G2 checks pass; ready for your signature | | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5, #7 |
+| 3 Plan | G3 Milestone scope and dates | Done: plan merged (#8); Strategy v1.0 intake (#9); Q-36–Q-42 decided. All G3 checks pass; ready for your signature | | docs/stage-3-plan, #8 · docs/strategy-v1-intake, #9 |
 
 | Milestone | Scope | Status | Exit date |
 |---|---|---|---|
-| M0 | Foundation: walking skeleton: 14 specs, 32 spec-days | Proposed at G3 | 22 Jan 2027 (proposed at 25 h/week, A-36) |
-| M1 | Feasibility (R0): 11 specs, 28 spec-days | Proposed at G3 | 12 Mar 2027 (proposed at 25 h/week, A-36) |
-| M2 | Brief to evidence (R1): 15 specs, 33 spec-days | Proposed at G3 | 7 May 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
-| M3 | Script to preview (R1): 12 specs, 26 spec-days | Proposed at G3 | 25 Jun 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
-| M4 | Master to export (R1): 8 specs, 19 spec-days | Proposed at G3 | 30 Jul 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
-| M5 | Revision and recovery (R1 gate): 9 specs, 22 spec-days | Proposed at G3 | 17 Sep 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
-| M6 | Channel record (R2 features): 7 specs, 13 spec-days | Proposed at G3 | 15 Oct 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
-| M7 | Hardening, go-live (G5): 7 specs, 12 spec-days | Proposed at G3 | 5 Nov 2027 (proposed at 25 h/week, A-36; indicative until M1 re-estimate) |
-| R2 slate | Twelve originals 4/4/2/2 published; R2 gate | Planned | 31 Dec 2027 (indicative) |
+| M0 | Foundation: walking skeleton: 14 specs, 32 spec-days | Planned | Not dated (Q-36); forecast 22 Jan 2027 |
+| M1 | Feasibility (R0): 11 specs, 28 spec-days | Planned | Not dated (Q-36); forecast 12 Mar 2027 |
+| M2 | Brief to evidence (R1): 15 specs, 33 spec-days | Planned | Not dated (Q-36); forecast 7 May 2027 |
+| M3 | Script to preview (R1): 12 specs, 26 spec-days | Planned | Not dated (Q-36); forecast 25 Jun 2027 |
+| M4 | Master to export (R1): 8 specs, 19 spec-days | Planned | Not dated (Q-36); forecast 30 Jul 2027 |
+| M5 | Revision and recovery (R1 gate): 9 specs, 22 spec-days | Planned | Not dated (Q-36); forecast 17 Sep 2027 |
+| M6 | Channel record (R2 features): 7 specs, 13 spec-days | Planned | Not dated (Q-36); forecast 15 Oct 2027 |
+| M7 | Hardening, go-live (G5): 7 specs, 12 spec-days | Planned | Not dated (Q-36); forecast 5 Nov 2027 |
+| R2 slate | Twelve originals 4/4/2/2 published; R2 gate | Planned | Not dated (Q-36); forecast 31 Dec 2027 |
 
 Scope, slices, exit criteria and RAID: [DELIVERY_PLAN.md](DELIVERY_PLAN.md). Specs: [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md). Tests and pipeline: [TEST_STRATEGY.md](TEST_STRATEGY.md).
 
@@ -119,14 +119,16 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 | Every spec lists its R-xx and T-xx | Pass: 83 of 83; every T-xx exists in the catalogue (T-13 C13 and T-89 UAT have no spec by design) |
 | Every frontend spec lists its approved S-xx | Pass: every W and B+W spec names its screen; S-01–S-16 each built by at least one spec and tested by T-15–T-30 |
 | Dependency order valid | Pass: every spec depends only on earlier specs in the same or an earlier milestone |
-| You agree what is in each milestone and when | **Open: needs you.** Capacity (Q-36) and the M0–M1 windows to agree; M2–M7 indicative until the M1 re-estimate |
+| You agree what is in each milestone and when | Pass: scope agreed with Q-37–Q-42 accepted; no dates by your decision (Q-36), milestones close on their exit criteria; forecast kept for orientation |
 
 ## Open questions and risks
 
 - [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-35 (DEC-01–12 are Q-01–Q-12).
-- Open: **Q-36** weekly capacity (A-36: 25 h/week), needed to commit dates at G3.
+- No open questions. Q-36 answered 14 Nov 2026: no dates; build it the right way.
+- Decided 14 Nov 2026, from [Strategy v1.0](../docs/sources/Strategy-v1.0.md): Q-37–Q-42 accepted (no generative video at R0–R2, no January launch, Remotion only, strategy briefs as M0 candidates, specialist tag for physics What If briefs, secondary manual metrics at R2).
+- Risk: several strategy briefs need animation families beyond the six; tagged in M0 and estimated before M6 (DELIVERY_PLAN.md RAID).
 - Issue: G2 signature not recorded (checks pass).
-- Risk: the plan is about 925 engineering hours, roughly 2.5× PRD §22.1's 228–364; at A-36 go-live is about 5 Nov 2027 and the R2 gate about 31 Dec 2027 (DELIVERY_PLAN.md).
+- Risk: the plan is about 925 engineering hours, roughly 2.5× PRD §22.1's 228–364; the indicative forecast puts go-live around Nov 2027 at 25 h/week (DELIVERY_PLAN.md). Re-estimated after M1.
 - Parked: Q-05 budget limits. Development uses free credits with costs recorded; real limits are set from measured per-video cost before the AWS move.
 - Before the first real provider call: opt out of ElevenLabs model training on every account; OpenAI calls use `store: false` (SECURITY.md).
 - Specialist checks: none outstanding. Q-14, Q-20, Q-25 and the narrator licence rule were decided by the tech lead at your request (engineering decisions, not legal advice).
@@ -138,6 +140,10 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 - Risk: Remotion render time and memory are unmeasured until the R0 baseline (NFR-02, ADR-002).
 
 ## Recent decisions
+
+- 2026-11-14: Q-36 answered: no capacity commitment and no milestone dates; milestones close on exit criteria (in line with Q-03). Forecast windows kept as indicative only.
+- 2026-11-14: Q-37–Q-42 accepted by the product owner; baseline and dates unchanged.
+- 2026-11-14: Strategy v1.0 added as a companion source (`docs/sources/Strategy-v1.0.md`). No requirement added; coverage traced in REQUIREMENTS.md; Q-37–Q-42 raised with assumptions that keep the baseline; DELIVERY_PLAN (M0 tasks, phase map, R2 gate outcomes, RAID), DEVELOPMENT_PLAN (strategy inputs → specs) and TEST_STRATEGY (eval topics, tracked beat timing) updated.
 
 - 2026-11-14: Stage 3 (tech lead, for you to confirm at G3): milestones M0 Foundation → M1 R0 feasibility (media first, PRD §22) → M2–M5 R1 slices → M6 R2 features → M7 hardening → R2 slate; re-estimate and renderer check after M1 (PRD §22.1–22.2). ADR-022: CI verifies, your machine builds each release once, staging and production are local Compose projects promoted by digest. ADR-019 amended (k6, OWASP ZAP, diff-cover). Eval thresholds set (hard gates zero; rates provisional, calibrated at M2 and M3). Conformance C05–C11 due at M2 exit, not M1 (M1 has no approvals, agent runs or budgets). Q-36 raised.
 

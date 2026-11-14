@@ -1,6 +1,6 @@
 # Requirements
 
-Baseline derived from [PRD v2.0](../sources/PRD-v2.0.md) (revised in discovery on 13 Nov 2026: §1.1 added). Revised in discovery on 14 Nov 2026 by product-owner decisions Q-34 (R-31 AC3) and Q-35 (R-41 AC3). Status: **Draft for G1**. Baselined at G1; after that it changes only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)). Open gaps and the assumptions we build on live in [QUESTIONS.md](QUESTIONS.md).
+Baseline derived from [PRD v2.0](../sources/PRD-v2.0.md) (revised in discovery on 13 Nov 2026: §1.1 added). Revised in discovery on 14 Nov 2026 by product-owner decisions Q-34 (R-31 AC3) and Q-35 (R-41 AC3). On 14 Nov 2026 the owner added the companion [Strategy v1.0](../sources/Strategy-v1.0.md); it adds no requirement, is traced in [Companion source: Strategy v1.0](#companion-source-strategy-v10), and the points where it differed from this baseline were decided as Q-37–Q-42 (all assumptions accepted, so the baseline stands). Status: **Draft for G1**. Baselined at G1; after that it changes only through change control ([PROCESS.md](../PROCESS.md#tracking-and-change-control)). Open gaps and the assumptions we build on live in [QUESTIONS.md](QUESTIONS.md).
 
 ## Summary
 
@@ -646,7 +646,7 @@ Analytics events for each KPI are defined in `OBSERVABILITY.md` (Stage 2). A tar
 | KPI-03 | Editorial quality | Proposed: every rubric dimension ≥ 4/5, zero unresolved material errors, zero rights blockers per approved video (Q-04) | Rubric on final master (R-38) | R1 | §19.1 |
 | KPI-04 | Human effort per approved video | Lower than a documented manual baseline at equal or better quality (baseline: Q-13) | Active minutes (R-36) vs baseline | R2 | §19.3, §21.1 |
 | KPI-05 | Variable cost per approved output | At or below the per-video ceiling (Q-05) | Cost records incl. failed attempts (R-35) ÷ approved outputs | R1 | §21.1 |
-| KPI-06 | Primary audience metric | Chosen available attention measure, 7-day window proposal, cold-start labelled; no numeric target before a baseline (Q-09) | Manual entry at R2; import at R3 (R-72) | R2 manual, R3 | §10.3, §17.3 |
+| KPI-06 | Primary audience metric | Chosen available attention measure, 7-day window proposal, cold-start labelled; no numeric target before a baseline (Q-09); secondary manual entries and view definitions: Q-42 | Manual entry at R2; import at R3 (R-72) | R2 manual, R3 | §10.3, §17.3 |
 | KPI-07 | Opening signal (initial choice / stayed to watch) | Diagnostic, no target | R-72, where the endpoint supports it | R3 | §17.1 |
 | KPI-08 | Attention depth (average duration, % viewed, retention) | Diagnostic, compared within duration groups | R-72 | R3 | §17.1 |
 | KPI-09 | Payoff signal (completion, replay) | Diagnostic | R-72 | R3 | §17.1 |
@@ -683,7 +683,7 @@ From PRD §3 non-goals, R4/R5 scope and the project's hard limits:
 - Agent marketplace; more than the three bounded model tasks at launch (§3, §14.1).
 - Billing, customer workspaces, team roles, agency administration (§3; R-78–R-80).
 - Multilingual narration or dubbing (§3, §4).
-- Extensive generative video; generative illustrations beyond a budget-capped option (§3, §21.1).
+- Extensive generative video; generative illustrations beyond a budget-capped option (§3, §21.1). At R1/R2 no generative illustrations at all (Q-24); cinematic generative shots proposed in Strategy v1.0 §7 are not used at R0–R2 (Q-37).
 - Content repurposing (§3).
 - Automatic enterprise knowledge synchronisation (§6.10).
 - Commercial pricing, subscription and licensing the library as an API (§21.2).
@@ -804,3 +804,29 @@ From PRD §3 non-goals, R4/R5 scope and the project's hard limits:
 | US-11 | R-09, R-33, R-37, R-38 | US-24 | R-81 |
 | US-12 | R-05, R-41, R-46 | US-25 | R-82 |
 | US-13 | R-45, R-46, R-47 | US-26 | R-56, NFR-10; R-66 (revocation); R-78 (customer) |
+
+## Companion source: Strategy v1.0
+
+[Strategy v1.0](../sources/Strategy-v1.0.md) (Niche Opportunity and Audience Traction Strategy, 14 Nov 2026) is a companion to the PRD added by the owner. It refines channel strategy and states that it does not supersede requirements, gates or the architecture. It adds **no R-xx, NFR-xx or KPI-xx**. Where it went beyond or against a decision already taken, the point was raised as Q-37–Q-42; the owner accepted all six assumptions on 14 Nov 2026, so this baseline stands.
+
+| Strategy section | Covered by |
+|---|---|
+| §1 Executive recommendation | Channel thesis consistent with PRD §1, §5; launch proof = R0 (R-11, R-19, R-31); scale rule = R2 gate then PRD §18 (R-77, R3); "cinematic generative shots selectively" → Q-37 |
+| §2 Niche definition, market signals | Input, no requirement. Platform-wide statistics are not demand evidence for this channel (as the strategy itself says); moat claims stay hypotheses (Q-32) |
+| §3 Audience segments | Input to briefs: the contract's audience field (R-06 AC1) and the M0 brief task. Viewer segments are not personas (P01–P06 are users of the product) |
+| §4 Competitive landscape | Input to M0 discovery (optional creator-catalogue and product-terms review, DELIVERY_PLAN.md). Originality and no imitation of references: R-23, R-59; PRD §5.2 |
+| §5 Editorial portfolio and 4/4/2/2 | R-57, R-58, R-39, KPI-01. Topic tags (40/35/25) are exploratory, not quotas: no requirement |
+| §5.1 Twelve candidate briefs | Q-40 (candidates for Q-02); claims reviewed per R-08–R-10; specialist scope Q-41 |
+| §6.1 Narrative beats and durations | Input to the script agent prompt and evals (SPEC-43, TEST_STRATEGY.md) and to R-57 series structure. Starting parameters, not rules; masters retime from measured narration (R-26) |
+| §6.2 Creative rules | R-23 (house style, brand cue), R-20 (persistent colour and labels), R-13 (illustrations labelled), R-27 and NFR-08 (muted legibility), R-08–R-10 (claim ledger), R-35, R-36 (effort and cost). "Original first frame, no long logo": input to brand kit v1 and the rubric (R-38) |
+| §7 Tools and applications | Remotion: ADR-002. Manim: Q-07 stands, comparison → Q-39. LTX Desktop, ComfyUI, Flow, Krea, Dreamina, PixVerse → Q-37. TTS adapter and FFmpeg: ADR-013, ADR-002. "Temporal candidate" is superseded here by DBOS (ADR-003); the strategy labels its stack as a proposal |
+| §7.1 Visual routing rule | Deterministic route = R-11, R-12, R-18, NFR-05. Generative route → Q-37 |
+| §8 Phases 0–3 | Phase 0 = M0 + M1 (R0); Phase 1 January launch → Q-38 (Q-03 stands meanwhile); Phase 2 = R2 slate, KPI-01, KPI-02; Phase 3 = PRD §18 growth study, R-77, KPI-13 (R3, conditional) |
+| §9 Measurement and guardrails | KPI-06 (A-09), R-72 (definitions, missing ≠ zero), R-76; secondary manual metrics and the 2025 view-definition change → Q-42 |
+| §9.1 Experiment contract | R-06 AC1 (hypothesis, measurement plan), R-74, R-75 (R3) |
+| §9.2 Diagnose, not chase | PRD §17.3 diagnostics, R-75, KPI-12 (R3) |
+| §10 Opportunity score and preflight gates | Score = R-73 (R3, same weights as PRD §17.2). Preflight gates: editorial feasibility → R-06 and the Gate A checklist (R-40); scientific feasibility → R-08, R-09; animation feasibility → R-07, R-18; rights and disclosure → R-55, R-60; budget → R-07, R-34; publication authority → R-41, R-46, R-47 |
+| §11 Risks | DELIVERY_PLAN.md RAID |
+| §12 Next four decisions | Channel identity → Q-01; three first briefs → Q-02, Q-40; renderer and app evaluation → Q-37, Q-39; launch measurement baseline → Q-09, Q-42, Q-13 |
+| §12 GO / ITERATE / STOP | R2 gate outcomes in DELIVERY_PLAN.md |
+| Views without commercial demand | R4, out of scope (PRD §21.2) |
