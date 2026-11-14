@@ -19,6 +19,7 @@ from opportunityos_contracts.validators import TIMESTAMP_PATTERN
 # - inlining of workflow-local $defs so workflow-request matches the 0.4.0 shape (no $defs block)
 # - recursive key ordering for deterministic bytes (AC1)
 # - replace inlined primitive patterns with #/$defs/... refs (same logical type as $ref rewrite)
+# - ge/le → minimum/maximum (draft 2020-12; Pydantic may emit ge on annotated ints)
 COMMON_NAMES = frozenset({*COMMON_DEF_MODELS.keys(), *COMMON_DEF_ALIASES.keys()})
 UUID_PATTERN = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
 LOCALID_PATTERN = r"^[a-z][a-z0-9_.-]{0,63}$"
@@ -58,6 +59,10 @@ WORKFLOW_META: dict[str, Any] = {
 def _polish_schema(node: Any) -> Any:
     if isinstance(node, dict):
         node = {key: _polish_schema(value) for key, value in node.items()}
+        if "ge" in node:
+            node["minimum"] = node.pop("ge")
+        if "le" in node:
+            node["maximum"] = node.pop("le")
         node.pop("title", None)
         return node
     if isinstance(node, list):
