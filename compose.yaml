@@ -172,7 +172,7 @@ services:
   # One-off and toolchain containers (profile "tools", never started by `up`).
   migrate: # make migrate: the api image with the bootstrap owner, so api never holds it
     profiles: [tools]
-    image: oos/api:dev
+    image: oos/migrate:dev # own tag: two services building one tag at once clash
     build:
       context: .
       dockerfile: docker/api.Dockerfile
