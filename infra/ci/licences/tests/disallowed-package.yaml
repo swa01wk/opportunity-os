@@ -1,0 +1,3 @@
+# Synthetic negative fixture for T-32 AC5 (not a real dependency).
+package: oos-ci-fixture-unlicensed
+license: Proprietary-Closed

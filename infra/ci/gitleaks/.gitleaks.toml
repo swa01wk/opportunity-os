@@ -1,0 +1,8 @@
+# Gitleaks config fragment for fixture scans (SPEC-02 AC2). Synthetic values only (A-23).
+title = "OpportunityOS CI fixtures"
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key (fixture rule id for T-32)"
+regex = '''AKIA[0-9A-Z]{16}'''
+keywords = ["akia"]

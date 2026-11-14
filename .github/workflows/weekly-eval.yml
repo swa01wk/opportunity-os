@@ -1,0 +1,22 @@
+# Weekly live eval placeholder (SPEC-02). Suites land with agent eval specs; keys from Actions secrets only.
+name: Weekly eval
+
+on:
+  schedule:
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
+      - run: make setup
+      - run: make eval
+        env:
+          # Live keys are injected only here when suites exist (TEST_STRATEGY.md, Q-05).
+          OPENAI_API_KEY: ${{ secrets.LIVE_EVAL_OPENAI_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.LIVE_EVAL_ELEVENLABS_API_KEY }}

@@ -1,0 +1,14 @@
+rules:
+  - id: oos.javascript.import.browser-automation
+    languages: [generic]
+    severity: ERROR
+    message: Browser automation libraries are only allowed in e2e/ and media/scenes/render/.
+    pattern-either:
+      - pattern: import playwright from "playwright"
+      - pattern: import playwright from 'playwright'
+      - pattern: import puppeteer from "puppeteer"
+      - pattern: import puppeteer from 'puppeteer'
+    paths:
+      exclude:
+        - e2e/**
+        - media/scenes/render/**

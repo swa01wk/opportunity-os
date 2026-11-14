@@ -1,0 +1,6 @@
+rules:
+  - id: oos.tsx.dangerous-inner-html
+    languages: [generic]
+    severity: ERROR
+    message: dangerouslySetInnerHTML is banned; render model output as text (NFR-05).
+    pattern: dangerouslySetInnerHTML

@@ -1,0 +1,2 @@
+# T-32 AC2 negative fixture: matches gitleaks generic-api-key style with synthetic data only.
+SYNTHETIC_GITLEAKS_FIXTURE=AKIA00000000000000000000000000000000000000

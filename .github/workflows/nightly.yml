@@ -1,0 +1,57 @@
+# TEST_STRATEGY.md nightly set entry point: T-31 fresh-clone (SPEC-01a), skip when main unchanged (AC6).
+name: Nightly
+
+on:
+  schedule:
+    - cron: "30 20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CI: "true"
+  DOCKER_BUILDKIT: "1"
+
+jobs:
+  skip-if-unchanged:
+    runs-on: ubuntu-latest
+    outputs:
+      run_suite: ${{ steps.main.outputs.run_suite }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
+        with:
+          fetch-depth: 0
+      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
+        id: cache
+        with:
+          path: /tmp/nightly-main-head
+          key: nightly-main-${{ github.event_name }}-${{ github.run_id }}
+          restore-keys: nightly-main-
+      - id: main
+        run: |
+          git fetch origin main --depth=1
+          HEAD_SHA=$(git rev-parse origin/main)
+          PREV=""
+          if [ -f /tmp/nightly-main-head/sha.txt ]; then PREV=$(cat /tmp/nightly-main-head/sha.txt); fi
+          if [ "$HEAD_SHA" = "$PREV" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "run_suite=false" >> "$GITHUB_OUTPUT"
+            echo "nightly: main unchanged since last run ($HEAD_SHA); skipping suites (SPEC-02 AC6)"
+          else
+            echo "run_suite=true" >> "$GITHUB_OUTPUT"
+            mkdir -p /tmp/nightly-main-head
+            echo "$HEAD_SHA" > /tmp/nightly-main-head/sha.txt
+          fi
+      - if: steps.main.outputs.run_suite == 'true'
+        uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
+        with:
+          path: /tmp/nightly-main-head
+          key: nightly-main-${{ github.event_name }}-${{ github.run_id }}
+
+  fresh-clone:
+    needs: skip-if-unchanged
+    if: needs.skip-if-unchanged.outputs.run_suite == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
+      - run: e2e/nfr/fresh-clone.sh main

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Asia/Kolkata",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 5,
+  "packageRules": [
+    {
+      "matchManagers": ["npm", "pnpm"],
+      "groupName": "pnpm workspace",
+      "schedule": ["before 6am on monday"]
+    },
+    {
+      "matchManagers": ["pep621", "uv"],
+      "groupName": "uv workspace",
+      "schedule": ["before 6am on monday"]
+    },
+    {
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "groupName": "docker images",
+      "schedule": ["before 6am on monday"]
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions",
+      "pinDigests": true,
+      "schedule": ["before 6am on monday"]
+    }
+  ]
+}

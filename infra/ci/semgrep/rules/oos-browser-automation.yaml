@@ -1,0 +1,18 @@
+rules:
+  # Playwright and scrapers belong in e2e/ and the Remotion renderer only (NFR-18).
+  - id: oos.import.browser-automation
+    languages: [python]
+    severity: ERROR
+    message: Browser automation or scraping libraries are only allowed in e2e/ and media/scenes/render/.
+    pattern-either:
+      - pattern: import playwright
+      - pattern: import selenium
+      - pattern: from playwright import $X
+      - pattern: from playwright.$SUB import $X
+      - pattern: from selenium import $X
+      - pattern: from selenium.$SUB import $X
+      - pattern: from bs4 import BeautifulSoup
+    paths:
+      exclude:
+        - e2e/**
+        - media/scenes/render/**

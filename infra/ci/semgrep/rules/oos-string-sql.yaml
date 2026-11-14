@@ -1,0 +1,18 @@
+rules:
+  # Allowed: psycopg.sql composition and format('%I'/'%L') (backend.mdc). Allowlisted migrations and
+  # functional support build SQL from validated identifiers from constant lists (SPEC-02, SPEC-04).
+  - id: oos.python.string-built-sql
+    languages: [python]
+    severity: ERROR
+    message: Do not build SQL with f-strings or concatenation; use bound parameters or psycopg.sql.
+    pattern-either:
+      - pattern: $CUR.execute(f"...")
+      - pattern: $CUR.execute("..." + ...)
+      - pattern: f"SELECT $..."
+      - pattern: f"INSERT $..."
+      - pattern: f"UPDATE $..."
+      - pattern: f"DELETE $..."
+    paths:
+      exclude:
+        - backend/migrations/m0_access.py
+        - backend/tests/functional/support.py

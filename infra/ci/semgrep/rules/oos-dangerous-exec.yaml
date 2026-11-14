@@ -1,0 +1,31 @@
+rules:
+  - id: oos.python.dangerous-exec
+    languages: [python]
+    severity: ERROR
+    message: Do not eval, exec or compile untrusted data (NFR-05).
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+      - pattern: compile(...)
+
+  - id: oos.python.subprocess
+    languages: [python]
+    severity: ERROR
+    message: Do not shell out to untrusted data (NFR-05).
+    pattern-either:
+      - pattern: subprocess.run(...)
+      - pattern: subprocess.call(...)
+      - pattern: subprocess.Popen(...)
+      - pattern: subprocess.check_output(...)
+
+  - id: oos.javascript.dynamic-import
+    languages: [generic]
+    severity: ERROR
+    message: Dynamic import of untrusted paths is banned (NFR-05).
+    pattern: import(
+
+  - id: oos.javascript.new-function
+    languages: [generic]
+    severity: ERROR
+    message: new Function on untrusted input is banned (NFR-05).
+    pattern: new Function

@@ -1,0 +1,39 @@
+# ADR-022: build every image and smoke /readyz on ephemeral stack after merge to main.
+name: Main
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  CI: "true"
+  COMPOSE_PROJECT: oos-ci
+  DOCKER_BUILDKIT: "1"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
+      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
+        with:
+          path: /tmp/.buildx-cache
+          key: main-buildx-${{ github.sha }}
+          restore-keys: |
+            buildx-
+            main-buildx-
+      - run: make setup
+      - run: make ci-images
+      - run: make up
+      - name: readyz smoke
+        run: |
+          compose=(docker compose --project-name oos-ci --env-file infra/images.env --env-file .env)
+          for service in api worker render web; do
+            "${compose[@]}" exec -T "$service" python -c "import os,sys,urllib.request as u; u.urlopen('http://127.0.0.1:'+os.environ['PORT']+'/readyz')" 2>/dev/null \
+              || "${compose[@]}" exec -T "$service" node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/readyz').then(r=>process.exit(r.ok?0:1))" || exit 1
+          done
+      - if: always()
+        run: make down CLEAN=1
