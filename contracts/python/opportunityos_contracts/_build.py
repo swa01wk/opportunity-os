@@ -11,6 +11,8 @@ from pydantic import BaseModel, TypeAdapter
 
 from opportunityos_contracts.agui.stream import (
     AGUI_DEF_MODELS,
+    AGUI_STREAM_DESCRIPTION,
+    AGUI_STREAM_TITLE,
     STEP_NAME_PATTERN,
     agui_x_block,
 )
@@ -472,9 +474,15 @@ def _build_agui_stream_document() -> dict[str, Any]:
             items = items_maybe
     if isinstance(items, dict) and "currentStep" in items:
         items["currentStep"] = {"$ref": "#/$defs/StepName"}
-    document = _merge_baseline_document("stream.0.4.0.json", defs)
-    document["x-agui"] = agui_x_block()
-    return document
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": AGUI_STREAM_ID,
+        "x-version": "0.4.0",
+        "title": AGUI_STREAM_TITLE,
+        "description": AGUI_STREAM_DESCRIPTION,
+        "x-agui": agui_x_block(),
+        "$defs": defs,
+    }
 
 
 def _build_workflow_document() -> dict[str, Any]:

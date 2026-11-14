@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
-from pydantic import BeforeValidator, StrictInt
+from pydantic import BeforeValidator, StrictBool, StrictInt
 
 # RFC 3339 UTC with a Z suffix (matches JSON Schema date-time + Ajv strict UTC fixtures).
 TIMESTAMP_PATTERN = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,9})?Z$"
@@ -36,6 +36,8 @@ def _json_number(value: object) -> float:
 
 
 JsonNumber = Annotated[float, BeforeValidator(_json_number)]
+
+JsonBool = StrictBool
 
 
 def reject_explicit_null_keys(data: Any, field_names: frozenset[str]) -> Any:

@@ -10,6 +10,15 @@ from opportunityos_contracts.common import Uuid
 from opportunityos_contracts.events.domain_event import Gate, ProductionState
 from opportunityos_contracts.validators import JsonInt, reject_explicit_null_keys
 
+AGUI_STREAM_TITLE = "AG-UI project event stream"
+AGUI_STREAM_DESCRIPTION = (
+    "How GET /projects/{projectId}/events encodes run progress and domain events as AG-UI "
+    "events (ADR-020, docs/architecture/AGENT_ARCHITECTURE.md). Event shapes are the pinned "
+    "AG-UI SDK's (ag-ui-protocol for Python, @ag-ui/core for TypeScript); this file fixes only "
+    "how OpportunityOS uses them. AG-UI events are a projection of DomainEvents and attempt "
+    "spans; they carry no authority, and every command goes through the REST API."
+)
+
 STEP_NAME_PATTERN: Final = (
     r"^(research|script|storyboard|revision\.impact|demonstration|narration|"
     r"tts\.scene\.[a-z0-9_.-]+|alignment|captions|compile|"

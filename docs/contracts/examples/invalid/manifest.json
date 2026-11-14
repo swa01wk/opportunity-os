@@ -135,6 +135,13 @@
       "note": "MetricRecorded value must be a JSON number, not a string (JsonNumber)."
     },
     {
+      "file": "string-cold-start.analytics-event.json",
+      "contract": "analytics/events.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "Boolean fields must be JSON true/false, not strings (JsonBool)."
+    },
+    {
       "file": "bad-seq.diagnostic-run.stream.jsonl",
       "contract": "agui/stream.json",
       "level": "stream",

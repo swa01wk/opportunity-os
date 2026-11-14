@@ -7,7 +7,12 @@ from pydantic import ConfigDict, Field, WithJsonSchema, model_validator
 
 from opportunityos_contracts._schema import ContractModel
 from opportunityos_contracts.common import Sha256, Timestamp, Uuid
-from opportunityos_contracts.validators import JsonInt, JsonNumber, reject_explicit_null_keys
+from opportunityos_contracts.validators import (
+    JsonBool,
+    JsonInt,
+    JsonNumber,
+    reject_explicit_null_keys,
+)
 
 ANALYTICS_OPTIONAL_FIELDS: Final = frozenset({"projectId", "memberId"})
 
@@ -143,7 +148,7 @@ class VideoPublishedProperties(ContractModel):
     route: PublicationRoute
     platform: Platform
     verification: Verification
-    package_match: Annotated[bool, Field(alias="packageMatch")]
+    package_match: Annotated[JsonBool, Field(alias="packageMatch")]
 
 
 class GateApprovedProperties(ContractModel):
@@ -179,8 +184,8 @@ class RunFinishedProperties(ContractModel):
     workflow_type: Annotated[str, Field(alias="workflowType", max_length=40)]
     outcome: RunOutcome
     attempts: Annotated[JsonInt, Field(ge=0)]
-    code_repair_needed: Annotated[bool, Field(alias="codeRepairNeeded")]
-    manual_takeover: Annotated[bool, Field(alias="manualTakeover")]
+    code_repair_needed: Annotated[JsonBool, Field(alias="codeRepairNeeded")]
+    manual_takeover: Annotated[JsonBool, Field(alias="manualTakeover")]
 
 
 class EffortLoggedProperties(ContractModel):
@@ -250,8 +255,8 @@ class RubricScoredProperties(ContractModel):
     originality: Annotated[JsonInt, Field(ge=1, le=5)]
     readability: Annotated[JsonInt, Field(ge=1, le=5)]
     promise_payoff: Annotated[JsonInt, Field(alias="promisePayoff", ge=1, le=5)]
-    muted_review_passed: Annotated[bool, Field(alias="mutedReviewPassed")]
-    all_at_least_threshold: Annotated[bool, Field(alias="allAtLeastThreshold")]
+    muted_review_passed: Annotated[JsonBool, Field(alias="mutedReviewPassed")]
+    all_at_least_threshold: Annotated[JsonBool, Field(alias="allAtLeastThreshold")]
 
 
 class FindingResolvedProperties(ContractModel):
@@ -262,7 +267,7 @@ class FindingResolvedProperties(ContractModel):
     )
 
     severity: Annotated[str, Field(max_length=20)]
-    material: bool
+    material: JsonBool
     disposition: Annotated[str, Field(max_length=40)]
 
 
@@ -294,7 +299,7 @@ class MetricRecordedProperties(ContractModel):
     window_start: Annotated[Timestamp, Field(alias="windowStart")]
     window_end: Annotated[Timestamp, Field(alias="windowEnd")]
     source: MetricSource
-    cold_start: Annotated[bool, Field(alias="coldStart")]
+    cold_start: Annotated[JsonBool, Field(alias="coldStart")]
     denominator: Annotated[str | None, Field(default=None, max_length=80)] = None
 
     @model_validator(mode="before")

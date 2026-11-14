@@ -16,7 +16,7 @@ from opportunityos_contracts.common import (
     VersionRef,
 )
 from opportunityos_contracts.events.workflow_request import WorkflowRequest
-from opportunityos_contracts.validators import JsonInt, reject_explicit_null_keys
+from opportunityos_contracts.validators import JsonBool, JsonInt, reject_explicit_null_keys
 
 DOMAIN_OPTIONAL_FIELDS: Final = frozenset({"projectId", "causationId", "traceparent"})
 SUBJECT_OPTIONAL_FIELDS: Final = frozenset({"version"})
@@ -330,7 +330,9 @@ class PublicationRecorded(ContractModel):
     route: PublicationRoute
     state: PublicationState
     verification: Annotated[PublicationVerification | None, Field(default=None)] = None
-    package_mismatch: Annotated[bool | None, Field(default=None, alias="packageMismatch")] = None
+    package_mismatch: Annotated[JsonBool | None, Field(default=None, alias="packageMismatch")] = (
+        None
+    )
 
     @model_validator(mode="before")
     @classmethod
