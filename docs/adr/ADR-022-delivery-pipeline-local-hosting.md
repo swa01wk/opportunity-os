@@ -1,5 +1,5 @@
 # ADR-022: Delivery pipeline and environments while hosting is local
-Status: Accepted (tech lead, Stage 3; you confirm at G3)    Date: 2026-11-14
+Status: Accepted (tech lead, Stage 3; confirmed by the owner at G3, 2026-11-14)    Date: 2026-11-14
 
 ## Context
 PROCESS.md (CI/CD pipeline) promotes one build artifact from PR to dev, staging and production, with feature flags and a rollback ready, and conformance C14 blocks a deployed build that differs from the verified one. ADR-011 keeps hosting on your machine until the R2 gate: there is no public endpoint, and GitHub-hosted runners cannot reach the machine. NFR-13 asks for reproducible local and staging environments with separate credentials and reviewed migrations with a tested rollback; NFR-14 for backups; SECURITY.md for per-environment secrets. Rendering images (Node, Chrome, Remotion) are large, so pushing every build to a private registry would eat into GitHub's package storage allowance.
