@@ -11,7 +11,7 @@ from alembic.config import Config
 from m0_access import ENV_PASSWORD_KEYS, LOGIN_ROLES
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
-from testcontainers.postgres import PostgresContainer
+from testcontainers.community.postgres import PostgresContainer
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 

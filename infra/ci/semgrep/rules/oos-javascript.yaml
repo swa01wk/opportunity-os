@@ -1,0 +1,24 @@
+rules:
+  - id: oos.javascript.dynamic-import
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Dynamic import of untrusted paths is banned (NFR-05).
+    pattern: import($X)
+    paths:
+      include:
+        - "**/*.ts"
+        - "**/*.tsx"
+        - "**/*.js"
+        - "**/*.mjs"
+
+  - id: oos.javascript.new-function
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: new Function on untrusted input is banned (NFR-05).
+    pattern: new Function(...)
+    paths:
+      include:
+        - "**/*.ts"
+        - "**/*.tsx"
+        - "**/*.js"
+        - "**/*.mjs"

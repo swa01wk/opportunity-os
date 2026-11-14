@@ -1,0 +1,18 @@
+rules:
+  # Playwright, Puppeteer and selenium-webdriver belong in e2e/ and media/scenes/render/ (NFR-18).
+  - id: oos.javascript.import.browser-automation
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Browser automation libraries are only allowed in e2e/ and media/scenes/render/.
+    pattern-regex: (?x)
+      (?:from\s+['"]|import\s+['"]|require\s*\(\s*['"])
+      (?:playwright|puppeteer|selenium-webdriver)(?:/[^'"]*)?['"]
+    paths:
+      include:
+        - "**/*.ts"
+        - "**/*.tsx"
+        - "**/*.js"
+        - "**/*.mjs"
+      exclude:
+        - e2e/**
+        - media/scenes/render/**

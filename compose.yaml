@@ -227,6 +227,21 @@ services:
     volumes: [".:/repo"]
     network_mode: none
 
+  # pip-audit needs PyPI for the advisory DB (SPEC-02 B12); py-tools stays hermetic.
+  py-audit:
+    profiles: [tools]
+    image: oos/py-tools:dev
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: dev
+      args: *python-build
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    environment:
+      HOME: /tmp
+    working_dir: /repo
+    volumes: [".:/repo"]
+
   py-functional:
     profiles: [tools]
     image: oos/py-functional:dev

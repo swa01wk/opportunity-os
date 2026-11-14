@@ -1,0 +1,244 @@
+# Trivy accept-list (SPEC-02 B15). oos/objectstore:interim only (ADR-015).
+# Owner acceptance until SPEC-05; see PR #19.
+
+vulnerabilities:
+  - id: CVE-2025-47913
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-111943
+    purls:
+      - "pkg:golang/stdlib@v1.25.14"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-116587
+    purls:
+      - "pkg:golang/github.com/go-jose/go-jose/v4@v4.1.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-24051
+    purls:
+      - "pkg:golang/go.opentelemetry.io/otel/sdk@v1.35.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-25681
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-27136
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-32285
+    purls:
+      - "pkg:golang/github.com/buger/jsonparser@v1.1.1"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-33186
+    purls:
+      - "pkg:golang/google.golang.org/grpc@v1.72.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-33814
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-34986
+    purls:
+      - "pkg:golang/github.com/go-jose/go-jose/v4@v4.1.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-39821
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-39828
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-39829
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-39830
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-39831
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-39832
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-39835
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-39883
+    purls:
+      - "pkg:golang/go.opentelemetry.io/otel/sdk@v1.35.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-41602
+    purls:
+      - "pkg:golang/github.com/apache/thrift@v0.21.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-42151
+    purls:
+      - "pkg:golang/github.com/prometheus/prometheus@v0.303.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-42154
+    purls:
+      - "pkg:golang/github.com/prometheus/prometheus@v0.303.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-42508
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-43871
+    purls:
+      - "pkg:golang/github.com/apache/thrift@v0.21.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-46595
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-46597
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-46600
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-56851
+    purls:
+      - "pkg:golang/golang.org/x/text@v0.24.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-56852
+    purls:
+      - "pkg:golang/golang.org/x/text@v0.24.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-56854
+    purls:
+      - "pkg:golang/golang.org/x/crypto@v0.37.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-63209
+    purls:
+      - "pkg:golang/github.com/klauspost/compress@v1.18.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-77403
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-77404
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-77405
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-77406
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-77407
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-77408
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-77410
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-77411
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-77412
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-78661
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-78667
+    purls:
+      - "pkg:golang/stdlib@v1.25.14"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-78669
+    purls:
+      - "pkg:golang/golang.org/x/net@v0.39.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-78669
+    purls:
+      - "pkg:golang/stdlib@v1.25.14"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-79921
+    purls:
+      - "pkg:golang/github.com/rabbitmq/amqp091-go@v1.10.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-84304
+    purls:
+      - "pkg:golang/google.golang.org/grpc@v1.72.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-84445
+    purls:
+      - "pkg:golang/google.golang.org/grpc@v1.72.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: CVE-2026-97031
+    purls:
+      - "pkg:golang/stdlib@v1.25.14"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"
+  - id: GHSA-hrxh-6v49-42gf
+    purls:
+      - "pkg:golang/google.golang.org/grpc@v1.72.0"
+    expired_at: 2027-02-28
+    statement: "ADR-015 interim MinIO; SPEC-05 replaces this image"

@@ -1,0 +1,25 @@
+rules:
+  - id: oos.python.dangerous-exec
+    languages: [python]
+    severity: ERROR
+    message: Do not eval, exec or compile untrusted data (NFR-05).
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+      - pattern: compile(...)
+
+  # Test harnesses may shell out; production code must not (NFR-05, SPEC-02 B3).
+  - id: oos.python.subprocess
+    languages: [python]
+    severity: ERROR
+    message: Do not shell out to untrusted data (NFR-05).
+    pattern-either:
+      - pattern: subprocess.run(...)
+      - pattern: subprocess.call(...)
+      - pattern: subprocess.Popen(...)
+      - pattern: subprocess.check_output(...)
+    paths:
+      exclude:
+        - "**/tests/**"
+        - e2e/**
+        - infra/ci/**

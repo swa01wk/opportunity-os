@@ -12,9 +12,12 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "diff-cover>=9.2,<10",
     "httpx>=0.28,<1",
     "jsonschema>=4.23,<5",
     "mypy>=1.18,<2",
+    "pip-audit>=2.7,<3",
+    "pytest-cov>=6.0,<7",
     "pytest>=8.4,<10",
     "pyyaml>=6.0,<7",
     "ruff>=0.14,<1",
@@ -54,6 +57,8 @@ known-first-party = [
 "**/tests/**" = ["S101"]
 "backend/tests/functional/support.py" = ["S608"]
 "e2e/**" = ["S101", "S603", "S607"]
+"infra/ci/semgrep/tests/**" = ["S307", "S602", "S607", "S608", "F401"]
+"infra/ci/**" = ["S603", "S607"]
 
 [tool.mypy]
 python_version = "3.13"
@@ -65,6 +70,9 @@ check_untyped_defs = true
 [[tool.mypy.overrides]]
 module = ["opportunityos_contracts.*", "opportunityos.domain.*"]
 strict = true
+
+[tool.coverage.run]
+relative_files = true
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib --strict-markers"

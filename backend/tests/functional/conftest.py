@@ -8,7 +8,7 @@ import pytest
 from m0_access import ALL_M0_TABLES
 from sqlalchemy.engine import Engine
 from support import alembic_upgrade, engines_for_roles, role_urls
-from testcontainers.postgres import PostgresContainer
+from testcontainers.community.postgres import PostgresContainer
 
 
 @pytest.fixture(scope="session")

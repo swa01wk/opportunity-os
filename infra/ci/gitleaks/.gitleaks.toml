@@ -1,0 +1,16 @@
+# Gitleaks CI config (SPEC-02 AC2). Synthetic fixtures only (A-23).
+title = "OpportunityOS"
+
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''infra/ci/gitleaks/tests/''',
+]
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key (T-32 fixture rule id)"
+regex = '''AKIA[0-9A-Z]{16}'''
+keywords = ["akia"]

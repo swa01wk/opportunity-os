@@ -1,0 +1,7 @@
+# T-32: License-Expression wins over a long License field (SPEC-02 B13).
+name: metadata-expression
+expected: MIT
+metadata:
+  Name: pkg-fixture-expression
+  License-Expression: MIT
+  License: Apache License Version 2.0 line one only would be ok but we use expression first

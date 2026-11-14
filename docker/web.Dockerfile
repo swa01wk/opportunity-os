@@ -20,6 +20,9 @@ COPY web web
 RUN pnpm --filter @oos/web build
 
 FROM ${NODE_IMAGE} AS runtime
+# SPEC-02 B15 deviation: runtime serves standalone output; node only (no npm/corepack).
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 ARG GIT_SHA=unknown
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 APP_VERSION=${GIT_SHA} PORT=3000 HOSTNAME=0.0.0.0
 WORKDIR /app
