@@ -19,10 +19,10 @@ jobs:
     outputs:
       run_suite: ${{ steps.main.outputs.run_suite }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         id: cache
         with:
           path: /tmp/nightly-main-head
@@ -43,7 +43,7 @@ jobs:
             echo "$HEAD_SHA" > /tmp/nightly-main-head/sha.txt
           fi
       - if: steps.main.outputs.run_suite == 'true'
-        uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: /tmp/nightly-main-head
           key: nightly-main-${{ github.event_name }}-${{ github.run_id }}
@@ -53,5 +53,7 @@ jobs:
     if: needs.skip-if-unchanged.outputs.run_suite == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: e2e/nfr/fresh-clone.sh main
+        env:
+          REPO_URL: file://${{ github.workspace }}

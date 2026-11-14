@@ -56,6 +56,8 @@ def validate() -> list[str]:
     for path in sorted(TESTS_DIR.iterdir()):
         if path.is_dir() or path.name.startswith("."):
             continue
+        if path.name.startswith("fixture-"):
+            continue
         positives, negatives = _fixture_ids(path)
         for rule_id in positives | negatives:
             if rule_id not in known:

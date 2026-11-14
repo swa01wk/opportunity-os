@@ -1,0 +1,7 @@
+# Dir-only scan for T-32 AC2 (synthetic data only, A-23).
+title = "OpportunityOS gitleaks fixture scan"
+
+[[rules]]
+id = "generic-api-key"
+description = "T-32 synthetic secret fixture"
+regex = '''OOS_T32_FIXTURE_SECRET=[0-9a-f]{48}'''

@@ -13,7 +13,9 @@ TEST_STRATEGY = ROOT / "plans" / "TEST_STRATEGY.md"
 
 REQUIRED_CHECKS_LINE = "**Required checks** on `main` (added to the ruleset when SPEC-02 merges): "
 
-USES_LINE = re.compile(r"^\s+uses:\s*(?P<ref>.+)$", re.MULTILINE)
+PINNED_USES = re.compile(
+    r"^\s+-?\s*uses:\s*(?P<action>[\w./-]+)@(?P<sha>[a-f0-9]{40})\s+#\s*v(?P<tag>[\d.]+)\s*$"
+)
 
 
 def required_check_names() -> list[str]:
@@ -21,7 +23,6 @@ def required_check_names() -> list[str]:
     start = text.index(REQUIRED_CHECKS_LINE)
     line = text[start : text.find("\n", start)]
     backtick_parts = re.findall(r"`([^`]+)`", line)
-    # First backtick pair is `main`; the rest are required check job names.
     return backtick_parts[1:]
 
 
@@ -37,21 +38,16 @@ def workflow_files() -> list[Path]:
 
 def assert_pinned_actions(path: Path) -> list[str]:
     issues: list[str] = []
-    for match in USES_LINE.finditer(path.read_text()):
-        ref = match.group("ref").strip()
-        if "${{" in ref:
+    for lineno, line in enumerate(path.read_text().splitlines(), start=1):
+        if "uses:" not in line or "${{" in line:
             continue
-        if "@" not in ref:
-            issues.append(f"{path.name}: unpinned action {ref!r}")
+        if "actions/" not in line:
             continue
-        _repo, version = ref.rsplit("@", 1)
-        version = version.strip()
-        if not (
-            re.fullmatch(r"[a-f0-9]{40}", version)
-            or re.fullmatch(r"[a-f0-9]{64}", version)
-            or version.startswith("sha256:")
-        ):
-            issues.append(f"{path.name}: action not pinned by commit SHA: {ref!r}")
+        if PINNED_USES.match(line):
+            continue
+        issues.append(
+            f"{path.name}:{lineno}: must be action@40-hex-sha # vX.Y.Z — got {line.strip()}"
+        )
     return issues
 
 

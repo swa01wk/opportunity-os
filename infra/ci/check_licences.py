@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# ruff: noqa: S607 — pnpm is invoked on the PATH in ts-tools and CI runners.
 """Verify lockfile dependencies against infra/ci/licences.yaml (SPEC-02 AC5)."""
 
 from __future__ import annotations
@@ -36,9 +35,20 @@ def _licensed_or_allowed(
 ) -> bool:
     if not license_name or license_name == "UNKNOWN":
         return False
-    if license_name in allowed:
+    expr = license_name.strip()
+    if " OR " in expr:
+        return any(
+            _licensed_or_allowed(part.strip(), allowed, overrides) for part in expr.split(" OR ")
+        )
+    if " AND " in expr:
+        return all(
+            _licensed_or_allowed(part.strip(), allowed, overrides) for part in expr.split(" AND ")
+        )
+    if expr in allowed:
         return True
-    return _normalise_license(license_name, overrides) in allowed
+    if expr in overrides:
+        return overrides[expr] in allowed
+    return _normalise_license(expr, overrides) in allowed
 
 
 def _python_licences(allowed: frozenset[str], overrides: dict[str, str]) -> list[tuple[str, str]]:

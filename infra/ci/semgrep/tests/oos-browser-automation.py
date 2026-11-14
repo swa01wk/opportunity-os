@@ -1,5 +1,3 @@
-# ruff: noqa: F401
-
 # ruleid: oos.import.browser-automation
 import playwright
 

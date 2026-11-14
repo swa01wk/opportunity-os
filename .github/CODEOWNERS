@@ -1,3 +1,4 @@
+* @swa01wk
 # C13: trusted tests, evals, CI and workflows need owner review.
 agent/evals/                    @swa01wk
 **/tests/**                     @swa01wk

@@ -14,161 +14,100 @@ concurrency:
 env:
   CI: "true"
   COMPOSE_PROJECT: oos-ci
-  UV_CACHE_DIR: /tmp/uv-cache
   DOCKER_BUILDKIT: "1"
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
-        with:
-          path: |
-            /tmp/uv-cache
-            /tmp/pnpm-store
-            /tmp/.buildx-cache
-          key: deps-${{ hashFiles('uv.lock', 'pnpm-lock.yaml') }}
-          restore-keys: |
-            deps-
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-lint
 
   types:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
-        with:
-          path: |
-            /tmp/uv-cache
-            /tmp/pnpm-store
-          key: deps-${{ hashFiles('uv.lock', 'pnpm-lock.yaml') }}
-          restore-keys: deps-
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-types
 
   test-backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
-          path: /tmp/uv-cache
-          key: deps-${{ hashFiles('uv.lock') }}
-          restore-keys: deps-
+          fetch-depth: 0
       - run: make setup
       - run: make ci-test-backend
 
   test-agent:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
-        with:
-          path: /tmp/uv-cache
-          key: deps-${{ hashFiles('uv.lock') }}
-          restore-keys: deps-
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-test-agent
 
   test-media:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
-        with:
-          path: |
-            /tmp/uv-cache
-            /tmp/pnpm-store
-          key: deps-${{ hashFiles('uv.lock', 'pnpm-lock.yaml') }}
-          restore-keys: deps-
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-test-media
 
   test-web:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
-        with:
-          path: |
-            /tmp/uv-cache
-            /tmp/pnpm-store
-          key: deps-${{ hashFiles('uv.lock', 'pnpm-lock.yaml') }}
-          restore-keys: deps-
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-test-web
 
   contracts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
-        with:
-          path: /tmp/uv-cache
-          key: deps-${{ hashFiles('uv.lock') }}
-          restore-keys: deps-
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-contracts
 
   conformance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-conformance
 
   e2e-smoke:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-e2e-smoke
 
   render-fixture:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-render-fixture
 
   migrations:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
-        with:
-          path: /tmp/.buildx-cache
-          key: buildx-${{ hashFiles('docker/**', 'uv.lock') }}
-          restore-keys: buildx-
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-migrations
 
   images:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
-        with:
-          path: /tmp/.buildx-cache
-          key: buildx-${{ hashFiles('docker/**', 'uv.lock', 'pnpm-lock.yaml') }}
-          restore-keys: buildx-
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-images
 
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
-        with:
-          path: |
-            /tmp/uv-cache
-            /tmp/pnpm-store
-          key: deps-${{ hashFiles('uv.lock', 'pnpm-lock.yaml') }}
-          restore-keys: deps-
       - run: make setup
       - run: make ci-security

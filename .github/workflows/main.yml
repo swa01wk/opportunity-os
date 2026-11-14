@@ -17,23 +17,16 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b3eb9e8f641aaaf7953e06ebe5b19af5120c43d71b2b751f794
-      - uses: actions/cache@6849a648213a6a9f342250da8a498effbae1de13
-        with:
-          path: /tmp/.buildx-cache
-          key: main-buildx-${{ github.sha }}
-          restore-keys: |
-            buildx-
-            main-buildx-
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - run: make setup
       - run: make ci-images
       - run: make up
       - name: readyz smoke
         run: |
           compose=(docker compose --project-name oos-ci --env-file infra/images.env --env-file .env)
-          for service in api worker render web; do
-            "${compose[@]}" exec -T "$service" python -c "import os,sys,urllib.request as u; u.urlopen('http://127.0.0.1:'+os.environ['PORT']+'/readyz')" 2>/dev/null \
-              || "${compose[@]}" exec -T "$service" node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/readyz').then(r=>process.exit(r.ok?0:1))" || exit 1
-          done
+          py='import os,sys,urllib.request as u; u.urlopen("http://127.0.0.1:"+os.environ["PORT"]+"/readyz"); sys.exit(0)'
+          node='fetch(`http://127.0.0.1:${process.env.PORT}/readyz`).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))'
+          for service in api worker; do "${compose[@]}" exec -T "$service" python -c "$py"; done
+          for service in render web; do "${compose[@]}" exec -T "$service" node -e "$node"; done
       - if: always()
         run: make down CLEAN=1

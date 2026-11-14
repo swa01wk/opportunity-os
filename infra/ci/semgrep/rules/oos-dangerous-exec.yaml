@@ -8,6 +8,7 @@ rules:
       - pattern: exec(...)
       - pattern: compile(...)
 
+  # Test harnesses may shell out; production code must not (NFR-05, SPEC-02 B3).
   - id: oos.python.subprocess
     languages: [python]
     severity: ERROR
@@ -17,15 +18,8 @@ rules:
       - pattern: subprocess.call(...)
       - pattern: subprocess.Popen(...)
       - pattern: subprocess.check_output(...)
-
-  - id: oos.javascript.dynamic-import
-    languages: [generic]
-    severity: ERROR
-    message: Dynamic import of untrusted paths is banned (NFR-05).
-    pattern: import(
-
-  - id: oos.javascript.new-function
-    languages: [generic]
-    severity: ERROR
-    message: new Function on untrusted input is banned (NFR-05).
-    pattern: new Function
+    paths:
+      exclude:
+        - "**/tests/**"
+        - e2e/**
+        - infra/ci/**

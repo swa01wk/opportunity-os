@@ -13,6 +13,8 @@ export default tseslint.config(
       "**/coverage/**",
       "docs/**",
       "contracts/ts/src/generated/**",
+      "infra/ci/semgrep/tests/**",
+      "e2e/nfr/browser-automation-allowlist-ok.ts",
     ],
   },
   js.configs.recommended,

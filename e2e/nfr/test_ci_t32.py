@@ -18,7 +18,8 @@ from nfr_support import ROOT
 
 SEMGREP_VALIDATE = ROOT / "infra" / "ci" / "semgrep" / "validate_rule_tests.py"
 CHECK_LICENCES = ROOT / "infra" / "ci" / "check_licences.py"
-GITLEAKS_FIXTURE = ROOT / "infra" / "ci" / "gitleaks" / "tests" / "synthetic-leak.txt"
+VERIFY_ACTION_PINS = ROOT / "infra" / "ci" / "verify_action_pins.py"
+GITLEAKS_VERIFY = ROOT / "infra" / "ci" / "gitleaks" / "verify_fixture.py"
 PR_YML = ROOT / ".github" / "workflows" / "pr.yml"
 
 
@@ -65,8 +66,25 @@ def test_licence_check_fixture_fails_for_disallowed() -> None:
 
 
 @pytest.mark.t("T-32")
-def test_gitleaks_fixture_and_redaction_configured() -> None:
-    assert GITLEAKS_FIXTURE.is_file()
-    makefile = (ROOT / "Makefile").read_text()
-    assert "--redact" in makefile
-    assert "synthetic-leak.txt" in makefile
+def test_action_pins_use_annotated_sha_format() -> None:
+    result = subprocess.run(
+        [sys.executable, str(VERIFY_ACTION_PINS), "--format-only"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.t("T-32")
+@pytest.mark.functional
+def test_gitleaks_fixture_dir_scan_redacts_secret() -> None:
+    result = subprocess.run(
+        [sys.executable, str(GITLEAKS_VERIFY)],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr

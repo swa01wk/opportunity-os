@@ -1,4 +1,3 @@
-# ruff: noqa: S608 — positive Semgrep fixture for string-built SQL (T-32).
 from sqlalchemy import text
 
 

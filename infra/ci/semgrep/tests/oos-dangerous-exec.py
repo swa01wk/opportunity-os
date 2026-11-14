@@ -1,5 +1,3 @@
-# ruff: noqa: S307, S602, S607
-
 import subprocess
 
 # ruleid: oos.python.dangerous-exec

@@ -13,7 +13,7 @@ export HOST_GID := $(shell id -g)
 
 COMPOSE := docker compose --project-name $(COMPOSE_PROJECT) --env-file infra/images.env --env-file .env
 PY := $(COMPOSE) run --rm --no-deps py-tools
-PY_FUNC := $(COMPOSE) run --rm --no-deps py-functional
+PY_FUNC := $(COMPOSE) run --rm --no-deps -e OOS_HOST_REPO=$(CURDIR) py-functional
 TS := $(COMPOSE) run --rm --no-deps ts-tools
 
 # Steps `make check` runs, in order; CI calls the same target (SPEC-02).
@@ -23,8 +23,8 @@ CHECK_STEPS ?= py-lint py-format py-types py-test py-functional ts-lint ts-forma
 	contracts contracts-check _contracts-drift r0-sample release deploy promote \
 	ci-lint ci-types ci-test-backend ci-test-agent ci-test-media ci-test-web \
 	ci-contracts ci-conformance ci-e2e-smoke ci-render-fixture ci-migrations ci-images ci-security \
-	_host-semgrep-rules-test _ci-gitleaks _ci-gitleaks-fixture _ci-semgrep _ci-pip-audit \
-	_ci-pnpm-audit _ci-trivy _ci-licences _ci-actionlint
+	_host-semgrep-rules-test _ci-verify-action-pins _ci-gitleaks _ci-gitleaks-fixture _ci-semgrep \
+	_ci-pip-audit _ci-pnpm-audit _ci-trivy _ci-licences _ci-actionlint
 
 help: ## List the targets
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | sed -E 's/^[^:]*:([a-z0-9-]+):.*## /\1\t/; s/^([a-z0-9-]+):.*## /\1\t/' \
@@ -89,7 +89,6 @@ _step-py-lint: ; $(PY) ruff check .
 _step-py-format: ; $(PY) ruff format --check .
 _step-py-types: ; $(PY) mypy
 _step-py-test: ; $(PY) pytest -m "not functional"
-	@$(MAKE) --no-print-directory _host-semgrep-rules-test
 _step-py-functional: ; $(PY_FUNC) pytest -m functional
 _step-ts-lint: ; $(TS) pnpm lint
 _step-ts-format: ; $(TS) pnpm format:check
@@ -171,22 +170,20 @@ ci-images: setup ## PR job image build
 	$(COMPOSE) --profile tools build
 
 ci-security: setup ## PR job gitleaks, Semgrep, audits, Trivy, licences
-	@$(MAKE) --no-print-directory _ci-actionlint _ci-gitleaks _ci-gitleaks-fixture \
-		_ci-semgrep _ci-pip-audit _ci-pnpm-audit _ci-trivy _ci-licences
+	@$(MAKE) --no-print-directory _ci-verify-action-pins _ci-actionlint _ci-gitleaks \
+		_ci-gitleaks-fixture _ci-semgrep _ci-pip-audit _ci-pnpm-audit _ci-trivy _ci-licences
 
 _step-py-test-backend: ; $(PY) pytest backend/tests -m "not functional" -q
 
 _step-diff-cover-backend:
-	@$(PY) uv run --with pip-audit --with pytest-cov --with diff-cover \
-		pytest backend/tests -m "not functional" \
+	@$(PY) pytest backend/tests -m "not functional" \
 		--cov=opportunityos/domain --cov-report=xml --cov-report=term-missing -q \
 		--cov-fail-under=0
-	@$(PY) uv run --with diff-cover diff-cover coverage.xml \
-		--compare-branch=$${GITHUB_BASE_REF:-origin/main} --fail-under=80 \
-		|| { [ "$${CI:-}" != true ] && echo "diff-cover: advisory outside CI"; exit 0; exit 1; }
+	@$(PY) diff-cover coverage.xml \
+		--compare-branch=origin/main --fail-under=80
 
 _step-diff-cover-web:
-	@echo "diff-cover: web components (70% floor when web/components/ has coverage reports)"
+	@echo "diff-cover: 0 web components yet (70% floor when web/components/ exists)"
 
 _host-semgrep-rules-test:
 	@if ! command -v docker >/dev/null 2>&1; then \
@@ -196,21 +193,20 @@ _host-semgrep-rules-test:
 	@docker run --rm -v "$(CURDIR):/src:ro" -w /src "$(SEMGREP_IMAGE)" semgrep --test \
 		--config /src/infra/ci/semgrep/rules /src/infra/ci/semgrep/tests
 
+_ci-verify-action-pins:
+	@python3 "$(CURDIR)/infra/ci/verify_action_pins.py"
+
 _ci-actionlint:
 	@if [ -z "$(ACTIONLINT_IMAGE)" ]; then echo "ACTIONLINT_IMAGE unset"; exit 1; fi
 	@docker run --rm -v "$(CURDIR):/repo:ro" -w /repo "$(ACTIONLINT_IMAGE)" -color
 
 _ci-gitleaks:
 	@docker run --rm -v "$(CURDIR):/repo:ro" -w /repo "$(GITLEAKS_IMAGE)" \
-		git --log-opts="--no-merges" --redact --no-banner detect --source /repo
+		git --redact=100 --no-banner -v /repo \
+		-c /repo/infra/ci/gitleaks/.gitleaks.toml
 
 _ci-gitleaks-fixture:
-	@output=$$(docker run --rm -v "$(CURDIR):/repo:ro" -w /repo "$(GITLEAKS_IMAGE)" \
-		detect --no-banner --redact --source /repo/infra/ci/gitleaks/tests \
-		--config /repo/infra/ci/gitleaks/.gitleaks.toml 2>&1); \
-	echo "$$output" | grep -Fq 'synthetic-leak.txt'; \
-	echo "$$output" | grep -Fq 'generic-api-key'; \
-	echo "$$output" | grep -Fvq 'AKIA0000000000000000'
+	@$(PY_FUNC) python /repo/infra/ci/gitleaks/verify_fixture.py
 
 _ci-semgrep:
 	@docker run --rm -v "$(CURDIR):/src:ro" -w /src "$(SEMGREP_IMAGE)" \
@@ -218,9 +214,9 @@ _ci-semgrep:
 	@docker run --rm -v "$(CURDIR):/src:ro" -w /src "$(SEMGREP_IMAGE)" semgrep --error \
 		--config /src/infra/ci/semgrep/rules --exclude /src/infra/ci/semgrep/tests /src
 
-_ci-pip-audit: ; $(PY) uv run --with pip-audit pip-audit
+_ci-pip-audit: ; $(PY) pip-audit
 
-_ci-pnpm-audit: ; $(TS) pnpm audit --audit-level high || [ $$? -eq 1 ]
+_ci-pnpm-audit: ; $(TS) pnpm audit --audit-level high
 
 _ci-trivy:
 	@$(MAKE) ci-images
