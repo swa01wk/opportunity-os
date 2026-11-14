@@ -96,9 +96,12 @@ contracts: .env ## Regenerate JSON Schema and TypeScript types from Pydantic (SP
 	$(TS) pnpm --filter @oos/contracts run generate
 
 contracts-check: contracts ## Fail when generated contracts drift from the repo
-	@drift=$$(git diff --name-only -- docs/contracts/common.schema.json \
-		docs/contracts/events/workflow-request.schema.json contracts/ts/src/); \
-	if [ -n "$$drift" ]; then echo "make contracts-check: drift in:$$drift"; exit 1; fi
+	@status=$$(git status --porcelain -- docs/contracts contracts/ts/src); \
+	if [ -n "$$status" ]; then \
+	  echo "make contracts-check: drift detected:"; \
+	  echo "$$status" | awk '{print $$2}'; \
+	  exit 1; \
+	fi
 r0-sample: ## The R0 odd-squares pipeline (SPEC-25)
 	@echo "make r0-sample: not implemented yet; SPEC-25 implements it"; exit 1
 release: ## Build every image once and write the release record (SPEC-01b)

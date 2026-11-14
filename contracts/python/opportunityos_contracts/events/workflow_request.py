@@ -1,11 +1,23 @@
 """WorkflowRequest (events/workflow-request.schema.json)."""
 
 from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field, model_validator
 
-from opportunityos_contracts.common import Actor, LocalId, Money, Uuid, VersionRef
+from opportunityos_contracts._schema import ContractModel
+from opportunityos_contracts.common import Actor, LocalId, Money, Timestamp, Uuid, VersionRef
+from opportunityos_contracts.validators import reject_explicit_null_keys
+
+OPTIONAL_WORKFLOW_INPUT_FIELDS = (
+    "contractRef",
+    "scriptRef",
+    "storyboardRef",
+    "revisionId",
+    "packageRef",
+    "sceneIds",
+    "estimatedCost",
+)
 
 
 class WorkflowType(StrEnum):
@@ -25,7 +37,7 @@ class WorkflowType(StrEnum):
     DIAGNOSTIC = "diagnostic"
 
 
-class WorkflowRequestInput(BaseModel):
+class WorkflowRequestInput(ContractModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     contract_ref: Annotated[VersionRef | None, Field(default=None, alias="contractRef")] = None
@@ -37,10 +49,26 @@ class WorkflowRequestInput(BaseModel):
         list[LocalId] | None,
         Field(default=None, alias="sceneIds", max_length=24),
     ] = None
-    estimated_cost: Annotated[Money | None, Field(default=None, alias="estimatedCost")] = None
+    estimated_cost: Annotated[
+        Money | None,
+        Field(
+            default=None,
+            alias="estimatedCost",
+            description=(
+                "Run estimate checked against the remaining allowance at "
+                "request time (R-07). Each task still reserves its own "
+                "cost before dispatch (R-34)."
+            ),
+        ),
+    ] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_no_nulls(cls, data: Any) -> Any:
+        return reject_explicit_null_keys(data, frozenset(OPTIONAL_WORKFLOW_INPUT_FIELDS))
 
 
-class WorkflowRequest(BaseModel):
+class WorkflowRequest(ContractModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     request_id: Annotated[Uuid, Field(alias="requestId")]
@@ -48,4 +76,9 @@ class WorkflowRequest(BaseModel):
     project_id: Annotated[Uuid, Field(alias="projectId")]
     requested_by: Annotated[Actor, Field(alias="requestedBy")]
     input: WorkflowRequestInput
-    not_before: Annotated[str | None, Field(default=None, alias="notBefore")] = None
+    not_before: Annotated[Timestamp | None, Field(default=None, alias="notBefore")] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_not_before_not_null(cls, data: Any) -> Any:
+        return reject_explicit_null_keys(data, frozenset({"notBefore"}))

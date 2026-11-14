@@ -1,0 +1,38 @@
+[
+  {
+    "contract": "events/workflow-request.schema.json",
+    "file": "diagnostic.workflow-request.json",
+    "expectValid": true,
+    "expectedCode": null
+  },
+  {
+    "contract": "events/workflow-request.schema.json",
+    "file": "preview.workflow-request.json",
+    "expectValid": true,
+    "expectedCode": null
+  },
+  {
+    "contract": "events/workflow-request.schema.json",
+    "file": "invalid/bad-workflow-type.workflow-request.json",
+    "expectValid": false,
+    "expectedCode": "SCHEMA"
+  },
+  {
+    "contract": "events/workflow-request.schema.json",
+    "file": "invalid/extra-workflow-property.workflow-request.json",
+    "expectValid": false,
+    "expectedCode": "SCHEMA"
+  },
+  {
+    "contract": "events/workflow-request.schema.json",
+    "file": "invalid/bad-fx-rate.workflow-request.json",
+    "expectValid": false,
+    "expectedCode": "SCHEMA"
+  },
+  {
+    "contract": "events/workflow-request.schema.json",
+    "file": "invalid/null-not-before.workflow-request.json",
+    "expectValid": false,
+    "expectedCode": "SCHEMA"
+  }
+]

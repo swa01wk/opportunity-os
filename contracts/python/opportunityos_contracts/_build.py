@@ -9,8 +9,16 @@ from typing import Any
 from pydantic import BaseModel, TypeAdapter
 
 from opportunityos_contracts.common import COMMON_DEF_ALIASES, COMMON_DEF_MODELS
-from opportunityos_contracts.events.workflow_request import WorkflowRequest, WorkflowType
+from opportunityos_contracts.events.workflow_request import WorkflowRequest
+from opportunityos_contracts.validators import TIMESTAMP_PATTERN
 
+# Pydantic cannot set these on export; the generator adds only the following post-processing:
+# - envelope metadata ($schema, $id, x-version, title, description) on each schema file
+# - $ref rewriting from #/$defs/{Name} to ../common.schema.json#/$defs/{Name}
+#   on schemas outside common.schema.json
+# - inlining of workflow-local $defs so workflow-request matches the 0.4.0 shape (no $defs block)
+# - recursive key ordering for deterministic bytes (AC1)
+# - replace inlined primitive patterns with #/$defs/... refs (same logical type as $ref rewrite)
 COMMON_NAMES = frozenset({*COMMON_DEF_MODELS.keys(), *COMMON_DEF_ALIASES.keys()})
 UUID_PATTERN = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
 LOCALID_PATTERN = r"^[a-z][a-z0-9_.-]{0,63}$"
@@ -21,7 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 COMMON_SCHEMA_ID = "https://opportunityos.invalid/contracts/common.schema.json"
 WORKFLOW_SCHEMA_ID = "https://opportunityos.invalid/contracts/events/workflow-request.schema.json"
 
-COMMON_META = {
+COMMON_META: dict[str, Any] = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": COMMON_SCHEMA_ID,
     "x-version": "0.1.0",
@@ -32,7 +40,7 @@ COMMON_META = {
     ),
 }
 
-WORKFLOW_META = {
+WORKFLOW_META: dict[str, Any] = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": WORKFLOW_SCHEMA_ID,
     "x-version": "0.4.0",
@@ -47,22 +55,59 @@ WORKFLOW_META = {
 }
 
 
+def _polish_schema(node: Any) -> Any:
+    if isinstance(node, dict):
+        node = {key: _polish_schema(value) for key, value in node.items()}
+        node.pop("title", None)
+        return node
+    if isinstance(node, list):
+        return [_polish_schema(item) for item in node]
+    return node
+
+
+def _sort_keys(node: Any) -> Any:
+    if isinstance(node, dict):
+        return {key: _sort_keys(node[key]) for key in sorted(node)}
+    if isinstance(node, list):
+        return [_sort_keys(item) for item in node]
+    return node
+
+
 def _format_json(value: Any) -> str:
-    return json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    return json.dumps(_sort_keys(value), indent=2, ensure_ascii=False) + "\n"
 
 
-def _def_schema(name: str, schema: dict[str, Any]) -> dict[str, Any]:
-    schema = dict(schema)
-    schema.pop("$schema", None)
-    schema.pop("$id", None)
-    schema.pop("title", None)
-    if schema.get("type") == "string" and "enum" in schema:
-        schema["enum"] = list(schema["enum"])
-    if "description" in schema and schema["description"] == name:
-        schema.pop("description", None)
-    if schema.get("type") == "object" and schema.get("additionalProperties") is False:
-        schema["additionalProperties"] = False
+def _export_def_schema(model: type[BaseModel] | type) -> dict[str, Any]:
+    if isinstance(model, type) and issubclass(model, BaseModel):
+        raw = model.model_json_schema(mode="serialization", ref_template="#/$defs/{model}")
+        local_defs = dict(raw.pop("$defs", {}))
+        inlined = _inline_local_refs(raw, local_defs)
+        if not isinstance(inlined, dict):
+            msg = f"expected dict schema for {model}"
+            raise TypeError(msg)
+        return inlined
+    schema = TypeAdapter(model).json_schema(ref_template="#/$defs/{model}")
+    if not isinstance(schema, dict):
+        msg = f"expected dict schema for {model}"
+        raise TypeError(msg)
     return schema
+
+
+def _inline_local_refs(node: Any, local_defs: dict[str, Any]) -> Any:
+    if isinstance(node, dict):
+        ref = node.get("$ref")
+        if isinstance(ref, str) and ref.startswith("#/$defs/"):
+            name = ref.removeprefix("#/$defs/")
+            if name in local_defs:
+                resolved = _inline_local_refs(local_defs[name], local_defs)
+                if isinstance(resolved, dict) and "description" in node:
+                    resolved = dict(resolved)
+                    resolved["description"] = node["description"]
+                return resolved
+        return {key: _inline_local_refs(value, local_defs) for key, value in node.items()}
+    if isinstance(node, list):
+        return [_inline_local_refs(item, local_defs) for item in node]
+    return node
 
 
 def _common_ref(name: str, *, external: bool) -> dict[str, str]:
@@ -71,169 +116,120 @@ def _common_ref(name: str, *, external: bool) -> dict[str, str]:
     return {"$ref": f"#/$defs/{name}"}
 
 
-def _resolve_schema_node(
-    node: Any,
-    local_defs: dict[str, Any],
-    *,
-    external_common: bool = False,
-) -> Any:
+def _pattern_common_ref(node: dict[str, Any], *, external: bool) -> dict[str, str] | None:
+    if node.get("type") != "string":
+        return None
+    pattern = node.get("pattern")
+    if pattern == UUID_PATTERN:
+        name = "Uuid"
+    elif pattern == LOCALID_PATTERN:
+        name = "LocalId"
+    elif pattern == SHA256_PATTERN:
+        name = "Sha256"
+    elif pattern == TIMESTAMP_PATTERN:
+        name = "Timestamp"
+    else:
+        return None
+    if external:
+        return {"$ref": f"../common.schema.json#/$defs/{name}"}
+    return {"$ref": f"#/$defs/{name}"}
+
+
+def _rewrite_common_refs(node: Any, *, external: bool) -> Any:
     if isinstance(node, dict):
         ref = node.get("$ref")
         if isinstance(ref, str) and ref.startswith("#/$defs/"):
             name = ref.removeprefix("#/$defs/")
             if name in COMMON_NAMES:
-                return _common_ref(name, external=external_common)
-            if name in local_defs:
-                return _resolve_schema_node(
-                    local_defs[name],
-                    local_defs,
-                    external_common=external_common,
-                )
-        if node.get("type") == "string" and node.get("pattern") == UUID_PATTERN:
-            return _common_ref("Uuid", external=external_common)
-        if node.get("type") == "string" and node.get("pattern") == LOCALID_PATTERN:
-            return _common_ref("LocalId", external=external_common)
-        if node.get("type") == "string" and node.get("pattern") == SHA256_PATTERN:
-            return _common_ref("Sha256", external=external_common)
-        if "anyOf" in node:
-            options = node["anyOf"]
-            non_null = [
-                item
-                for item in options
-                if not (isinstance(item, dict) and item.get("type") == "null")
-            ]
-            has_null = len(non_null) < len(options)
-            if has_null and len(non_null) == 1:
-                return _resolve_schema_node(
-                    non_null[0],
-                    local_defs,
-                    external_common=external_common,
-                )
-        resolved = {
-            key: _resolve_schema_node(value, local_defs, external_common=external_common)
-            for key, value in node.items()
-        }
-        resolved.pop("default", None)
-        resolved.pop("title", None)
-        return resolved
+                if external:
+                    return {"$ref": f"../common.schema.json#/$defs/{name}"}
+                return {"$ref": f"#/$defs/{name}"}
+        pattern_ref = _pattern_common_ref(node, external=external)
+        allowed = {"type", "pattern", "format", "description", "title"}
+        if pattern_ref is not None and set(node.keys()) <= allowed:
+            return pattern_ref
+        return {key: _rewrite_common_refs(value, external=external) for key, value in node.items()}
     if isinstance(node, list):
-        return [
-            _resolve_schema_node(item, local_defs, external_common=external_common) for item in node
-        ]
+        return [_rewrite_common_refs(item, external=external) for item in node]
     return node
 
 
-def _build_common_defs() -> dict[str, Any]:
-    defs: dict[str, Any] = {}
-    for name, model in COMMON_DEF_MODELS.items():
-        if isinstance(model, type) and issubclass(model, BaseModel):
-            raw = model.model_json_schema(mode="serialization", ref_template="#/$defs/{model}")
-            local_defs = dict(raw.pop("$defs", {}))
-            resolved = _resolve_schema_node(raw, local_defs, external_common=False)
-        else:
-            resolved = TypeAdapter(model).json_schema(ref_template="#/$defs/{model}")
-        defs[name] = _def_schema(name, resolved)
-    for name, alias in COMMON_DEF_ALIASES.items():
-        raw = TypeAdapter(alias).json_schema(ref_template="#/$defs/{model}")
-        defs[name] = _def_schema(name, raw)
-        if name == "Uuid":
-            defs[name]["format"] = "uuid"
-        if name == "Timestamp":
-            defs[name]["format"] = "date-time"
-    _attach_common_descriptions(defs)
-    return defs
-
-
-def _attach_common_descriptions(defs: dict[str, Any]) -> None:
-    defs["Sha256"]["description"] = (
-        "Lowercase hex SHA-256 of canonical JSON (RFC 8785) or of file bytes."
-    )
-    defs["Timestamp"]["description"] = (
-        "Absolute UTC timestamp (RFC 3339). Display timezone is a destination setting (R-04)."
-    )
-    defs["LocalId"]["description"] = (
-        "Stable, human-readable ID unique within its document "
-        "(objects, elements, scenes, beats, phrases)."
-    )
-    defs["Token"]["description"] = (
-        "Design-token name from docs/design/tokens.md, e.g. color.layer.3 or ease.standard. "
-        "Never a raw value."
-    )
-    defs["Money"]["properties"]["amountMinor"]["description"] = (
-        "Amount in minor units (paise, cents)."
-    )
-    defs["Money"]["properties"]["fxRateToReporting"] = {
-        "type": "string",
-        "pattern": "^[0-9]+(\\.[0-9]+)?$",
-        "description": (
-            "Recorded conversion rate into the reporting currency (INR, Q-05), as a decimal string."
-        ),
+def _build_common_document() -> dict[str, Any]:
+    defs = {
+        name: _rewrite_common_refs(_export_def_schema(model), external=False)
+        for name, model in COMMON_DEF_MODELS.items()
     }
-    defs["VersionRef"]["description"] = (
-        "Pointer to one immutable version of a record. Approvals and manifests bind to these."
-    )
-    defs["BlobRef"]["description"] = "Content-addressed object in private storage (ADR-007)."
-    defs["Actor"]["properties"]["responsibility"]["description"] = (
-        "PRD §2.3 responsibility the action was taken under (R-05). Only members have one."
-    )
-    defs["ErrorClass"]["description"] = (
-        "R-53 classification. Each class has its own repair options."
-    )
-    defs["ErrorTarget"]["properties"]["field"]["description"] = (
-        "JSON pointer into the failing document."
-    )
+    for name, alias in COMMON_DEF_ALIASES.items():
+        defs[name] = _export_def_schema(alias)
+    return {**COMMON_META, "$defs": defs}
 
 
-def _build_workflow_schema(_common_defs: dict[str, Any]) -> dict[str, Any]:
-    raw = WorkflowRequest.model_json_schema(
-        mode="serialization",
-        ref_template="#/$defs/{model}",
-    )
-    local_defs = dict(raw.get("$defs", {}))
-    properties = raw.get("properties", {})
-    resolved_properties: dict[str, Any] = {}
-    for json_name, prop in properties.items():
-        if json_name == "workflowType":
-            resolved_properties[json_name] = {"enum": [member.value for member in WorkflowType]}
+_INPUT_COMMON_REFS: dict[str, str] = {
+    "contractRef": "VersionRef",
+    "scriptRef": "VersionRef",
+    "storyboardRef": "VersionRef",
+    "packageRef": "VersionRef",
+    "estimatedCost": "Money",
+    "revisionId": "Uuid",
+}
+
+
+def _workflow_input_common_refs(input_schema: dict[str, Any]) -> None:
+    properties = input_schema.get("properties")
+    if not isinstance(properties, dict):
+        return
+    for key, def_name in _INPUT_COMMON_REFS.items():
+        if key not in properties:
             continue
-        if json_name == "notBefore":
-            resolved_properties[json_name] = _common_ref("Timestamp", external=True)
-            continue
-        resolved = _resolve_schema_node(prop, local_defs, external_common=True)
-        if json_name == "input" and isinstance(resolved, dict):
-            inner_props = resolved.get("properties", {})
-            if "estimatedCost" in inner_props:
-                inner_props["estimatedCost"] = {
-                    "$ref": "../common.schema.json#/$defs/Money",
-                    "description": (
-                        "Run estimate checked against the remaining allowance at "
-                        "request time (R-07). Each task still reserves its own "
-                        "cost before dispatch (R-34)."
-                    ),
-                }
-        resolved_properties[json_name] = resolved
+        current = properties[key]
+        description = current.get("description") if isinstance(current, dict) else None
+        ref: dict[str, Any] = {"$ref": f"../common.schema.json#/$defs/{def_name}"}
+        if key == "estimatedCost" and description:
+            ref["description"] = description
+        properties[key] = ref
+
+
+def _build_workflow_document() -> dict[str, Any]:
+    raw = WorkflowRequest.model_json_schema(mode="serialization", ref_template="#/$defs/{model}")
+    local_defs = dict(raw.pop("$defs", {}))
+    properties = {
+        key: _rewrite_common_refs(
+            _inline_local_refs(value, local_defs),
+            external=True,
+        )
+        for key, value in raw.get("properties", {}).items()
+    }
+    if isinstance(properties.get("input"), dict):
+        _workflow_input_common_refs(properties["input"])
+    for key in ("requestId", "projectId"):
+        if key in properties:
+            properties[key] = _common_ref("Uuid", external=True)
+    if "requestedBy" in properties:
+        properties["requestedBy"] = _common_ref("Actor", external=True)
+    if "notBefore" in properties:
+        properties["notBefore"] = _common_ref("Timestamp", external=True)
+    workflow_type = properties.get("workflowType")
+    if isinstance(workflow_type, dict):
+        workflow_type.pop("type", None)
     return {
         **WORKFLOW_META,
         "required": list(raw.get("required", [])),
-        "properties": resolved_properties,
+        "properties": properties,
     }
 
 
-def _write_schema(path: Path, document: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(_format_json(document), encoding="utf-8")
-
-
-def generate() -> None:
-    common_defs = _build_common_defs()
-    common_doc = {**COMMON_META, "$defs": common_defs}
-    workflow_doc = _build_workflow_schema(common_defs)
-
-    _write_schema(REPO_ROOT / "docs" / "contracts" / "common.schema.json", common_doc)
-    _write_schema(
-        REPO_ROOT / "docs" / "contracts" / "events" / "workflow-request.schema.json",
-        workflow_doc,
-    )
+def generate(output_root: Path | None = None) -> None:
+    root = output_root or REPO_ROOT
+    common_path = root / "docs" / "contracts" / "common.schema.json"
+    workflow_path = root / "docs" / "contracts" / "events" / "workflow-request.schema.json"
+    common_path.parent.mkdir(parents=True, exist_ok=True)
+    workflow_path.parent.mkdir(parents=True, exist_ok=True)
+    common_doc = _build_common_document()
+    common_doc["$defs"] = _polish_schema(common_doc["$defs"])
+    workflow_doc = _build_workflow_document()
+    workflow_doc["properties"] = _polish_schema(workflow_doc["properties"])
+    common_path.write_text(_format_json(common_doc), encoding="utf-8")
+    workflow_path.write_text(_format_json(workflow_doc), encoding="utf-8")
 
 
 def main() -> None:

@@ -1,0 +1,11 @@
+{
+  "requestId": "00000000-0000-4000-8000-000000000053",
+  "workflowType": "not_a_real_workflow",
+  "projectId": "00000000-0000-4000-8000-000000000010",
+  "requestedBy": {
+    "type": "member",
+    "id": "00000000-0000-4000-8000-000000000002",
+    "responsibility": "editor"
+  },
+  "input": {}
+}

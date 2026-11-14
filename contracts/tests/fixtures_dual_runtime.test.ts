@@ -14,20 +14,35 @@ const common = JSON.parse(
 const workflow = JSON.parse(
   readFileSync(path.join(repoRoot, "docs/contracts/events/workflow-request.schema.json"), "utf8"),
 );
-const preview = JSON.parse(
-  readFileSync(
-    path.join(repoRoot, "docs/contracts/examples/preview.workflow-request.json"),
-    "utf8",
-  ),
-);
+type CatalogCase = {
+  contract: string;
+  file: string;
+  expectValid: boolean;
+  expectedCode: string | null;
+};
+const catalog = JSON.parse(
+  readFileSync(path.join(repoRoot, "contracts/tests/fixture_catalog.json"), "utf8"),
+) as CatalogCase[];
 
-test("T-33 Ajv accepts the preview workflow fixture", () => {
+function workflowAjv() {
   const ajv = new Ajv2020({ allErrors: true, strict: false });
   addFormats(ajv);
   ajv.addSchema(common);
-  const validate = ajv.compile(workflow);
-  expect(validate(preview)).toBe(true);
-});
+  return ajv.compile(workflow);
+}
+
+const validateWorkflow = workflowAjv();
+
+test.each(catalog.filter((entry) => entry.contract === "events/workflow-request.schema.json"))(
+  "T-33 Ajv verdict for %s",
+  (entry) => {
+    const payload = JSON.parse(
+      readFileSync(path.join(repoRoot, "docs/contracts/examples", entry.file), "utf8"),
+    );
+    const ok = validateWorkflow(payload) as boolean;
+    expect(ok).toBe(entry.expectValid);
+  },
+);
 
 test("T-33 the TypeScript contracts package exports one type per def", () => {
   const expected = [...Object.keys(common.$defs).sort(), "WorkflowRequest"];
