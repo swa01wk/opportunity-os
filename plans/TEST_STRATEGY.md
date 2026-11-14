@@ -54,6 +54,8 @@ GitHub-hosted runners have a monthly minutes allowance; nightly runs skip when `
 | storyboard | 10: golden × 4, long labels and equations × 2, capability gap × 2, invalid-spec repair × 1, injection in script text × 1 | Long labels, invalid specs, capability gaps | SPEC-47 |
 | revision redraft | 8: script targets × 4 (claim, beat, hook, wording), scene targets × 4 (including the PRD §10.3 hold) | Revision cases, out-of-scope attempts | SPEC-62 |
 
+Golden scenarios take their topics from the twelve candidate briefs in [Strategy v1.0 §5.1](../docs/sources/Strategy-v1.0.md) (Q-40), with synthetic source pages we write; they are topics, not approved claims.
+
 A **holdout** set of about 20% more scenarios per task lives in `agent/evals/holdout/`, is never used while tuning prompts, and runs only at milestone exits. Every production failure becomes a new scenario with synthetic data (counterexamples are kept).
 
 **Graders.** Rule-based first: excerpt found verbatim in the fetched fixture text, excerpt under 25 words, every evidence `sourceId` fetched in this run, every beat cites only input claims, VideoSpec compiles, values only through `valueRef`, changed IDs ⊆ revision targets, tool calls ⊆ `permittedTools`. A model-graded check is used only to match a produced claim to a golden claim when wording differs, and is spot-checked by you at each milestone.
@@ -81,6 +83,8 @@ A **holdout** set of about 20% more scenarios per task lives in `agent/evals/hol
 | revision | Requested change applied to the target | ≥ 0.90 |
 | All tasks | Task success within the retry ceiling | ≥ 0.90 |
 | Regression | Drop in any rate against the last accepted baseline | ≤ 5 points; more blocks the release of that prompt or model and milestone exit |
+
+**Tracked, not gated.** For script and storyboard runs the eval report also shows where the hook, setup, demonstration, payoff and closure fall against the Strategy v1.0 §6.1 starting ranges (hook in the first 3 s, closure in the last 3–8 s). These are design parameters, not rules, so they inform prompt changes and never fail a run.
 
 **N and cost.** Milestone and prompt-change runs use N = 10 per scenario (PROCESS.md). At the TECH_STACK per-pass estimates, a weekly N = 3 run costs about USD 11 (≈ ₹1,050) and a milestone N = 10 run about USD 37 (≈ ₹3,500). Eval spend is recorded as stage `eval` and reported separately from per-video cost (KPI-05). In development it runs on free credits (Q-05).
 

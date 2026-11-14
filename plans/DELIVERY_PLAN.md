@@ -2,7 +2,7 @@
 
 Status: **Draft for G3** (Stage 3, 14 Nov 2026). Agreed at G3, then living: dates are re-baselined at M1 exit and whenever change control moves scope. Client view of the plan. The specs behind each milestone are in [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md); test cadence and exit checks in [TEST_STRATEGY.md](TEST_STRATEGY.md); progress in [STATUS.md](STATUS.md).
 
-Scope is R0 → R1 → R2 (PRD §4). R3 is planned in outline and starts only after you sign the R2 gate and promote it (A-18). R4/R5 are out of scope. Milestones M0–M7 here are PROCESS.md milestones; the PRD's own are written "PRD M0–M6".
+Scope is R0 → R1 → R2 (PRD §4). R3 is planned in outline and starts only after you sign the R2 gate and promote it (A-18). R4/R5 are out of scope. Milestones M0–M7 here are PROCESS.md milestones; the PRD's own are written "PRD M0–M6". The companion [Strategy v1.0](../docs/sources/Strategy-v1.0.md) phases map onto these milestones as shown in [Strategy v1.0 phases](#strategy-v10-phases); where it differs from this plan the point is open as Q-37–Q-42.
 
 ## Milestones
 
@@ -26,8 +26,11 @@ Every milestone is a vertical slice you can use end to end, closed by Gate G4 (P
 
 **Slice.** The walking skeleton (PROCESS.md Milestones): repo, Makefile and Compose stack, CI with security scans, contracts 1.0.0 generated from Pydantic, database with migrations and RLS, the replacement object store, Keycloak sign-in and the app shell, telemetry, the outbox and DBOS workflows, the AG-UI project stream, the agent runtime with a fake model and tool host, the render service skeleton, and the search API choice. 14 specs, 32 spec-days.
 
-**Your tasks in M0** (about 20 hours, PRD M0 discovery):
-- twelve briefs across the four series and the first three topics, one mathematical first (Q-02, OOS-002);
+**Your tasks in M0** (about 24 hours, PRD M0 discovery; the extra hours from Strategy v1.0 come out of the M0 buffer):
+- twelve briefs across the four series and the first three topics, one mathematical first (Q-02, OOS-002), starting from the twelve candidates in Strategy §5.1 (Q-40); tag each against the six families and the PRD §9.1 expansion list, and mark briefs that need a specialist (Q-41);
+- the renderer and tools evaluation from Strategy §12 as a desk matrix (output quality, factual reliability, editability, cost, rights): Remotion against Manim only as Q-39 allows, and the generative tools only as an evaluation, with no adapter, while A-37 holds;
+- optional: a short review of live creator catalogues and the terms of the tools in Strategy §4, to keep the brand original;
+- the launch measurement sheet: primary metric (A-09) and the secondary manual metrics with their definitions (Q-42);
 - motion and voice references for brand kit v1 (A-31, OOS-003);
 - rights and access preflight: font licences into the ledger, ElevenLabs "improve the models" opt-out on every account before the first real call, the YouTube destination account noted for R2 (OOS-004, Q-08, SECURITY.md);
 - the manual effort baseline: time one comparable Short made with your current tools (Q-13, KPI-04);
@@ -85,6 +88,17 @@ Go-live (G5) starts the operate phase (PROCESS.md, Operate and support), with tw
 
 **R2 gate (PRD §19.3).** Twelve reviewed originals across the four series, with actual public records, rights, effort, cost and quality results; effort compared with the M0 manual baseline (KPI-04); production reliability reported against the adopted threshold of 10 of 12 without code-level repair (KPI-02, Q-04); every rubric dimension ≥ 4 with no unresolved material error or rights blocker (KPI-03); moat hypotheses 1–3 checked against their PRD §1.1 proof (Q-32). Content time: the PRD's 60–120 hours.
 
+**Gate outcomes** (Strategy §12): **GO** when the product makes distinct, accurate, enjoyable videos without routine code fixes; **ITERATE** when style or narration underperforms but the workflow is recoverable; **STOP or rescope** when claims cannot be verified, licensing is unclear, or costs stay outside the approved cap (Q-05).
+
+### Strategy v1.0 phases
+
+| Strategy v1.0 phase | Strategy timing | In this plan |
+|---|---|---|
+| Phase 0 Feasibility: M0 discovery, brand, the odd-squares sample, manual-effort comparison | Nov–Dec 2026 | M0 + M1 (R0), ending about 12 Mar 2027 at A-36 |
+| Phase 1 Small channel launch: three to five originals, manual publication | January 2027 | **Not planned** (Q-03). Open as Q-38 |
+| Phase 2 Twelve-video quality gate (4/4/2/2) | PRD R2 | The R2 validation slate after go-live |
+| Phase 3 Conditional 90-day growth study: up to 48 originals, up to 96 uploads, 1,000,000-view stretch | After R2 | R3, conditional on A-18 (PRD §18, R-77, KPI-13); planned with M9 below |
+
 ### Conditional, after the R2 gate
 
 Not specced and not dated. Each starts only on your decision, with its own estimate.
@@ -93,7 +107,7 @@ Not specced and not dated. Each starts only on your decision, with its own estim
 |---|---|---|
 | AWS Mumbai move | R2 gate signed (Q-21, ADR-011) | Terraform, ECS Fargate, RDS, S3 Object Lock, Secrets Manager, Cognito (ADR-012); real budget limits set from measured per-video cost (Q-05) |
 | M8 Connected channel (R3) | You promote R3 (A-18) | R-66–R-71: YouTube connection and Instagram eligibility, private upload, release and reconciliation, scheduling, connected verification; S-17, S-18; QA-07. PRD §22.1 says this suite needs its own estimate |
-| M9 Learning loop (R3) | After M8 | R-72–R-77: metric import and dictionary, Opportunity Lab, experiments, diagnostic recommendations; S-19, S-20; KPI-07–KPI-13 |
+| M9 Learning loop (R3) | After M8 | R-72–R-77: metric import and dictionary, Opportunity Lab, experiments, diagnostic recommendations; S-19, S-20; KPI-07–KPI-13. The 90-day growth study (PRD §18, Strategy Phase 3) runs on it |
 
 ## Dates, demos and UAT
 
@@ -250,6 +264,11 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 | Generic or repeated output across the slate (PRD §25) | Medium | Medium | Variety check before Gate D (R-39), rubric | S-16 flags |
 | Provider terms, prices or the Remotion licence change | Low | Medium | Adapters (ADR-009); terms re-checked at first real call and on change | SECURITY.md provider table |
 | Three Compose stacks exhaust one machine | Medium | Low | Staging runs only during release-candidate checks; production from G5 | Host memory |
+| The twelve slate briefs need animation families beyond the six (Strategy §5.1) | High | Medium | Capability tags in M0 (Q-40); first three topics chosen to fit the six; any added family (R-24) estimated and re-planned before M6 | M0 capability tags |
+| What If and physics briefs need a specialist who is not yet identified (Q-41) | Medium | Medium | Tag at preflight; such briefs block Gates B and D until reviewed; schedule them only once a reviewer is found | Briefs tagged "needs specialist" |
+| The strategy's January 2027 launch is expected but not planned (Q-38) | Medium | Medium | Decide at G3; until then Q-03 stands and no public upload happens before go-live | Q-38 |
+| Platform metric definitions change, as YouTube's Shorts views did on 31 Mar 2025 | Medium | Low | Store each metric with its platform definition and capture date; keep views and engaged views apart (Q-42, R-72) | Platform changelogs |
+| One strong video is read as a trend (Strategy §11) | Medium | Medium | R2 tests production and quality, not audience optimisation (PRD §17.3); compare within platform, window, format and duration band; medians at R3 | Slate review |
 
 ### Assumptions
 
@@ -272,6 +291,7 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 | Q-29 search API | Open | Decided in SPEC-14 (M0) |
 | Q-05 budget limits | Parked | Set before the AWS move |
 | Contracts are 0.4.0 drafts | Expected | Regenerated as 1.0.0 by SPEC-03 |
+| Strategy v1.0 open points: Q-37 generative video, Q-38 January launch, Q-39 Manim, Q-40 briefs and families, Q-41 specialist scope, Q-42 R2 metrics | Open | You answer at G3; assumptions keep this plan meanwhile |
 
 ### Dependencies
 
@@ -284,3 +304,4 @@ Every Must R-xx and every NFR-xx is in a milestone (checked by script). "Starts"
 | Paid ElevenLabs plan; public channel identity (Q-01); YouTube destination account (Q-08) | Go-live, before the first public upload | You |
 | Pinned versions: DBOS, Remotion 4.0.x, AG-UI SDKs, Keycloak | M0 | Tech lead |
 | Open-licence fonts in the rights ledger | SPEC-18 (M1) | You |
+| A subject specialist for briefs tagged "needs specialist" (Q-41) | Before such a brief is scheduled (M3 onward) | You |

@@ -28,7 +28,7 @@ Docs exist now; the code folders are created by SPEC-01 (M0). If SPEC-01 changes
 AGENTS.md, CLAUDE.md        agent instructions and review checklist
 .cursor/rules/              000-core, backend, agent, media, frontend, contracts, testing, observability
 docs/
-  sources/PRD-v2.0.md       the PRD (never edit)
+  sources/                  PRD-v2.0.md and the companion Strategy-v1.0.md (never edit)
   product/                  REQUIREMENTS.md (R-xx, NFR-xx, KPI-xx), QUESTIONS.md (Q-xx, A-xx), UI_DESIGN.md (S-xx)
   architecture/             ARCHITECTURE.md, AGENT_ARCHITECTURE.md, TECH_STACK.md, SECURITY.md, OBSERVABILITY.md
   adr/                      ADR-001 … ADR-022
@@ -102,4 +102,4 @@ If the spec is wrong, ambiguous or would need more than about 400 changed lines,
 - Never scrape or automate a browser in place of a missing platform API (NFR-18).
 - Never weaken or delete a test, eval or threshold to make a change pass.
 - Never push to `main`; never force-push a shared branch.
-- Never edit `docs/sources/PRD-v2.0.md`.
+- Never edit anything in `docs/sources/` (the PRD and the strategy).

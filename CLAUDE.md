@@ -8,7 +8,7 @@ Conventions for this repo are in [AGENTS.md](AGENTS.md) and `.cursor/rules/*.mdc
 - Work on the branch the stage names and open a PR. Never push to `main`. Update STATUS.md at the end of every stage.
 - Never invent requirements: a gap becomes a Q-xx with an assumption A-xx in `docs/product/QUESTIONS.md`.
 - Ask the owner before choices that are expensive to reverse (cloud, database, model or TTS provider, auth, Remotion licence). Decide the rest, record an ADR and say which.
-- Never edit `docs/sources/PRD-v2.0.md`.
+- Never edit `docs/sources/` (PRD v2.0 and the companion Strategy v1.0). A new source version goes through change control; points beyond the baseline become Q-xx.
 
 ## PR review
 
