@@ -1,0 +1,9 @@
+{"seq": "301", "data": {"type": "STATE_SNAPSHOT", "snapshot": {"projectId": "00000000-0000-4000-8000-0000000000c1", "asOfSeq": 301, "productionState": "DRAFT", "activeRuns": [], "blockers": []}}}
+{"seq": "302", "data": {"type": "RUN_STARTED", "threadId": "00000000-0000-4000-8000-0000000000c1", "runId": "00000000-0000-4000-8000-0000000000d2"}}
+{"seq": "303", "data": {"type": "STEP_STARTED", "stepName": "diagnostic.echo"}}
+{"seq": "304", "data": {"type": "STEP_FINISHED", "stepName": "diagnostic.echo"}}
+{"seq": "305", "data": {"type": "STEP_STARTED", "stepName": "diagnostic.validate"}}
+{"seq": "306", "data": {"type": "STEP_FINISHED", "stepName": "diagnostic.validate"}}
+{"seq": "307", "data": {"type": "STEP_STARTED", "stepName": "diagnostic.join"}}
+{"seq": "308", "data": {"type": "STEP_FINISHED", "stepName": "diagnostic.join"}}
+{"seq": "309", "data": {"type": "RUN_FINISHED", "threadId": "00000000-0000-4000-8000-0000000000c1", "runId": "00000000-0000-4000-8000-0000000000d2"}}

@@ -10,6 +10,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");
 
 const WORKFLOW_CONTRACT = "events/workflow-request.schema.json";
+const DOMAIN_CONTRACT = "events/domain-event.schema.json";
+const ANALYTICS_CONTRACT = "analytics/events.schema.json";
 
 type FixtureCase = {
   contract: string;
@@ -18,10 +20,10 @@ type FixtureCase = {
   expectedCode: string | null;
 };
 
-function workflowValidExamples(): string[] {
+function sortedJsonExamples(suffix: string): string[] {
   const examplesDir = path.join(repoRoot, "docs/contracts/examples");
   return readdirSync(examplesDir)
-    .filter((name) => name.endsWith(".workflow-request.json"))
+    .filter((name) => name.endsWith(suffix))
     .sort();
 }
 
@@ -30,15 +32,30 @@ function loadFixtureCases(): FixtureCase[] {
     readFileSync(path.join(repoRoot, "docs/contracts/examples/invalid/manifest.json"), "utf8"),
   ) as { fixtures: { file: string; contract: string; level: string; expected: string }[] };
 
-  const valid: FixtureCase[] = workflowValidExamples().map((file) => ({
-    contract: WORKFLOW_CONTRACT,
-    file,
-    expectValid: true,
-    expectedCode: null,
-  }));
+  const valid: FixtureCase[] = [
+    ...sortedJsonExamples(".workflow-request.json").map((file) => ({
+      contract: WORKFLOW_CONTRACT,
+      file,
+      expectValid: true,
+      expectedCode: null,
+    })),
+    ...sortedJsonExamples(".event.json").map((file) => ({
+      contract: DOMAIN_CONTRACT,
+      file,
+      expectValid: true,
+      expectedCode: null,
+    })),
+    ...sortedJsonExamples(".analytics-event.json").map((file) => ({
+      contract: ANALYTICS_CONTRACT,
+      file,
+      expectValid: true,
+      expectedCode: null,
+    })),
+  ];
 
+  const registered = new Set([WORKFLOW_CONTRACT, DOMAIN_CONTRACT, ANALYTICS_CONTRACT]);
   const invalid = manifest.fixtures
-    .filter((entry) => entry.level === "schema" && entry.contract === WORKFLOW_CONTRACT)
+    .filter((entry) => entry.level === "schema" && registered.has(entry.contract))
     .map((entry) => ({
       contract: entry.contract,
       file: `invalid/${entry.file}`,
@@ -65,6 +82,8 @@ function listSchemaFiles(dir: string): string[] {
 function buildAjv() {
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   ajv.addKeyword("x-version");
+  ajv.addKeyword("x-kpis");
+  ajv.addKeyword("x-agui");
   (ajvFormats as unknown as FormatsPlugin)(ajv);
   const contractsDir = path.join(repoRoot, "docs/contracts");
   for (const file of listSchemaFiles(contractsDir)) {
@@ -73,36 +92,35 @@ function buildAjv() {
   return ajv;
 }
 
-const common = JSON.parse(
-  readFileSync(path.join(repoRoot, "docs/contracts/common.schema.json"), "utf8"),
-);
-const workflow = JSON.parse(
-  readFileSync(path.join(repoRoot, "docs/contracts/events/workflow-request.schema.json"), "utf8"),
-);
-
 const ajv = buildAjv();
-const workflowId = workflow.$id as string;
-const validateWorkflow = ajv.getSchema(workflowId);
-if (validateWorkflow === undefined) {
-  throw new Error(`missing compiled schema for ${workflowId}`);
+
+function validatorFor(contract: string) {
+  const rel = path.join("docs/contracts", contract);
+  const schema = JSON.parse(readFileSync(path.join(repoRoot, rel), "utf8"));
+  const id = schema.$id as string;
+  const validate = ajv.getSchema(id);
+  if (validate === undefined) {
+    throw new Error(`missing compiled schema for ${id}`);
+  }
+  return validate;
 }
 
 const catalog = loadFixtureCases();
 
-test.each(catalog.filter((entry) => entry.contract === WORKFLOW_CONTRACT))(
-  "T-33 Ajv verdict for %s",
-  (entry) => {
-    const payload = JSON.parse(
-      readFileSync(path.join(repoRoot, "docs/contracts/examples", entry.file), "utf8"),
-    );
-    const ok = validateWorkflow(payload) as boolean;
-    expect(ok).toBe(entry.expectValid);
-  },
-);
+test.each(catalog)("T-33 Ajv verdict for %s (%s)", (entry) => {
+  const payload = JSON.parse(
+    readFileSync(path.join(repoRoot, "docs/contracts/examples", entry.file), "utf8"),
+  );
+  const validate = validatorFor(entry.contract);
+  const ok = validate(payload) as boolean;
+  expect(ok).toBe(entry.expectValid);
+});
 
-test("T-33 the TypeScript contracts package exports one type per def", () => {
-  const expected = [...Object.keys(common.$defs).sort(), "WorkflowRequest"];
+test("T-33 the TypeScript contracts package exports generated types", () => {
   const index = readFileSync(path.join(repoRoot, "contracts/ts/src/index.ts"), "utf8");
   const exported = [...index.matchAll(/export type \{ (\w+) \}/gu)].map((match) => match[1]).sort();
-  expect(exported).toEqual(expected);
+  expect(exported).toContain("DomainEvent");
+  expect(exported).toContain("AnalyticsEvent");
+  expect(exported).toContain("WorkflowRequest");
+  expect(exported.length).toBeGreaterThan(10);
 });

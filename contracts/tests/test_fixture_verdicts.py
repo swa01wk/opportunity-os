@@ -12,11 +12,21 @@ from fixture_harness import (
     validate_pydantic,
 )
 
+from opportunityos_contracts.analytics.events import AnalyticsEvent
+from opportunityos_contracts.events.domain_event import DomainEvent
 from opportunityos_contracts.events.workflow_request import WorkflowRequest
 
 register_schema(
     "events/workflow-request.schema.json",
     pydantic=pydantic_validator(WorkflowRequest),
+)
+register_schema(
+    "events/domain-event.schema.json",
+    pydantic=pydantic_validator(DomainEvent),
+)
+register_schema(
+    "analytics/events.schema.json",
+    pydantic=pydantic_validator(AnalyticsEvent),
 )
 
 

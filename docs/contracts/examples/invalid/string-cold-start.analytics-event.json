@@ -1,0 +1,16 @@
+{
+  "sourceEventId": "7a8b9c0d-1111-4b7a-9c1d-0a0b0c0d0e02",
+  "eventName": "metric.recorded",
+  "eventVersion": 1,
+  "occurredAt": "2026-11-21T14:00:00Z",
+  "workspaceId": "0b0c0d0e-2222-4f00-8a00-000000000001",
+  "properties": {
+    "publicationId": "0b0c0d0e-6666-4f00-8a00-000000000005",
+    "measure": "views",
+    "availability": "available",
+    "windowStart": "2026-11-14T00:00:00Z",
+    "windowEnd": "2026-11-21T00:00:00Z",
+    "source": "manual",
+    "coldStart": "true"
+  }
+}

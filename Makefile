@@ -105,12 +105,15 @@ _step-selftest-fail: ; @false
 contracts: .env ## Regenerate JSON Schema and TypeScript types from Pydantic (SPEC-03a)
 	$(PY) python -m opportunityos_contracts._build
 	$(TS) pnpm --filter @oos/contracts run generate
+	$(TS) pnpm exec prettier --write contracts/ts/src/generated contracts/ts/src/index.ts
 
 _contracts-drift: ## Fail when generated contract files differ from git (SPEC-03a AC2)
 	@status=$$(git status --porcelain -- docs/contracts contracts/ts/src); \
 	if [ -n "$$status" ]; then \
 	  echo "make contracts-check: drift detected:"; \
 	  echo "$$status" | awk '{print $$2}'; \
+	  git diff --stat -- docs/contracts contracts/ts/src; \
+	  git diff -- docs/contracts contracts/ts/src | head -n 60; \
 	  exit 1; \
 	fi
 
