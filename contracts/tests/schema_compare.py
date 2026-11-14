@@ -23,13 +23,7 @@ def _normalize(node: Any) -> Any:
 
 
 def normalize_schema(document: dict[str, Any]) -> dict[str, Any]:
-    doc = _normalize(document)
-    defs = doc.get("$defs")
-    if isinstance(defs, dict):
-        timestamp = defs.get("Timestamp")
-        if isinstance(timestamp, dict) and timestamp.get("format") == "date-time":
-            timestamp.pop("pattern", None)
-    return doc
+    return _normalize(document)
 
 
 def schema_diff(

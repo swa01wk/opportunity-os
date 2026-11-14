@@ -3,7 +3,7 @@
 from enum import StrEnum
 from typing import Annotated, Any
 
-from pydantic import ConfigDict, Field, StringConstraints, model_validator
+from pydantic import ConfigDict, Field, StrictInt, StringConstraints, model_validator
 
 from opportunityos_contracts._schema import ContractModel
 from opportunityos_contracts.validators import (
@@ -79,7 +79,7 @@ class Money(ContractModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     amount_minor: Annotated[
-        int,
+        StrictInt,
         Field(alias="amountMinor", description="Amount in minor units (paise, cents)."),
     ]
     currency: Annotated[str, StringConstraints(pattern=r"^[A-Z]{3}$")]
@@ -107,7 +107,7 @@ class VersionRef(ContractModel):
     )
 
     id: Uuid
-    version: Annotated[int, Field(ge=1)]
+    version: Annotated[StrictInt, Field(ge=1)]
     sha256: Sha256
 
 
@@ -125,7 +125,7 @@ class BlobRef(ContractModel):
         StringConstraints(pattern=r"^ws/[0-9a-f-]{36}/sha256/[0-9a-f]{64}\.[a-z0-9]{1,8}$"),
     ]
     sha256: Sha256
-    bytes: Annotated[int, Field(ge=0)]
+    bytes: Annotated[StrictInt, Field(ge=0)]
     media_type: Annotated[str, Field(alias="mediaType", max_length=100)]
 
 

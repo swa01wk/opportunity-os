@@ -30,6 +30,13 @@
       "note": "Optional timestamps must be omitted, not null."
     },
     {
+      "file": "bool-amount.workflow-request.json",
+      "contract": "events/workflow-request.schema.json",
+      "level": "schema",
+      "expected": "SCHEMA",
+      "note": "amountMinor must be a strict integer, not a boolean."
+    },
+    {
       "file": "unknown-op.video-spec.json",
       "contract": "media/video-spec.schema.json",
       "level": "schema",

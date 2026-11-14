@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from fixture_catalog import load_fixture_cases, write_catalog
+from fixture_catalog import load_fixture_cases
 from fixture_harness import (
     load_fixture_payload,
     pydantic_validator,
@@ -18,8 +18,6 @@ register_schema(
     "events/workflow-request.schema.json",
     pydantic=pydantic_validator(WorkflowRequest),
 )
-
-write_catalog()
 
 
 @pytest.mark.t("T-33")

@@ -9,7 +9,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EXAMPLES = REPO_ROOT / "docs" / "contracts" / "examples"
 INVALID_MANIFEST = EXAMPLES / "invalid" / "manifest.json"
-CATALOG_PATH = Path(__file__).resolve().parent / "fixture_catalog.json"
 
 WORKFLOW_CONTRACT = "events/workflow-request.schema.json"
 
@@ -48,17 +47,3 @@ def load_fixture_cases() -> list[FixtureCase]:
             )
         )
     return cases
-
-
-def write_catalog() -> None:
-    """Emit the JSON catalog consumed by the TypeScript harness."""
-    payload = [
-        {
-            "contract": case.contract,
-            "file": case.file,
-            "expectValid": case.expect_valid,
-            "expectedCode": case.expected_code,
-        }
-        for case in load_fixture_cases()
-    ]
-    CATALOG_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")

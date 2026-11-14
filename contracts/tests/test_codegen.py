@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-from fixture_catalog import write_catalog
 from schema_compare import schema_diff
 
 from opportunityos_contracts._build import generate
@@ -28,9 +27,7 @@ def _generated_paths(root: Path) -> tuple[Path, Path]:
     )
 
 
-@pytest.fixture(autouse=True)
-def _refresh_fixture_catalog() -> None:
-    write_catalog()
+AC3_ALLOWED_COMMON_DIFFS = frozenset({"missing in expected: $defs.Timestamp.pattern"})
 
 
 @pytest.mark.t("T-33")
@@ -57,7 +54,7 @@ def test_common_schema_matches_stage_2a_baseline(tmp_path: Path) -> None:
     expected = _load_json(BASELINES / "common.stage2a.json")
     actual = _load_json(_generated_paths(tmp_path)[0])
     diff = schema_diff(expected, actual)
-    assert not diff, "\n".join(diff[:20])
+    assert set(diff) == AC3_ALLOWED_COMMON_DIFFS, "\n".join(diff[:20])
 
 
 @pytest.mark.t("T-33")
