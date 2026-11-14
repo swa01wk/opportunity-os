@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // ok: oos.javascript.import.browser-automation (allowed under e2e/)
-import playwright from "playwright";
+import { chromium } from "playwright";
+import { test } from "playwright/test";
 
-export const allowlisted = playwright;
+export const allowlisted = { chromium, test };

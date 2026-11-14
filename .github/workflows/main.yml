@@ -21,12 +21,6 @@ jobs:
       - run: make setup
       - run: make ci-images
       - run: make up
-      - name: readyz smoke
-        run: |
-          compose=(docker compose --project-name oos-ci --env-file infra/images.env --env-file .env)
-          py='import os,sys,urllib.request as u; u.urlopen("http://127.0.0.1:"+os.environ["PORT"]+"/readyz"); sys.exit(0)'
-          node='fetch(`http://127.0.0.1:${process.env.PORT}/readyz`).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))'
-          for service in api worker; do "${compose[@]}" exec -T "$service" python -c "$py"; done
-          for service in render web; do "${compose[@]}" exec -T "$service" node -e "$node"; done
+      - run: make ci-smoke-readyz
       - if: always()
         run: make down CLEAN=1

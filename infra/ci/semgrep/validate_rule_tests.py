@@ -1,7 +1,4 @@
-"""Lightweight Semgrep rule/fixture cross-check for make check (T-32).
-
-Full ``semgrep --test`` runs on the host via ``make _host-semgrep-rules-test``.
-"""
+"""Lightweight Semgrep rule/fixture cross-check for make check (T-32)."""
 
 from __future__ import annotations
 

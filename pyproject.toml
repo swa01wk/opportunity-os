@@ -71,6 +71,9 @@ check_untyped_defs = true
 module = ["opportunityos_contracts.*", "opportunityos.domain.*"]
 strict = true
 
+[tool.coverage.run]
+relative_files = true
+
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib --strict-markers"
 pythonpath = ["e2e/nfr", "contracts/tests", "backend/migrations", "backend/tests/functional"]

@@ -4,14 +4,9 @@ rules:
     languages: [javascript, typescript]
     severity: ERROR
     message: Browser automation libraries are only allowed in e2e/ and media/scenes/render/.
-    pattern-either:
-      - pattern-regex: (?x) ^\s*import\s+[\w$]+\s+from\s+['"]playwright['"]
-      - pattern-regex: (?x) ^\s*import\s+playwright\b
-      - pattern-regex: (?x) require\s*\(\s*['"]playwright['"]\s*\)
-      - pattern-regex: (?x) ^\s*import\s+[\w$]+\s+from\s+['"]puppeteer['"]
-      - pattern-regex: (?x) require\s*\(\s*['"]puppeteer['"]\s*\)
-      - pattern-regex: (?x) require\s*\(\s*['"]selenium-webdriver['"]\s*\)
-      - pattern-regex: (?x) ^\s*import\s+[\w$]+\s+from\s+['"]selenium-webdriver['"]
+    pattern-regex: (?x)
+      (?:from\s+['"]|import\s+['"]|require\s*\(\s*['"])
+      (?:playwright|puppeteer|selenium-webdriver)(?:/[^'"]*)?['"]
     paths:
       include:
         - "**/*.ts"

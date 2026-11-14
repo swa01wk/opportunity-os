@@ -9,6 +9,7 @@
 .vscode/
 
 # Python
+coverage.xml
 __pycache__/
 *.py[cod]
 .venv/

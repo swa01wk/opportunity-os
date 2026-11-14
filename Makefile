@@ -18,13 +18,16 @@ TS := $(COMPOSE) run --rm --no-deps ts-tools
 
 # Steps `make check` runs, in order; CI calls the same target (SPEC-02).
 CHECK_STEPS ?= py-lint py-format py-types py-test py-functional ts-lint ts-format ts-types ts-test
+# ci-security runs every sub-check and lists all failures (SPEC-02 B9).
+SECURITY_CHECK_STEPS ?= verify-action-pins actionlint gitleaks gitleaks-fixture semgrep \
+	pip-audit pnpm-audit trivy licences
 
 .PHONY: help setup up down migrate seed lint fmt test test-int test-e2e eval check \
 	contracts contracts-check _contracts-drift r0-sample release deploy promote \
 	ci-lint ci-types ci-test-backend ci-test-agent ci-test-media ci-test-web \
 	ci-contracts ci-conformance ci-e2e-smoke ci-render-fixture ci-migrations ci-images ci-security \
-	_host-semgrep-rules-test _ci-verify-action-pins _ci-gitleaks _ci-gitleaks-fixture _ci-semgrep \
-	_ci-pip-audit _ci-pnpm-audit _ci-trivy _ci-licences _ci-actionlint
+	ci-smoke-readyz _step-verify-action-pins _step-actionlint _step-gitleaks _step-gitleaks-fixture \
+	_step-semgrep _step-pip-audit _step-pnpm-audit _step-trivy _step-licences
 
 help: ## List the targets
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | sed -E 's/^[^:]*:([a-z0-9-]+):.*## /\1\t/; s/^([a-z0-9-]+):.*## /\1\t/' \
@@ -169,63 +172,67 @@ ci-migrations: .env ## PR job migrations up, down, re-up
 ci-images: setup ## PR job image build
 	$(COMPOSE) --profile tools build
 
+ci-smoke-readyz: .env ## Main workflow: /readyz on api, worker, render and web (ADR-022)
+	@compose=(docker compose --project-name $(COMPOSE_PROJECT) --env-file infra/images.env --env-file .env); \
+	py_probe='import os,sys,urllib.request as u; u.urlopen("http://127.0.0.1:"+os.environ["PORT"]+"/readyz"); sys.exit(0)'; \
+	node_probe='fetch(`http://127.0.0.1:$${process.env.PORT}/readyz`).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))'; \
+	for service in api worker; do "$${compose[@]}" exec -T "$$service" python -c "$$py_probe" || exit 1; done; \
+	for service in render web; do "$${compose[@]}" exec -T "$$service" node -e "$$node_probe" || exit 1; done
+
 ci-security: setup ## PR job gitleaks, Semgrep, audits, Trivy, licences
-	@$(MAKE) --no-print-directory _ci-verify-action-pins _ci-actionlint _ci-gitleaks \
-		_ci-gitleaks-fixture _ci-semgrep _ci-pip-audit _ci-pnpm-audit _ci-trivy _ci-licences
+	@failed=""; for step in $(SECURITY_CHECK_STEPS); do \
+		echo "==> ci-security: $$step"; \
+		$(MAKE) --no-print-directory _step-$$step || failed="$$failed $$step"; \
+	done; \
+	if [ -n "$$failed" ]; then echo "ci-security: FAILED at step(s):$$failed"; exit 1; fi; \
+	echo "ci-security: all steps passed ($(SECURITY_CHECK_STEPS))"
 
 _step-py-test-backend: ; $(PY) pytest backend/tests -m "not functional" -q
 
 _step-diff-cover-backend:
 	@$(PY) pytest backend/tests -m "not functional" \
-		--cov=opportunityos/domain --cov-report=xml --cov-report=term-missing -q \
-		--cov-fail-under=0
+		--cov=backend/opportunityos/domain --cov-report=xml:coverage.xml \
+		--cov-report=term-missing -q --cov-fail-under=0
 	@$(PY) diff-cover coverage.xml \
 		--compare-branch=origin/main --fail-under=80
 
 _step-diff-cover-web:
 	@echo "diff-cover: 0 web components yet (70% floor when web/components/ exists)"
 
-_host-semgrep-rules-test:
-	@if ! command -v docker >/dev/null 2>&1; then \
-		echo "host Semgrep: docker not available (OK inside constrained sandboxes)"; exit 0; \
-	fi
-	@if [ -z "$(SEMGREP_IMAGE)" ]; then echo "SEMGREP_IMAGE unset"; exit 1; fi
-	@docker run --rm -v "$(CURDIR):/src:ro" -w /src "$(SEMGREP_IMAGE)" semgrep --test \
-		--config /src/infra/ci/semgrep/rules /src/infra/ci/semgrep/tests
-
-_ci-verify-action-pins:
+_step-verify-action-pins:
 	@python3 "$(CURDIR)/infra/ci/verify_action_pins.py"
 
-_ci-actionlint:
+_step-actionlint:
 	@if [ -z "$(ACTIONLINT_IMAGE)" ]; then echo "ACTIONLINT_IMAGE unset"; exit 1; fi
 	@docker run --rm -v "$(CURDIR):/repo:ro" -w /repo "$(ACTIONLINT_IMAGE)" -color
 
-_ci-gitleaks:
+_step-gitleaks:
 	@docker run --rm -v "$(CURDIR):/repo:ro" -w /repo "$(GITLEAKS_IMAGE)" \
 		git --redact=100 --no-banner -v /repo \
 		-c /repo/infra/ci/gitleaks/.gitleaks.toml
 
-_ci-gitleaks-fixture:
+_step-gitleaks-fixture:
 	@$(PY_FUNC) python /repo/infra/ci/gitleaks/verify_fixture.py
 
-_ci-semgrep:
+_step-semgrep:
 	@docker run --rm -v "$(CURDIR):/src:ro" -w /src "$(SEMGREP_IMAGE)" \
 		semgrep --test --config /src/infra/ci/semgrep/rules /src/infra/ci/semgrep/tests
 	@docker run --rm -v "$(CURDIR):/src:ro" -w /src "$(SEMGREP_IMAGE)" semgrep --error \
 		--config /src/infra/ci/semgrep/rules --exclude /src/infra/ci/semgrep/tests /src
 
-_ci-pip-audit: ; $(PY) pip-audit
+_step-pip-audit: ; $(PY) pip-audit
 
-_ci-pnpm-audit: ; $(TS) pnpm audit --audit-level high
+_step-pnpm-audit: ; $(TS) pnpm audit --audit-level high
 
-_ci-trivy:
+_step-trivy:
 	@$(MAKE) ci-images
 	@for img in oos/api:dev oos/worker:dev oos/web:dev oos/render:dev oos/objectstore:interim; do \
-		docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$(TRIVY_IMAGE)" \
-			image --severity HIGH,CRITICAL "$$img"; \
+		docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$(CURDIR):/repo:ro" \
+			"$(TRIVY_IMAGE)" image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed \
+			--ignorefile /repo/infra/ci/.trivyignore "$$img"; \
 	done
 
-_ci-licences:
+_step-licences:
 	@$(PY) python /repo/infra/ci/check_licences.py --python-only
 	@$(TS) sh -c 'pnpm licenses list --json > /repo/infra/ci/.pnpm-licenses.json'
 	@$(PY) python /repo/infra/ci/check_licences.py --pnpm-json /repo/infra/ci/.pnpm-licenses.json
