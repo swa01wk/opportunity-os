@@ -1,0 +1,30 @@
+{
+  "name": "opportunityos",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "format:check": "prettier --check web media/scenes contracts/ts contracts/tests/*.ts eslint.config.mjs package.json tsconfig.base.json pnpm-workspace.yaml",
+    "format": "prettier --write web media/scenes contracts/ts contracts/tests/*.ts eslint.config.mjs package.json tsconfig.base.json pnpm-workspace.yaml",
+    "typecheck": "pnpm -r --parallel typecheck",
+    "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^24.10.0",
+    "eslint": "^9.39.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "globals": "^16.5.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^4.0.0"
+  },
+  "prettier": {
+    "printWidth": 100
+  }
+}

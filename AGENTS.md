@@ -22,7 +22,7 @@ Three things are true everywhere in the code:
 
 ## Repo map
 
-Docs exist now; the code folders are created by SPEC-01 (M0). If SPEC-01 changes a path, it updates this map in the same PR.
+The code folders were created by SPEC-01a (M0). A spec that changes a path updates this map in the same PR.
 
 ```
 AGENTS.md, CLAUDE.md        agent instructions and review checklist
@@ -57,17 +57,20 @@ contracts/
   python/opportunityos_contracts/   canonical Pydantic models (ADR-008)
   ts/                               generated TypeScript types (never hand-edit)
 e2e/                        Playwright: smoke/, screens/ (T-15–T-30), journeys/, conformance/, nfr/
-docker/                     one Dockerfile per service
-infra/                      Compose-adjacent config: otel collector, grafana provisioning, keycloak realm (no secrets), drills
+docker/                     one Dockerfile per service (api, worker, render, web, objectstore, otel-collector)
+infra/                      Compose-adjacent config: images.env (image pins), pin.sh, git-hooks/, otel collector,
+                            grafana provisioning, keycloak realm (no secrets), drills
 releases/                   release records (commit, image digests), ADR-022
 Makefile, compose.yaml, .env.example, CHANGELOG.md
+pyproject.toml, uv.lock     uv workspace (backend, agent, media/audio, contracts/python)
+package.json, pnpm-*.yaml   pnpm workspace (web, media/scenes, contracts/ts); eslint.config.mjs, tsconfig.base.json
 ```
 
 Layers (ADR-001) talk only through the contracts in `docs/contracts/`. `agent/` is imported only by the worker; `media/scenes` is imported by `web` for the Remotion Player and runs as the `render` service; `media/audio` is imported by the worker.
 
 ## Commands
 
-Everything runs through `make` inside containers; the host needs only Docker, make and git (PROCESS.md, ADR-019). The targets are stubs until SPEC-01 implements them.
+Everything runs through `make` inside containers; the host needs only Docker, make and git (PROCESS.md, ADR-019). `make help` lists them; targets owned by later specs fail with the spec's name.
 
 | Target | Does |
 |---|---|

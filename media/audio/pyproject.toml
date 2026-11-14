@@ -1,0 +1,14 @@
+[project]
+name = "opportunityos-audio"
+version = "0.0.0"
+description = "TTS adapters, alignment and caption segmentation"
+requires-python = "==3.13.*"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "opportunityos_audio"
+module-root = ""

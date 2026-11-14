@@ -27,3 +27,8 @@ out/
 renders/
 *.mp4
 *.wav
+
+# Toolchain (SPEC-01a)
+*.tsbuildinfo
+next-env.d.ts
+.pnpm-store/
