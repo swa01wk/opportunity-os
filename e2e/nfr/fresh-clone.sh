@@ -50,7 +50,7 @@ for service in $expected; do
 done
 
 step "/healthz returns 200 on api, worker, render and web (AC1)"
-py_probe='import os,sys,urllib.request as u; sys.exit(0 if u.urlopen(f"http://127.0.0.1:{os.environ[\"PORT\"]}/healthz").status == 200 else 1)'
+py_probe='import os,sys,urllib.request as u; sys.exit(0 if u.urlopen("http://127.0.0.1:" + os.environ["PORT"] + "/healthz").status == 200 else 1)'
 node_probe='fetch(`http://127.0.0.1:${process.env.PORT}/healthz`).then(r => process.exit(r.status === 200 ? 0 : 1), () => process.exit(1))'
 for service in api worker; do "${compose[@]}" exec -T "$service" python -c "$py_probe" || fail "$service /healthz"; echo "  $service: 200"; done
 for service in render web; do "${compose[@]}" exec -T "$service" node -e "$node_probe" || fail "$service /healthz"; echo "  $service: 200"; done
