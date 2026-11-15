@@ -1,19 +1,21 @@
-import { redactFields } from "./redaction.ts";
+import pino from "pino";
 
-const enabled = () => process.env.OOS_LOG_REDACTION !== "0";
-
-export type LogFields = Record<string, unknown>;
-
-export function log(service: string, event: string, fields: LogFields = {}): void {
-  const line = redactFields(
-    {
-      ts: new Date().toISOString(),
-      level: "info",
-      service,
-      event,
-      ...fields,
+import { redactRecord, redactString } from "./redaction.ts";
+export const logger = pino({
+  level: process.env.LOG_LEVEL ?? "info",
+  timestamp: pino.stdTimeFunctions.isoTime,
+  formatters: {
+    level: (label) => ({ level: label }),
+    log: (obj) => redactRecord(obj as Record<string, unknown>),
+  },
+  hooks: {
+    logMethod(args, method) {
+      const next = args.map((arg) => (typeof arg === "string" ? redactString(arg) : arg));
+      return method.apply(this, next as Parameters<typeof method>);
     },
-    enabled(),
-  );
-  console.log(JSON.stringify(line));
+  },
+});
+
+export function serviceLogger(service: string): pino.Logger {
+  return logger.child({ service });
 }

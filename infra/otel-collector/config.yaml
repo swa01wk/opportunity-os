@@ -16,6 +16,13 @@ processors:
     check_interval: 1s
     limit_mib: 256
   batch: {}
+  transform/logs:
+    log_statements:
+      - context: log
+        statements:
+          - replace_pattern(body, "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted]")
+          - replace_pattern(body, "Bearer [^\\s]+", "Bearer [redacted]")
+          - replace_pattern(body, "(\\?|&)(X-Amz-Signature)=[^&\\s]+", "$1$2=[redacted]")
   redaction:
     allow_all_keys: false
     redact_all_types: true
@@ -67,7 +74,7 @@ processors:
       - "(?i).*cookie.*"
       - "(?i).*password.*"
       - "(?i).*secret.*"
-      - "(?i).*token.*"
+      - "(?i)(^|[._-])(access|refresh|id|session|bearer|auth|api)[._-]?(token|key)($|[._-])"
       - "(?i).*api[_-]?key.*"
     blocked_values:
       - "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
@@ -98,5 +105,5 @@ service:
       exporters: [otlp/lgtm]
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, redaction, batch]
+      processors: [memory_limiter, transform/logs, redaction, batch]
       exporters: [otlp/lgtm]

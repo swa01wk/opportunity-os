@@ -28,6 +28,14 @@ def test_redaction_drops_secret_keys() -> None:
 
 
 @pytest.mark.t("T-38")
-def test_redaction_can_be_disabled_for_collector_tests() -> None:
+def test_gen_ai_token_counts_survive_redaction() -> None:
+    raw = {"gen_ai.usage.input_tokens": 123, "access_token": "secret-value"}
+    redacted = redact_event_dict(raw)
+    assert redacted["gen_ai.usage.input_tokens"] == 123
+    assert "access_token" not in redacted
+
+
+@pytest.mark.t("T-38")
+def test_redaction_can_be_disabled_for_unit_comparisons() -> None:
     raw = {"authorization": "Bearer secret"}
     assert redact_event_dict(raw, enabled=False) == raw

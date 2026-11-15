@@ -1,0 +1,10 @@
+# T-38 functional overlay: ship traces and logs to the debug exporter (production uses LGTM).
+exporters:
+  debug:
+    verbosity: detailed
+service:
+  pipelines:
+    traces:
+      exporters: [debug]
+    logs:
+      exporters: [debug]

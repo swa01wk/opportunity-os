@@ -54,7 +54,7 @@ def health_router(service: str, checks: Mapping[str, Check]) -> APIRouter:
                 failed.append(name)
         if failed:
             for name in failed:
-                log.info("health.not_ready", dependency=name)
+                log.warning("health.not_ready", dependency=name)
         body: dict[str, object] = {
             "status": "unavailable" if failed else "ok",
             "service": service,

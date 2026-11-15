@@ -26,5 +26,11 @@
   },
   "prettier": {
     "printWidth": 100
+  },
+  "pnpm": {
+    "overrides": {
+      "@opentelemetry/propagator-jaeger": "2.9.0",
+      "protobufjs": "8.4.1"
+    }
   }
 }

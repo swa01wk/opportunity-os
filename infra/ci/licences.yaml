@@ -22,3 +22,4 @@ overrides:
   PSFL: PSF-2.0
   "Python Software Foundation License": PSF-2.0
   pathspec: MIT
+  "3-Clause BSD License": BSD-3-Clause

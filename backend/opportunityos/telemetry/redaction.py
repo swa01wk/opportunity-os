@@ -12,7 +12,10 @@ DROP_KEY = re.compile(
     r"keycloak_client_secret|auth_secret|openai_api_key|elevenlabs_api_key|"
     r"search_api_key|token_encryption_key)$"
 )
-SECRET_KEY = re.compile(r"(?i)(secret|token|password|api[_-]?key|credential)")
+CREDENTIAL_KEY = re.compile(
+    r"(?i)(^|[._-])(access|refresh|id|session|bearer|auth|api)[._-]?(token|key)($|[._-])"
+    r"|(?:secret|password|credential|api[_-]?key)"
+)
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 SK_PREFIX = re.compile(r"\bsk-[A-Za-z0-9]{16,}\b")
 SIGNED_URL = re.compile(
@@ -23,7 +26,7 @@ MASK = "[redacted]"
 
 
 def _redact_value(key: str, value: Any) -> Any:
-    if DROP_KEY.search(key) or SECRET_KEY.search(key):
+    if DROP_KEY.search(key) or CREDENTIAL_KEY.search(key):
         return MASK
     if isinstance(value, str):
         if EMAIL.search(value):

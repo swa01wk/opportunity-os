@@ -7,4 +7,4 @@ providers:
     disableDeletion: false
     allowUiUpdates: false
     options:
-      path: /var/lib/grafana/dashboards
+      path: /otel-lgtm/grafana/conf/provisioning/dashboards/custom

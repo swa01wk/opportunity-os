@@ -3,12 +3,9 @@ import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-http";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { NodeSDK } from "@opentelemetry/sdk-node";
+
+import { registerServiceUp } from "./service-up.ts";
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
-import {
-  ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
-  ATTR_SERVICE_NAME,
-  ATTR_SERVICE_VERSION,
-} from "@opentelemetry/semantic-conventions";
 
 let sdk: NodeSDK | undefined;
 
@@ -19,9 +16,9 @@ export function initTelemetry(serviceName: string): void {
   const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://otel-collector:4318";
   diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
   const resource = resourceFromAttributes({
-    [ATTR_SERVICE_NAME]: serviceName,
-    [ATTR_SERVICE_VERSION]: process.env.APP_VERSION ?? "unknown",
-    [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: process.env.APP_ENV ?? "dev",
+    "service.name": serviceName,
+    "service.version": process.env.APP_VERSION ?? "unknown",
+    "deployment.environment": process.env.APP_ENV ?? "dev",
   });
   sdk = new NodeSDK({
     resource,
@@ -31,6 +28,7 @@ export function initTelemetry(serviceName: string): void {
     }),
   });
   sdk.start();
+  registerServiceUp();
   const stop = () => sdk?.shutdown().catch(() => undefined);
   process.once("SIGTERM", stop);
   process.once("SIGINT", stop);

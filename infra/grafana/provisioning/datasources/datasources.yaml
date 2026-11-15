@@ -1,3 +1,0 @@
-# otel-lgtm wires Prometheus, Loki and Tempo automatically; keep provisioning for overrides.
-apiVersion: 1
-deleteDatasources: []

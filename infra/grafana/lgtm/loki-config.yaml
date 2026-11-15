@@ -1,3 +1,0 @@
-# Mounted into grafana/otel-lgtm: log retention 30 days (OBSERVABILITY.md, Q-14).
-limits_config:
-  retention_period: 720h

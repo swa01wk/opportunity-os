@@ -3,7 +3,7 @@
 import { createServer } from "node:http";
 
 import { reply, tcpCheck } from "./health.ts";
-import { log } from "./telemetry/logger.ts";
+import { serviceLogger } from "./telemetry/logger.ts";
 import { initTelemetry } from "./telemetry/otel.ts";
 
 const service = "render";
@@ -22,4 +22,4 @@ createServer((req, res) => {
       res.end(JSON.stringify(body));
     },
   );
-}).listen(port, () => log(service, "render.started", { port }));
+}).listen(port, () => serviceLogger(service).info({ event: "render.started", port }));

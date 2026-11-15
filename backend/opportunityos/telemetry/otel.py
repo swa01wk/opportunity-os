@@ -18,8 +18,11 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
+from opportunityos.telemetry.service_up import register_service_up
+
 if TYPE_CHECKING:
     from fastapi import FastAPI
+    from opentelemetry.sdk.trace import TracerProvider
 
 _CONFIGURED = False
 
@@ -52,6 +55,7 @@ def configure_otel(service_name: str) -> None:
 
     reader = PeriodicExportingMetricReader(OTLPMetricExporter(endpoint=f"{endpoint}/v1/metrics"))
     metrics.set_meter_provider(MeterProvider(resource=resource, metric_readers=[reader]))
+    register_service_up()
 
     logger_provider = LoggerProvider(resource=resource)
     logger_provider.add_log_record_processor(
@@ -63,10 +67,20 @@ def configure_otel(service_name: str) -> None:
     _CONFIGURED = True
 
 
-def instrument_fastapi(app: FastAPI, *, service_name: str) -> None:
-    configure_otel(service_name)
+def instrument_fastapi(
+    app: FastAPI,
+    *,
+    service_name: str,
+    tracer_provider: TracerProvider | None = None,
+) -> None:
+    if tracer_provider is None:
+        configure_otel(service_name)
     if _sdk_disabled():
         return
     from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
-    FastAPIInstrumentor.instrument_app(app, excluded_urls="healthz,readyz")
+    FastAPIInstrumentor.instrument_app(
+        app,
+        excluded_urls="healthz,readyz",
+        tracer_provider=tracer_provider,
+    )

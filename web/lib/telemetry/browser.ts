@@ -5,11 +5,6 @@ import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { FetchInstrumentation } from "@opentelemetry/instrumentation-fetch";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { BatchSpanProcessor, WebTracerProvider } from "@opentelemetry/sdk-trace-web";
-import {
-  ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
-  ATTR_SERVICE_NAME,
-  ATTR_SERVICE_VERSION,
-} from "@opentelemetry/semantic-conventions";
 
 let started = false;
 
@@ -18,9 +13,9 @@ export function initBrowserTelemetry(): void {
   started = true;
   if (process.env.NEXT_PUBLIC_OTEL_DISABLED === "true") return;
   const resource = resourceFromAttributes({
-    [ATTR_SERVICE_NAME]: "web-browser",
-    [ATTR_SERVICE_VERSION]: process.env.NEXT_PUBLIC_APP_VERSION ?? "unknown",
-    [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: process.env.NEXT_PUBLIC_APP_ENV ?? "dev",
+    "service.name": "web-browser",
+    "service.version": process.env.NEXT_PUBLIC_APP_VERSION ?? "unknown",
+    "deployment.environment": process.env.NEXT_PUBLIC_APP_ENV ?? "dev",
   });
   const provider = new WebTracerProvider({
     resource,
