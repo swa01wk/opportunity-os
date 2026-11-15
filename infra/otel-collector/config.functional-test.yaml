@@ -1,0 +1,41 @@
+# Standalone Collector config for T-38 (no LGTM backend required).
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+  batch: {}
+  redaction:
+    allow_all_keys: false
+    redact_all_types: true
+    summary: silent
+    allowed_keys:
+      - http.route
+      - http.url
+      - service.name
+    blocked_key_patterns:
+      - "(?i).*authorization.*"
+    blocked_values:
+      - "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+      - "(?i)([?&](X-Amz-Signature)=[^&\\s]+)"
+
+exporters:
+  debug:
+    verbosity: detailed
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, redaction, batch]
+      exporters: [debug]

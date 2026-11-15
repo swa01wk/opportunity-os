@@ -1,0 +1,6 @@
+# Metric retention 90 days (OBSERVABILITY.md).
+global:
+  scrape_interval: 15s
+storage:
+  tsdb:
+    retention.time: 2160h

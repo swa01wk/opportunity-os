@@ -1,0 +1,4 @@
+# Trace retention 30 days (OBSERVABILITY.md).
+compactor:
+  compaction:
+    block_retention: 720h

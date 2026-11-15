@@ -10,17 +10,21 @@ import uvicorn
 from fastapi import FastAPI
 
 from opportunityos.health import health_app, tcp_check
-from opportunityos.logs import uvicorn_log_config
+from opportunityos.telemetry import configure_logging, instrument_fastapi
+from opportunityos.telemetry.log import uvicorn_log_config
 
 
 def create_app() -> FastAPI:
-    return health_app(
+    configure_logging()
+    app = health_app(
         "worker",
         {
             "postgres": tcp_check(os.environ["DATABASE_URL"]),
             "objectstore": tcp_check(os.environ["OBJECTSTORE_ENDPOINT"]),
         },
     )
+    instrument_fastapi(app, service_name="worker")
+    return app
 
 
 if __name__ == "__main__":

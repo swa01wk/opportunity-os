@@ -13,6 +13,8 @@ from urllib.parse import urlsplit
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import JSONResponse
 
+from opportunityos.telemetry.log import get_logger
+
 Check = Callable[[], None]
 TIMEOUT_SECONDS = 2.0
 
@@ -36,6 +38,7 @@ def tcp_check(url: str) -> Check:
 
 def health_router(service: str, checks: Mapping[str, Check]) -> APIRouter:
     router = APIRouter()
+    log = get_logger(component=service)
 
     @router.get("/healthz", include_in_schema=False)
     def healthz() -> dict[str, str]:
@@ -49,6 +52,9 @@ def health_router(service: str, checks: Mapping[str, Check]) -> APIRouter:
                 check()
             except OSError:
                 failed.append(name)
+        if failed:
+            for name in failed:
+                log.info("health.not_ready", dependency=name)
         body: dict[str, object] = {
             "status": "unavailable" if failed else "ok",
             "service": service,
