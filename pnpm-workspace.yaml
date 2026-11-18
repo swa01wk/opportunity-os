@@ -3,3 +3,9 @@ packages:
   - web
   - media/scenes
   - contracts/ts
+
+# Accepted advisories (docs/architecture/SECURITY.md#accepted-risks). Each has a revisit date there.
+auditConfig:
+  ignoreGhsas:
+    # picomatch <=4.0.7 ReDoS; no patched release; dev and test tooling only. Revisit 2027-02-28.
+    - GHSA-fc5q-39xc-vjpf
