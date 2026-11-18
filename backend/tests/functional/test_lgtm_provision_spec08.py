@@ -1,4 +1,4 @@
-"""T-38: LGTM image provisioning and Prometheus retention (SPEC-08 AC4 partial)."""
+"""T-38: LGTM provisioning from compose.yaml (SPEC-08 AC4, R4)."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 import requests
+from lgtm_compose import lgtm_service_spec, mount_configured_volumes
 from testcontainers.core.container import DockerContainer
 from wait_http import wait_http_ready
 
@@ -19,7 +20,7 @@ def _docker_mount_root() -> Path:
     return Path(os.environ.get("OOS_HOST_REPO", _checkout_root()))
 
 
-def _lgtm_image(root: Path) -> str:
+def _lgtm_image() -> str:
     for line in (_checkout_root() / "infra/images.env").read_text().splitlines():
         if line.startswith("LGTM_IMAGE="):
             return line.split("=", 1)[1].strip()
@@ -27,48 +28,42 @@ def _lgtm_image(root: Path) -> str:
     raise RuntimeError(msg)
 
 
-def _lgtm_container() -> DockerContainer:
+def _start_lgtm_from_compose() -> DockerContainer:
+    spec = lgtm_service_spec(_checkout_root())
     mount_root = _docker_mount_root()
-    return (
-        DockerContainer(_lgtm_image(_checkout_root()))
-        .with_exposed_ports(3000, 9090)
-        .with_env("PROMETHEUS_EXTRA_ARGS", "--storage.tsdb.retention.time=90d")
-        .with_env(
-            "LOKI_EXTRA_ARGS",
-            (
-                "-store.retention=30d -compactor.retention-enabled=true "
-                "-compactor.delete-request-store=filesystem"
-            ),
-        )
-        .with_volume_mapping(
-            mount_root / "infra/grafana/lgtm/tempo-config.yaml",
-            "/otel-lgtm/tempo-config.yaml",
-        )
-        .with_volume_mapping(
-            mount_root / "infra/grafana/provisioning/dashboards/custom.yaml",
-            "/otel-lgtm/grafana/conf/provisioning/dashboards/custom.yaml",
-        )
-        .with_volume_mapping(
-            mount_root / "infra/grafana/dashboards/stack-health.json",
-            "/otel-lgtm/grafana/conf/provisioning/dashboards/custom/stack-health.json",
-        )
-    )
+    container = DockerContainer(_lgtm_image()).with_exposed_ports(3000, 9090, 3100, 3200)
+    for key, value in spec["environment"].items():
+        container = container.with_env(key, value)
+    mount_configured_volumes(container, mount_root=mount_root, spec=spec)
+    return container
 
 
 @pytest.fixture(scope="module")
 def lgtm_endpoints() -> dict[str, str]:
-    container = _lgtm_container()
+    container = _start_lgtm_from_compose()
     container.start()
     host = container.get_container_host_ip()
-    grafana_port = container.get_exposed_port(3000)
-    prom_port = container.get_exposed_port(9090)
-    wait_http_ready(f"http://{host}:{grafana_port}/api/health")
-    endpoints = {
-        "grafana": f"http://{host}:{grafana_port}",
-        "prometheus": f"http://{host}:{prom_port}",
+    ports = {
+        "grafana": container.get_exposed_port(3000),
+        "prometheus": container.get_exposed_port(9090),
+        "loki": container.get_exposed_port(3100),
+        "tempo": container.get_exposed_port(3200),
     }
+    wait_http_ready(f"http://{host}:{ports['grafana']}/api/health")
+    endpoints = {name: f"http://{host}:{port}" for name, port in ports.items()}
     yield endpoints
     container.stop()
+
+
+@pytest.mark.functional
+@pytest.mark.t("T-38")
+def test_compose_lgtm_env_matches_running_stack(lgtm_endpoints: dict[str, str]) -> None:
+    spec = lgtm_service_spec(_checkout_root())
+    assert "90d" in spec["environment"]["PROMETHEUS_EXTRA_ARGS"]
+    assert "compactor.retention-enabled=true" in spec["environment"]["LOKI_EXTRA_ARGS"]
+    res = requests.get(f"{lgtm_endpoints['prometheus']}/api/v1/status/flags", timeout=15)
+    res.raise_for_status()
+    assert res.json()["data"]["storage.tsdb.retention.time"] == "90d"
 
 
 @pytest.mark.functional
@@ -86,19 +81,32 @@ def test_grafana_lists_three_datasources(lgtm_endpoints: dict[str, str]) -> None
 
 @pytest.mark.functional
 @pytest.mark.t("T-38")
-def test_prometheus_retention_flag_is_90d(lgtm_endpoints: dict[str, str]) -> None:
-    import time
+def test_grafana_provisions_stack_health_dashboard(lgtm_endpoints: dict[str, str]) -> None:
+    res = requests.get(
+        f"{lgtm_endpoints['grafana']}/api/search",
+        params={"query": "Stack health"},
+        auth=("admin", "admin"),
+        timeout=30,
+    )
+    res.raise_for_status()
+    titles = {entry.get("title") for entry in res.json()}
+    assert "Stack health" in titles
 
-    stop = time.monotonic() + 60
-    retention = ""
-    while time.monotonic() < stop:
-        try:
-            res = requests.get(f"{lgtm_endpoints['prometheus']}/api/v1/status/flags", timeout=5)
-            res.raise_for_status()
-            retention = res.json()["data"]["storage.tsdb.retention.time"]
-            if retention == "90d":
-                break
-        except requests.RequestException:
-            pass
-        time.sleep(0.25)
-    assert retention == "90d"
+
+@pytest.mark.functional
+@pytest.mark.t("T-38")
+def test_loki_retention_config_effective(lgtm_endpoints: dict[str, str]) -> None:
+    res = requests.get(f"{lgtm_endpoints['loki']}/config", timeout=30)
+    res.raise_for_status()
+    text = res.text
+    assert "retention_period" in text
+    assert "720h" in text or "30d" in text
+    assert "retention_enabled: true" in text.lower()
+
+
+@pytest.mark.functional
+@pytest.mark.t("T-38")
+def test_tempo_block_retention_effective(lgtm_endpoints: dict[str, str]) -> None:
+    res = requests.get(f"{lgtm_endpoints['tempo']}/status/config", timeout=30)
+    res.raise_for_status()
+    assert "block_retention: 720h" in res.text or "block_retention: '720h'" in res.text

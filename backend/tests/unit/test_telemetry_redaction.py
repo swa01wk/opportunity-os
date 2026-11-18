@@ -28,6 +28,15 @@ def test_redaction_drops_secret_keys() -> None:
 
 
 @pytest.mark.t("T-38")
+def test_bare_token_key_is_redacted_but_input_tokens_kept() -> None:
+    raw = {"token": "secret", "input_tokens": 7, "gen_ai.usage.input_tokens": 123}
+    redacted = redact_event_dict(raw)
+    assert redacted["token"] == "[redacted]"  # noqa: S105
+    assert redacted["input_tokens"] == 7
+    assert redacted["gen_ai.usage.input_tokens"] == 123
+
+
+@pytest.mark.t("T-38")
 def test_gen_ai_token_counts_survive_redaction() -> None:
     raw = {"gen_ai.usage.input_tokens": 123, "access_token": "secret-value"}
     redacted = redact_event_dict(raw)

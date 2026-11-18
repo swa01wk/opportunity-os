@@ -14,6 +14,7 @@ DROP_KEY = re.compile(
 )
 CREDENTIAL_KEY = re.compile(
     r"(?i)(^|[._-])(access|refresh|id|session|bearer|auth|api)[._-]?(token|key)($|[._-])"
+    r"|(^|[._-])token($|[._-])"
     r"|(?:secret|password|credential|api[_-]?key)"
 )
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")

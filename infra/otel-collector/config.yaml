@@ -20,9 +20,10 @@ processors:
     log_statements:
       - context: log
         statements:
-          - replace_pattern(body, "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted]")
-          - replace_pattern(body, "Bearer [^\\s]+", "Bearer [redacted]")
-          - replace_pattern(body, "(\\?|&)(X-Amz-Signature)=[^&\\s]+", "$1$2=[redacted]")
+          - replace_pattern(body, "(?i)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted]")
+          - replace_pattern(body, "(?i)Bearer [^\\s]+", "Bearer [redacted]")
+          - replace_pattern(body, "(?i)(\\?|&)(X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token)=[^&\\s]+", "$1$2=[redacted]")
+          - replace_pattern(body, "(?i)\\bsk-[A-Za-z0-9]{16,}\\b", "[redacted]")
   redaction:
     allow_all_keys: false
     redact_all_types: true
@@ -40,6 +41,8 @@ processors:
       - http.flavor
       - http.host
       - http.method
+      - http.request.method
+      - http.response.status_code
       - http.route
       - http.scheme
       - http.status_code
@@ -47,6 +50,7 @@ processors:
       - http.url
       - http.user_agent
       - net.host.name
+      - network.protocol.version
       - net.peer.name
       - net.peer.port
       - oos.artifact_sha256
@@ -75,6 +79,7 @@ processors:
       - "(?i).*password.*"
       - "(?i).*secret.*"
       - "(?i)(^|[._-])(access|refresh|id|session|bearer|auth|api)[._-]?(token|key)($|[._-])"
+      - "(?i)(^|[._-])token($|[._-])"
       - "(?i).*api[_-]?key.*"
     blocked_values:
       - "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"

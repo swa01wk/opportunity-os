@@ -11,6 +11,17 @@ describe("web logger redaction", () => {
     expect(masked).not.toContain("deadbeef");
   });
 
+  test("T-38 masks bare token keys but keeps input_tokens", () => {
+    const out = redactRecord({
+      token: "secret",
+      input_tokens: 7,
+      "gen_ai.usage.input_tokens": 123,
+    });
+    expect(out.token).toBe("[redacted]");
+    expect(out.input_tokens).toBe(7);
+    expect(out["gen_ai.usage.input_tokens"]).toBe(123);
+  });
+
   test("T-38 drops sensitive keys from records", () => {
     const out = redactRecord({ password: "x", event: "auth.callback_failed" });
     expect(out).not.toHaveProperty("password");

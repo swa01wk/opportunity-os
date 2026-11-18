@@ -8,3 +8,5 @@ service:
       exporters: [debug]
     logs:
       exporters: [debug]
+    metrics:
+      exporters: [debug]

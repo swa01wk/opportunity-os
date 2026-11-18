@@ -13,7 +13,7 @@
       "id": 1,
       "targets": [
         {
-          "expr": "sum by (service_name) (rate(http_server_request_duration_count[5m]))",
+          "expr": "sum by (service_name) (rate(http_server_request_duration_seconds_count[5m]))",
           "legendFormat": "{{service_name}}"
         }
       ],
@@ -28,7 +28,7 @@
       "id": 2,
       "targets": [
         {
-          "expr": "sum by (service_name) (rate(http_server_request_duration_count{http_status_code=~\"5..\"}[5m])) / sum by (service_name) (rate(http_server_request_duration_count[5m]))",
+          "expr": "sum by (service_name) (rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[5m])) / sum by (service_name) (rate(http_server_request_duration_seconds_count[5m]))",
           "legendFormat": "{{service_name}}"
         }
       ],
@@ -43,7 +43,7 @@
       "id": 3,
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, service_name) (rate(http_server_request_duration_bucket[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, service_name) (rate(http_server_request_duration_seconds_bucket[5m])))",
           "legendFormat": "{{service_name}}"
         }
       ],

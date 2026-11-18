@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from pathlib import Path
 
 import pytest
@@ -99,7 +100,16 @@ def collector_output() -> str:
             extra={"client_secret": "top-secret"},
         )
         log_provider.force_flush()
-        return container.get_wrapped_container().logs(stdout=True, stderr=True)
+        stop = time.monotonic() + 10
+        text = ""
+        while time.monotonic() < stop:
+            text = _output_text(container.get_wrapped_container().logs(stdout=True, stderr=True))
+            if "gen_ai.usage.input_tokens" in text:
+                break
+            time.sleep(0.25)
+        tracer_provider.shutdown()
+        log_provider.shutdown()
+        return text
 
 
 def _output_text(collector_output: str | bytes) -> str:
@@ -116,6 +126,14 @@ def test_collector_redacts_sensitive_span_fields(collector_output: str) -> None:
     assert "Bearer leaked" not in text
     assert "abc123" not in text
     assert "top-secret" not in text
+
+
+@pytest.mark.functional
+@pytest.mark.t("T-38")
+def test_collector_preserves_gen_ai_token_counts(collector_output: str) -> None:
+    text = _output_text(collector_output)
+    assert "gen_ai.usage.input_tokens" in text
+    assert "123" in text
 
 
 @pytest.mark.functional

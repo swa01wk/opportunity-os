@@ -1,4 +1,7 @@
-"""T-38: Prometheus reports oos.service.up for api, worker, web and render (SPEC-08 AC4)."""
+"""T-38: Prometheus reports oos.service.up for api, worker, web and render (SPEC-08 AC4).
+
+Metrics are exported directly to the LGTM OTLP HTTP endpoint, not through the Collector.
+"""
 
 from __future__ import annotations
 

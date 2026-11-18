@@ -31,3 +31,4 @@ def test_stack_health_dashboard_uses_service_up_gauge(root: Path) -> None:
         if "expr" in target
     ]
     assert any("oos_service_up" in expr or "oos.service.up" in expr for expr in targets)
+    assert any("http_server_request_duration_seconds" in expr for expr in targets)

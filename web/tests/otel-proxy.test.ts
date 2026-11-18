@@ -46,15 +46,43 @@ describe("OTLP browser proxy", () => {
     expect(res.status).toBe(415);
   });
 
-  test("T-38 rejects oversized bodies", async () => {
+  test("T-38 rejects Content-Length above cap before reading body", async () => {
+    const fetchMock = vi.mocked(globalThis.fetch);
     const { POST } = await import("../app/api/otel/[...path]/route");
-    const big = "x".repeat(512 * 1024 + 1);
+    const res = await POST(
+      new Request("http://web/api/otel/v1/traces", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "content-length": String(512 * 1024 + 1),
+        },
+        body: "small",
+      }),
+      { params: Promise.resolve({ path: ["v1", "traces"] }) },
+    );
+    expect(res.status).toBe(413);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  test("T-38 rejects streamed bodies above cap", async () => {
+    const { POST } = await import("../app/api/otel/[...path]/route");
+    const chunk = new Uint8Array(64 * 1024);
+    chunk.fill(1);
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        for (let i = 0; i < 9; i += 1) {
+          controller.enqueue(chunk);
+        }
+        controller.close();
+      },
+    });
     const res = await POST(
       new Request("http://web/api/otel/v1/traces", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: big,
-      }),
+        body: stream,
+        duplex: "half",
+      } as RequestInit),
       { params: Promise.resolve({ path: ["v1", "traces"] }) },
     );
     expect(res.status).toBe(413);

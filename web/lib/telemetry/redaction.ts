@@ -13,6 +13,8 @@ const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 const SK_PREFIX = /\bsk-[A-Za-z0-9]{16,}\b/g;
 const SIGNED_URL =
   /([?&](X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token|sig|signature|token)=[^&\s]+)/gi;
+const CREDENTIAL_KEY =
+  /(?:^|[._-])(access|refresh|id|session|bearer|auth|api)[._-]?(token|key)(?:$|[._-])|(?:^|[._-])token(?:$|[._-])|(?:secret|password|credential|api[_-]?key)/i;
 const MASK = "[redacted]";
 
 export function redactString(value: string, enabled = true): string {
@@ -31,6 +33,10 @@ export function redactRecord(
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(fields)) {
     if (DROP_PATHS.includes(key.toLowerCase())) continue;
+    if (CREDENTIAL_KEY.test(key)) {
+      out[key] = MASK;
+      continue;
+    }
     if (typeof value === "string") out[key] = redactString(value, enabled);
     else out[key] = value;
   }

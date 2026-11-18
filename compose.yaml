@@ -23,6 +23,7 @@ x-otel-env: &otel-env
   OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
   OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}
   OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-0}
+  OTEL_SEMCONV_STABILITY_OPT_IN: http
 
 x-node-build: &node-build
   NODE_IMAGE: ${NODE_IMAGE:?pinned in infra/images.env}

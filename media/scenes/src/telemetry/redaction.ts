@@ -1,7 +1,7 @@
 const DROP_KEY =
   /^(authorization|cookie|set-cookie|password|client_secret|api_key|access_token|refresh_token|id_token)$/i;
 const CREDENTIAL_KEY =
-  /(?:^|[._-])(access|refresh|id|session|bearer|auth|api)[._-]?(token|key)(?:$|[._-])|(?:secret|password|credential|api[_-]?key)/i;
+  /(?:^|[._-])(access|refresh|id|session|bearer|auth|api)[._-]?(token|key)(?:$|[._-])|(?:^|[._-])token(?:$|[._-])|(?:secret|password|credential|api[_-]?key)/i;
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 const SK_PREFIX = /\bsk-[A-Za-z0-9]{16,}\b/g;
 const SIGNED_URL =
