@@ -1,5 +1,5 @@
-# STATUS: OpportunityOS        Updated: 2026-11-14
-Current stage: 4 Build M0 (SPEC-01a, SPEC-02, SPEC-03a, SPEC-04 merged; SPEC-03b and SPEC-08 next) | Next gate: G4 M0 exit
+# STATUS: OpportunityOS        Updated: 2026-11-18
+Current stage: 4 Build M0 (SPEC-01a, SPEC-02, SPEC-03a, SPEC-03b, SPEC-04, SPEC-08 merged; SPEC-09a next) | Next gate: G4 M0 exit
 
 Release target: R0 -> R1 -> R2 (PRD Section 4). R3 conditional; R4/R5 out of scope.
 
@@ -13,11 +13,11 @@ All gates are signed by the product owner / tech lead (same person).
 | 1 Intake | G1 Requirements baseline | Signed | 2026-11-12 | docs/stage-1-intake, #2 |
 | 2 Design | G2 Design review and screens | Signed: 2a, 2b, 2c merged (HTML prototypes S-01–S-16 in #7); all G2 checks pass | 2026-11-14 | docs/stage-2a-architecture, #3 · docs/stage-2b-design, #4 · design/screens-v1, #5, #7 |
 | 3 Plan | G3 Milestone scope and dates | Signed: plan (#8), Strategy v1.0 intake (#9, #10); Q-36–Q-42 decided; all G3 checks pass; milestones not dated (Q-36) | 2026-11-14 | docs/stage-3-plan, #8 · docs/strategy-v1-intake, #9 |
-| 4 Prepare M0 | — (Definition of Ready per spec; G4 at M0 exit) | Prepared and merged 2026-11-14: [plans/M0/milestone.md](M0/milestone.md) and 21 specs with prompts; Q-43 accepted; splits confirmed. Building: SPEC-01a merged (#13) | — | docs/m0-specs, #12 · feat/SPEC-01a-toolchain, #13 |
+| 4 Prepare M0 | — (Definition of Ready per spec; G4 at M0 exit) | Prepared and merged 2026-11-14: [plans/M0/milestone.md](M0/milestone.md) and 21 specs with prompts; Q-43 accepted; splits confirmed. Building: 6 of 21 specs merged (see below) | — | docs/m0-specs, #12 · feat/SPEC-01a-toolchain, #13 |
 
 | Milestone | Scope | Status | Exit date |
 |---|---|---|---|
-| M0 | Foundation: walking skeleton: 21 specs, 39 spec-days | In progress: 4 of 21 specs merged (SPEC-01a, SPEC-02, SPEC-03a, SPEC-04) | Not dated (Q-36); forecast 5 Feb 2027 |
+| M0 | Foundation: walking skeleton: 21 specs, 39 spec-days | In progress: 6 of 21 specs merged (SPEC-01a, SPEC-02, SPEC-03a, SPEC-03b, SPEC-04, SPEC-08) | Not dated (Q-36); forecast 5 Feb 2027 |
 | M1 | Feasibility (R0): 11 specs, 28 spec-days | Planned | Not dated (Q-36); forecast 26 Mar 2027 |
 | M2 | Brief to evidence (R1): 15 specs, 33 spec-days | Planned | Not dated (Q-36); forecast 21 May 2027 |
 | M3 | Script to preview (R1): 12 specs, 26 spec-days | Planned | Not dated (Q-36); forecast 9 Jul 2027 |
@@ -40,13 +40,13 @@ M0, prepared in Stage 4: [plans/M0/milestone.md](M0/milestone.md) (dependency gr
 | [SPEC-02 CI pipeline, security scans and branch rules](M0/specs/SPEC-02/spec.md) | NFR-05, NFR-06, NFR-13, NFR-18 | — | `feat/SPEC-02-ci-pipeline`, [#19](https://github.com/swa01wk/opportunity-os/pull/19) | Done (merged 2026-11-15; 13 required checks on main) | Owner (Cursor) |
 | [SPEC-03a Contracts I: pipeline, drift, dual-runtime fixtures, common, workflow requests](M0/specs/SPEC-03a/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03a-contracts-pipeline`, [#15](https://github.com/swa01wk/opportunity-os/pull/15) | Done (merged 2026-11-15; T-33 passed) | Owner (Cursor) |
 | [SPEC-05 Object store choice and BlobStore adapter (ADR-015 amendment)](M0/specs/SPEC-05/spec.md) | R-30, NFR-04 | — | `feat/SPEC-05-object-store` | Ready | Owner (Cursor) |
-| [SPEC-08 Telemetry wiring, Collector redaction and health checks](M0/specs/SPEC-08/spec.md) | NFR-09, NFR-06, NFR-15 | — | `feat/SPEC-08-telemetry` | In review | Owner (Cursor) |
-| [SPEC-03b Contracts II: domain events, AG-UI stream, analytics](M0/specs/SPEC-03b/spec.md) | NFR-19, R-50 | — | `feat/SPEC-03b-contracts-events` | In review | Owner (Cursor) |
+| [SPEC-08 Telemetry wiring, Collector redaction and health checks](M0/specs/SPEC-08/spec.md) | NFR-09, NFR-06, NFR-15 | — | `feat/SPEC-08-telemetry`, [#22](https://github.com/swa01wk/opportunity-os/pull/22) | Done (merged 2026-11-18; T-38 Collector, Grafana and propagation parts passed; Tempo end to end moves to SPEC-13) | Owner (Cursor) |
+| [SPEC-03b Contracts II: domain events, AG-UI stream, analytics](M0/specs/SPEC-03b/spec.md) | NFR-19, R-50 | — | `feat/SPEC-03b-contracts-events`, [#21](https://github.com/swa01wk/opportunity-os/pull/21) | Done (merged 2026-11-15; T-33 passed) | Owner (Cursor) |
 | [SPEC-03c Contracts III: agent task, execution and tool contracts](M0/specs/SPEC-03c/spec.md) | NFR-19, R-63 | — | `feat/SPEC-03c-contracts-agent` | Ready | Owner (Cursor) |
 | [SPEC-03d Contracts IV: media contracts](M0/specs/SPEC-03d/spec.md) | NFR-19, R-18 | — | `feat/SPEC-03d-contracts-media` | Ready | Owner (Cursor) |
 | [SPEC-04 Database baseline, migrations, service roles and RLS](M0/specs/SPEC-04/spec.md) | R-01, NFR-04, NFR-13 | — | `feat/SPEC-04-database`, [#17](https://github.com/swa01wk/opportunity-os/pull/17) | Done (merged 2026-11-15; T-34, T-07 passed) | Owner (Cursor) |
 | [SPEC-03e Contracts V: Studio API models, OpenAPI drift, TS client, contracts 1.0.0](M0/specs/SPEC-03e/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03e-contracts-api` | Draft: needs SPEC-03b–03d | Owner (Cursor) |
-| [SPEC-09a Write path: idempotency, audit, outbox and workflow dispatch](M0/specs/SPEC-09a/spec.md) | NFR-01, R-50 | — | `feat/SPEC-09a-outbox` | Draft: needs SPEC-04, SPEC-03b, SPEC-08 | Owner (Cursor) |
+| [SPEC-09a Write path: idempotency, audit, outbox and workflow dispatch](M0/specs/SPEC-09a/spec.md) | NFR-01, R-50 | — | `feat/SPEC-09a-outbox` | Ready | Owner (Cursor) |
 | [SPEC-12 Render service skeleton, job API and resource limits](M0/specs/SPEC-12/spec.md) | R-29, NFR-12 | — | `feat/SPEC-12-render-skeleton` | Draft: needs SPEC-03d, SPEC-05 | Owner (Cursor) |
 | [SPEC-06 API authentication, members and responsibilities](M0/specs/SPEC-06/spec.md) | R-01, R-05, NFR-04 | — | `feat/SPEC-06-api-auth` | Draft: needs SPEC-04, SPEC-03e | Owner (Cursor) |
 | [SPEC-09b DBOS kill-and-resume spike (ADR-003)](M0/specs/SPEC-09b/spec.md) | NFR-01, R-50, R-51 | — | `feat/SPEC-09b-dbos-spike` | Draft: needs SPEC-09a | Owner (Cursor) |
@@ -132,7 +132,8 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 ## Open questions and risks
 
 - [QUESTIONS.md](../docs/product/QUESTIONS.md) is the running decision log for Q-01–Q-35 (DEC-01–12 are Q-01–Q-12).
-- No open questions. Q-43 accepted 14 Nov 2026 (walking-skeleton diagnostic run and the S-01 System check).
+- No open questions. Q-43 accepted 14 Nov 2026 (walking-skeleton diagnostic run and the S-01 System check). Q-44 accepted 15 Nov 2026 (Postgres slow-query logs stay on container stdout in M0, not Loki).
+- Accepted risk 18 Nov 2026: `picomatch` ≤4.0.7 ReDoS (GHSA-fc5q-39xc-vjpf), no patched release, dev and test tooling only; ignored in `pnpm audit` until 2027-02-28 ([SECURITY.md](../docs/architecture/SECURITY.md#accepted-risks), #23).
 - Q-36 answered 14 Nov 2026: no dates; build it the right way.
 - Decided 14 Nov 2026, from [Strategy v1.0](../docs/sources/Strategy-v1.0.md): Q-37–Q-42 accepted (no generative video at R0–R2, no January launch, Remotion only, strategy briefs as M0 candidates, specialist tag for physics What If briefs, secondary manual metrics at R2).
 - Risk: several strategy briefs need animation families beyond the six; tagged in M0 and estimated before M6 (DELIVERY_PLAN.md RAID).
@@ -149,6 +150,7 @@ Full list and R-xx → screen map: [UI_DESIGN.md](../docs/product/UI_DESIGN.md).
 
 ## Recent decisions
 
+- 2026-11-18: **SPEC-08 merged** (#22) after three reviews. OpenTelemetry in api, worker, render and web (server and browser via a same-origin `/api/otel/v1/traces` proxy with type and size limits); structlog and pino with redaction; the Collector redacts again (attribute allowlist, credential-key patterns, log-body transform) and is tested with the shipped `config.yaml`; stable HTTP semantic conventions; `oos.service.up` gauge added to OBSERVABILITY.md; Stack health dashboard and retention (30 days logs and traces, 90 days metrics) applied through the otel-lgtm image's own mechanism; Postgres `log_min_duration_statement=500`. Owner decisions: the Tempo end-to-end half of AC1 moves to SPEC-13 (T-38 nightly); size waiver (about 1,100 lines without lockfiles); Q-44 accepted. Owner accepted GHSA-fc5q-39xc-vjpf (#23). **SPEC-03b merged** (#21) on 2026-11-15. SPEC-09a (critical path) is Ready; next within the two-open-specs limit: SPEC-09a and one of SPEC-03c, 03d or 05.
 - 2026-11-15: **SPEC-02 merged** (#19); the `main` ruleset now requires all 13 checks (owner). Owner decision: **accept 48 MinIO module CVEs** in `oos/objectstore:interim` until 2027-02-28 (ADR-015 interim; SPEC-05 replaces the image); api, worker, web and render carry none (pip, npm and corepack removed from runtime images). Follow-ups for SPEC-01b: replace the build-time `apt-get install zlib1g` with a `pin.sh` base refresh (reproducible builds, ADR-022); a newer Go image clears 4 stdlib CVEs. Next: SPEC-03b and SPEC-08, the remaining inputs to SPEC-09a.
 - 2026-11-15: **SPEC-04 merged** (#17): baseline migration, least-privilege grant matrix (no DELETE for api/worker; only retention deletes; render media-only), forced RLS on every workspace table, synthetic seed, Testcontainers functional step `py-functional`. Open owner questions from review: Q1 baseline downgrade drops `dbos` (tech lead recommends accept); Q2 seed placeholder member to be replaced by the real owner in SPEC-06 (recommended). Next: SPEC-02.
 - 2026-11-15: **SPEC-03a merged** (#15) after four reviews. Pydantic is now canonical for `common` and `workflow-request`; Pydantic and Ajv agree on every fixture. Owner decision: **`Timestamp` must be UTC with a `Z` suffix** (breaking, recorded in the 1.0.0 change-log row; nothing stored yet). Deviations accepted: `git` in the py-tools image, the Ajv test in `contracts/ts/tests/`. SPEC-03b, 03c, 03d and SPEC-04 are Ready; SPEC-04 (critical path) and SPEC-02 (CI) started.
