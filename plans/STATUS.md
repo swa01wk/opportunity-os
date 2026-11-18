@@ -1,5 +1,5 @@
 # STATUS: OpportunityOS        Updated: 2026-11-18
-Current stage: 4 Build M0 (SPEC-01a, SPEC-02, SPEC-03a, SPEC-03b, SPEC-04, SPEC-08 merged; SPEC-09a next) | Next gate: G4 M0 exit
+Current stage: 4 Build M0 (SPEC-01a–SPEC-08 merged; SPEC-09a in review) | Next gate: G4 M0 exit
 
 Release target: R0 -> R1 -> R2 (PRD Section 4). R3 conditional; R4/R5 out of scope.
 
@@ -46,7 +46,7 @@ M0, prepared in Stage 4: [plans/M0/milestone.md](M0/milestone.md) (dependency gr
 | [SPEC-03d Contracts IV: media contracts](M0/specs/SPEC-03d/spec.md) | NFR-19, R-18 | — | `feat/SPEC-03d-contracts-media` | Ready | Owner (Cursor) |
 | [SPEC-04 Database baseline, migrations, service roles and RLS](M0/specs/SPEC-04/spec.md) | R-01, NFR-04, NFR-13 | — | `feat/SPEC-04-database`, [#17](https://github.com/swa01wk/opportunity-os/pull/17) | Done (merged 2026-11-15; T-34, T-07 passed) | Owner (Cursor) |
 | [SPEC-03e Contracts V: Studio API models, OpenAPI drift, TS client, contracts 1.0.0](M0/specs/SPEC-03e/spec.md) | NFR-19, NFR-11 | — | `feat/SPEC-03e-contracts-api` | Draft: needs SPEC-03b–03d | Owner (Cursor) |
-| [SPEC-09a Write path: idempotency, audit, outbox and workflow dispatch](M0/specs/SPEC-09a/spec.md) | NFR-01, R-50 | — | `feat/SPEC-09a-outbox` | Ready | Owner (Cursor) |
+| [SPEC-09a Write path: idempotency, audit, outbox and workflow dispatch](M0/specs/SPEC-09a/spec.md) | NFR-01, R-50 | — | `feat/SPEC-09a-outbox` | In review | Owner (Cursor) |
 | [SPEC-12 Render service skeleton, job API and resource limits](M0/specs/SPEC-12/spec.md) | R-29, NFR-12 | — | `feat/SPEC-12-render-skeleton` | Draft: needs SPEC-03d, SPEC-05 | Owner (Cursor) |
 | [SPEC-06 API authentication, members and responsibilities](M0/specs/SPEC-06/spec.md) | R-01, R-05, NFR-04 | — | `feat/SPEC-06-api-auth` | Draft: needs SPEC-04, SPEC-03e | Owner (Cursor) |
 | [SPEC-09b DBOS kill-and-resume spike (ADR-003)](M0/specs/SPEC-09b/spec.md) | NFR-01, R-50, R-51 | — | `feat/SPEC-09b-dbos-spike` | Draft: needs SPEC-09a | Owner (Cursor) |

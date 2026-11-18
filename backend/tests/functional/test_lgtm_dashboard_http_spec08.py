@@ -25,7 +25,14 @@ from testcontainers.core.container import DockerContainer
 from testcontainers.core.network import Network
 from wait_http import wait_http_ready
 
+from opportunityos.telemetry.business_metrics import IDEMPOTENCY_REPLAYS
 from opportunityos.telemetry.service_up import register_service_up
+from opportunityos.workflows.metrics import (
+    DISPATCH_SECONDS,
+    RELAY_DELIVERED,
+    register_worker_metrics,
+    set_outbox_lag_seconds,
+)
 
 
 def _checkout_root() -> Path:
@@ -68,6 +75,11 @@ def _wire_fastapi_to_collector(app: FastAPI, *, endpoint: str) -> None:
     )
     metrics.set_meter_provider(MeterProvider(resource=resource, metric_readers=[reader]))
     register_service_up()
+    register_worker_metrics()
+    set_outbox_lag_seconds(0.25)
+    DISPATCH_SECONDS.record(0.01)
+    RELAY_DELIVERED.add(1)
+    IDEMPOTENCY_REPLAYS.add(1)
     FastAPIInstrumentor.instrument_app(
         app,
         tracer_provider=tracer_provider,

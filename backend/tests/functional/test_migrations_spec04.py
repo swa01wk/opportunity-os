@@ -147,3 +147,27 @@ def test_outbox_seq_unique_under_concurrent_inserts(migrated_database: dict[str,
     assert len(all_seqs) == len(set(all_seqs))
     ordered = sorted(all_seqs)
     assert ordered == list(range(ordered[0], ordered[0] + len(ordered)))
+
+
+@pytest.mark.t("T-34")
+@pytest.mark.parametrize("role", ["oos_api", "oos_render", "oos_retention", "oos_analytics_ro"])
+def test_claim_functions_not_executable_by_non_worker_roles(
+    migrated_database: dict[str, str],
+    role: str,
+) -> None:
+    engine = create_engine(migrated_database[role])
+    with engine.connect() as conn, conn.begin():
+        conn.execute(text(f"SET LOCAL ROLE {role}"))
+        with pytest.raises(Exception, match=r"permission denied|InsufficientPrivilege"):
+            conn.execute(text("SELECT app.claim_workflow_requests(1)"))
+        with pytest.raises(Exception, match=r"permission denied|InsufficientPrivilege"):
+            conn.execute(text("SELECT app.claim_outbox_events(1)"))
+
+
+@pytest.mark.t("T-34")
+def test_claim_functions_executable_by_worker(migrated_database: dict[str, str]) -> None:
+    engine = create_engine(migrated_database["oos_worker"])
+    with engine.connect() as conn, conn.begin():
+        conn.execute(text("SET LOCAL ROLE oos_worker"))
+        conn.execute(text("SELECT app.claim_workflow_requests(0)"))
+        conn.execute(text("SELECT app.claim_outbox_events(0)"))
