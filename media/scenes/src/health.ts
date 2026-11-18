@@ -2,6 +2,8 @@
 // object store, the only dependency render has (SPEC-01a). SPEC-12 adds the job API.
 import { connect } from "node:net";
 
+import { serviceLogger } from "./telemetry/logger.ts";
+
 export type Check = () => Promise<void>;
 export type Reply = { status: number; body: Record<string, unknown> };
 
@@ -37,6 +39,13 @@ export async function reply(
     names.map((name, i) => [name, results[i]!.status === "fulfilled" ? "ok" : "fail"]),
   );
   const ready = Object.values(outcome).every((value) => value === "ok");
+  if (!ready) {
+    for (const [name, status] of Object.entries(outcome)) {
+      if (status === "fail") {
+        serviceLogger(service).warn({ event: "health.not_ready", dependency: name });
+      }
+    }
+  }
   return {
     status: ready ? 200 : 503,
     body: { status: ready ? "ok" : "unavailable", ...base, checks: outcome },

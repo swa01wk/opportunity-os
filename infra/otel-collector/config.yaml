@@ -1,5 +1,4 @@
-# OpenTelemetry Collector: the single ingest point (ADR-016). SPEC-01a forwards every
-# signal to the LGTM container; SPEC-08 adds the redaction processors (OBSERVABILITY.md).
+# OpenTelemetry Collector (ADR-016). Deviation: lives in infra/otel-collector/ (SPEC-01a), not infra/otel/.
 extensions:
   health_check:
     endpoint: 0.0.0.0:13133
@@ -17,6 +16,80 @@ processors:
     check_interval: 1s
     limit_mib: 256
   batch: {}
+  transform/logs:
+    log_statements:
+      - context: log
+        statements:
+          - replace_pattern(body, "(?i)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted]")
+          - replace_pattern(body, "(?i)Bearer [^\\s]+", "Bearer [redacted]")
+          - replace_pattern(body, "(?i)(\\?|&)(X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token)=[^&\\s]+", "$1$2=[redacted]")
+          - replace_pattern(body, "(?i)\\bsk-[A-Za-z0-9]{16,}\\b", "[redacted]")
+  redaction:
+    allow_all_keys: false
+    redact_all_types: true
+    summary: silent
+    allowed_keys:
+      - code.function
+      - code.namespace
+      - db.name
+      - db.system
+      - deployment.environment
+      - error.type
+      - gen_ai.request.model
+      - gen_ai.usage.input_tokens
+      - gen_ai.usage.output_tokens
+      - http.flavor
+      - http.host
+      - http.method
+      - http.request.method
+      - http.response.status_code
+      - http.route
+      - http.scheme
+      - http.status_code
+      - http.target
+      - http.url
+      - http.user_agent
+      - net.host.name
+      - network.protocol.version
+      - net.peer.name
+      - net.peer.port
+      - oos.artifact_sha256
+      - oos.gate
+      - oos.project_id
+      - oos.render_job_id
+      - oos.run_id
+      - oos.task_attempt_id
+      - oos.task_type
+      - oos.workflow_type
+      - oos.workspace_id
+      - server.address
+      - server.port
+      - service.name
+      - service.version
+      - span.kind
+      - telemetry.sdk.language
+      - telemetry.sdk.name
+      - telemetry.sdk.version
+      - url.full
+      - url.path
+      - url.scheme
+    blocked_key_patterns:
+      - "(?i).*authorization.*"
+      - "(?i).*cookie.*"
+      - "(?i).*password.*"
+      - "(?i).*secret.*"
+      - "(?i)(^|[._-])(access|refresh|id|session|bearer|auth|api)[._-]?(token|key)($|[._-])"
+      - "(?i)(^|[._-])token($|[._-])"
+      - "(?i).*api[_-]?key.*"
+    blocked_values:
+      - "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+      - "(?i)\\bsk-[A-Za-z0-9]{16,}\\b"
+      - "(?i)([?&](X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token)=[^&\\s]+)"
+    url_sanitizer:
+      enabled: true
+      attributes:
+        - http.url
+        - url.full
 
 exporters:
   otlp/lgtm:
@@ -29,13 +102,13 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, redaction, batch]
       exporters: [otlp/lgtm]
     metrics:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, redaction, batch]
       exporters: [otlp/lgtm]
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, transform/logs, redaction, batch]
       exporters: [otlp/lgtm]

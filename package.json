@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "format:check": "prettier --check web media/scenes contracts/ts contracts/ts/tests contracts/tests/*.ts eslint.config.mjs package.json tsconfig.base.json pnpm-workspace.yaml",
     "format": "prettier --write web media/scenes contracts/ts contracts/ts/tests contracts/tests/*.ts eslint.config.mjs package.json tsconfig.base.json pnpm-workspace.yaml",
-    "typecheck": "pnpm -r --parallel typecheck",
+    "typecheck": "pnpm -r --workspace-concurrency 1 typecheck",
     "test": "pnpm -r test"
   },
   "devDependencies": {
@@ -26,5 +26,11 @@
   },
   "prettier": {
     "printWidth": 100
+  },
+  "pnpm": {
+    "overrides": {
+      "@opentelemetry/propagator-jaeger": "2.9.0",
+      "protobufjs": "8.4.1"
+    }
   }
 }

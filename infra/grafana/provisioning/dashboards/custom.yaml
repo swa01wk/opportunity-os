@@ -1,0 +1,10 @@
+apiVersion: 1
+providers:
+  - name: opportunityos
+    orgId: 1
+    folder: OpportunityOS
+    type: file
+    disableDeletion: false
+    allowUiUpdates: false
+    options:
+      path: /otel-lgtm/grafana/conf/provisioning/dashboards/custom

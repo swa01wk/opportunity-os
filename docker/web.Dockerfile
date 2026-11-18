@@ -15,6 +15,12 @@ COPY tsconfig.base.json ./
 COPY web/package.json web/
 COPY media/scenes/package.json media/scenes/
 COPY contracts/ts/package.json contracts/ts/
+ARG NEXT_PUBLIC_APP_ENV=dev
+ARG NEXT_PUBLIC_APP_VERSION=unknown
+ARG NEXT_PUBLIC_OTEL_DISABLED=0
+ENV NEXT_PUBLIC_APP_ENV=${NEXT_PUBLIC_APP_ENV} \
+    NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION} \
+    NEXT_PUBLIC_OTEL_DISABLED=${NEXT_PUBLIC_OTEL_DISABLED}
 RUN --mount=type=cache,target=/pnpm/store pnpm install --frozen-lockfile
 COPY web web
 RUN pnpm --filter @oos/web build

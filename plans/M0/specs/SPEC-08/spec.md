@@ -28,8 +28,8 @@ Conventions are owned by OBSERVABILITY.md and observability.mdc; this spec wires
 - AC4 (NFR-15): Given the stack running, when Grafana opens, then the Stack health dashboard shows every service.
 
 ## Tests
-- T-38 integration: trace continuity web → api now, extended to worker, agent and render by SPEC-13; Collector redaction and allowlist with logger redaction disabled (AC1–AC3). Runs nightly once SPEC-02 merges.
-- Unit: logger redaction processors in both runtimes.
+- T-38 integration: trace continuity web → api propagation is unit-tested here (FastAPI `traceparent` and web Undici `fetch`); the Tempo end-to-end half of AC1 moves to SPEC-13 (T-38 nightly) with worker, agent and render. Collector redaction and allowlist use the shipped `config.yaml` plus a debug exporter overlay (AC2–AC3). Runs nightly once SPEC-02 merges.
+- Unit: logger redaction processors in both runtimes; uvicorn access-log redaction; OTLP browser proxy limits.
 
 ## Observability
 This spec is the wiring. Update OBSERVABILITY.md only if a convention changes.

@@ -1,0 +1,116 @@
+{
+  "annotations": { "list": [] },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "HTTP request rate per service (NFR-15, AC4).",
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "targets": [
+        {
+          "expr": "sum by (service_name) (rate(http_server_request_duration_seconds_count[5m]))",
+          "legendFormat": "{{service_name}}"
+        }
+      ],
+      "title": "Request rate by service",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "HTTP 5xx ratio per service.",
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "targets": [
+        {
+          "expr": "sum by (service_name) (rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[5m])) / sum by (service_name) (rate(http_server_request_duration_seconds_count[5m]))",
+          "legendFormat": "{{service_name}}"
+        }
+      ],
+      "title": "Error rate by service",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "P95 request duration.",
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, service_name) (rate(http_server_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{service_name}}"
+        }
+      ],
+      "title": "P95 duration by service",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Processes exporting OTLP metrics (oos.service.up).",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "options": { "showHeader": true },
+      "targets": [
+        {
+          "expr": "oos_service_up{service_name=~\"api|worker|web|render\"}",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "title": "Stack health (oos.service.up)",
+      "type": "table"
+    },
+    {
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 16 },
+      "id": 5,
+      "options": {
+        "content": "PostgreSQL slow-query threshold: **500 ms** (`log_min_duration_statement=500` on the postgres service). Lines go to the container stdout in M0; they are not shipped to Loki (Q-44).",
+        "mode": "markdown"
+      },
+      "title": "PostgreSQL slow-query threshold",
+      "type": "text"
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["opportunityos", "stack-health"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": ["api", "worker", "web", "render", "postgres", "objectstore", "keycloak", "otel-collector", "lgtm"],
+          "value": ["api", "worker", "web", "render", "postgres", "objectstore", "keycloak", "otel-collector", "lgtm"]
+        },
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "service",
+        "options": [
+          { "selected": true, "text": "api", "value": "api" },
+          { "selected": true, "text": "worker", "value": "worker" },
+          { "selected": true, "text": "web", "value": "web" },
+          { "selected": true, "text": "render", "value": "render" },
+          { "selected": true, "text": "postgres", "value": "postgres" },
+          { "selected": true, "text": "objectstore", "value": "objectstore" },
+          { "selected": true, "text": "keycloak", "value": "keycloak" },
+          { "selected": true, "text": "otel-collector", "value": "otel-collector" },
+          { "selected": true, "text": "lgtm", "value": "lgtm" }
+        ],
+        "query": "api,worker,web,render,postgres,objectstore,keycloak,otel-collector,lgtm",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Stack health",
+  "uid": "oos-stack-health",
+  "version": 1
+}
