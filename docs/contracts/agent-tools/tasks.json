@@ -1,5 +1,5 @@
 {
-  "$comment": "Task contracts for the three bounded model tasks (R-63, PRD §14.1). Budgets are ceilings per task run; actual money limits come from the project allowance (R-34, Q-05). Numbers are starting values, tuned from the R0 evaluation and changed only through a spec. Each task also names its output disposition and reviewing gate; per-attempt bindings are in execution.schema.json (ADR-021). Every task can also fail with stale_input or cancelled.",
+  "$comment": "Task contracts for bounded model tasks (R-63, PRD §14.1). Budgets are ceilings per task run; actual money limits come from the project allowance (R-34, Q-05). Numbers are starting values, tuned from the R0 evaluation and changed only through a spec. Each task also names its output disposition and reviewing gate; per-attempt bindings are in execution.schema.json (ADR-021). Every task can also fail with stale_input or cancelled. The diagnostic_echo task is enabled only at runtime when FEATURE_DIAGNOSTICS=1 (SPEC-11a, A-43).",
   "contractVersion": "0.4.0",
   "tasks": [
     {
@@ -113,6 +113,33 @@
       "evaluationFixtures": "agent/evals/storyboard/",
       "outputDisposition": "draft_version",
       "reviewGate": "C_storyboard"
+    },
+    {
+      "taskType": "diagnostic_echo",
+      "input": "task-io.schema.json#/$defs/DiagnosticEchoInput",
+      "output": "task-io.schema.json#/$defs/DiagnosticEchoOutput",
+      "permittedTools": [],
+      "budget": {
+        "maxModelCalls": 1,
+        "maxToolCalls": 0,
+        "maxInputTokens": 2000,
+        "maxOutputTokens": 500,
+        "maxLinkHops": 0,
+        "maxChildren": 0
+      },
+      "retryCeiling": 1,
+      "timeoutSec": 30,
+      "failureStates": [
+        "schema_invalid",
+        "timed_out",
+        "provider_error"
+      ],
+      "postconditions": [
+        "output text equals input text",
+        "modelId is the model used"
+      ],
+      "outputDisposition": "attempt_only",
+      "reviewGate": "none"
     }
   ]
 }
