@@ -8,6 +8,7 @@ from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
+from dbos_system import migrate_dbos_system
 from m0_access import ENV_PASSWORD_KEYS, LOGIN_ROLES
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
@@ -30,6 +31,8 @@ def alembic_upgrade(url: str, *, revision: str = "head") -> None:
         os.environ[key] = value
     cfg = Config(str(REPO_ROOT / "backend" / "alembic.ini"))
     command.upgrade(cfg, revision)
+    if revision == "head":
+        migrate_dbos_system(url)
 
 
 def alembic_downgrade(url: str, *, revision: str = "base") -> None:

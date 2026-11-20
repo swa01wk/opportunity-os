@@ -11,7 +11,8 @@ from uuid import UUID
 import structlog
 from dbos import DBOS, SetWorkflowID
 from opentelemetry import trace
-from sqlalchemy import create_engine, text
+from pydantic import ValidationError
+from sqlalchemy import text
 from sqlalchemy.engine import Connection, Engine
 
 from opportunityos.workflows.claim import claim_workflow_requests
@@ -58,6 +59,33 @@ def _load_request(conn: Connection, request_id: UUID) -> WorkflowRequest:
     return WorkflowRequest.model_validate(body)
 
 
+def _insert_pending_run(
+    conn: Connection,
+    *,
+    run_id: UUID,
+    workspace_id: UUID,
+    project_id: str,
+    workflow_type: str,
+) -> None:
+    conn.execute(
+        text(
+            """
+            INSERT INTO app.execution_run (
+                id, workspace_id, project_id, workflow_type, state
+            )
+            VALUES (:id, :ws, :project, :wf_type, 'pending')
+            ON CONFLICT (id) DO NOTHING
+            """
+        ),
+        {
+            "id": str(run_id),
+            "ws": str(workspace_id),
+            "project": project_id,
+            "wf_type": workflow_type,
+        },
+    )
+
+
 def _mark_dispatched(conn: Connection, *, request_id: UUID) -> None:
     if _mark_dispatched_hook is not None:
         _mark_dispatched_hook()
@@ -78,42 +106,92 @@ def dispatch_batch(engine: Engine, *, limit: int = 16) -> int:
     started = 0
     with engine.connect() as conn, conn.begin():
         conn.execute(text("SET LOCAL ROLE oos_worker"))
+        conn.execute(text("SELECT set_config('app.claim_bypass', '1', true)"))
         claimed = claim_workflow_requests(conn, limit=limit)
         for row in claimed:
-            with _TRACER.start_as_current_span("workflow.start"):
-                conn.execute(
-                    text("SELECT set_config('app.workspace_id', :wid, true)"),
-                    {"wid": str(row.workspace_id)},
-                )
-                request = _load_request(conn, row.row_id)
-                starter = _resolve_starter(request.workflow_type)
-                if starter is None:
-                    msg = f"no workflow registered for type {request.workflow_type!s}"
-                    raise RuntimeError(msg)
-
-                existing = DBOS.get_workflow_status(str(row.row_id))
-                t0 = time.monotonic()
-                if existing is not None:
-                    _log.info(
-                        "workflow.duplicate_start_ignored",
-                        workflow_id=str(row.row_id),
-                        workspace_id=str(row.workspace_id),
+            nested = conn.begin_nested()
+            try:
+                with _TRACER.start_as_current_span("workflow.start"):
+                    conn.execute(
+                        text("SELECT set_config('app.workspace_id', :wid, true)"),
+                        {"wid": str(row.workspace_id)},
                     )
-                else:
-                    with SetWorkflowID(str(row.row_id), workflow_id_reuse_policy="return-existing"):
-                        DBOS.start_workflow(
-                            starter,
-                            str(row.row_id),
-                            str(row.workspace_id),
-                            request.project_id,
-                            request.workflow_type.value,
+                    try:
+                        request = _load_request(conn, row.row_id)
+                    except ValidationError:
+                        _log.error(
+                            "workflow.dispatch_failed",
+                            workflow_id=str(row.row_id),
+                            reason="invalid_request_body",
                         )
-                    started += 1
+                        nested.rollback()
+                        conn.execute(
+                            text(
+                                """
+                                UPDATE app.workflow_request
+                                SET dispatched_at = now()
+                                WHERE id = :id AND dispatched_at IS NULL
+                                """
+                            ),
+                            {"id": str(row.row_id)},
+                        )
+                        continue
+                    starter = _resolve_starter(request.workflow_type)
+                    if starter is None:
+                        _log.error(
+                            "workflow.dispatch_failed",
+                            workflow_id=str(row.row_id),
+                            reason="unknown_workflow_type",
+                            workflow_type=request.workflow_type.value,
+                        )
+                        nested.rollback()
+                        continue
+
+                    _insert_pending_run(
+                        conn,
+                        run_id=row.row_id,
+                        workspace_id=row.workspace_id,
+                        project_id=request.project_id,
+                        workflow_type=request.workflow_type.value,
+                    )
+
+                    existing = DBOS.get_workflow_status(str(row.row_id))
+                    t0 = time.monotonic()
+                    if existing is not None:
+                        _log.info(
+                            "workflow.duplicate_start_ignored",
+                            workflow_id=str(row.row_id),
+                            workspace_id=str(row.workspace_id),
+                        )
+                    else:
+                        with SetWorkflowID(
+                            str(row.row_id),
+                            workflow_id_reuse_policy="return-existing",
+                        ):
+                            DBOS.start_workflow(
+                                starter,
+                                str(row.row_id),
+                                str(row.workspace_id),
+                                request.project_id,
+                                request.workflow_type.value,
+                            )
+                        started += 1
+                    DISPATCH_SECONDS.record(time.monotonic() - t0)
+                nested.commit()
+            except Exception:
+                nested.rollback()
+                _log.exception(
+                    "workflow.dispatch_failed",
+                    workflow_id=str(row.row_id),
+                    reason="start_failed",
+                )
+                continue
+            try:
                 _mark_dispatched(conn, request_id=row.row_id)
-                DISPATCH_SECONDS.record(time.monotonic() - t0)
+            except Exception:
+                raise
     return started
 
 
-def dispatch_once(database_url: str, *, limit: int = 16) -> int:
-    engine = create_engine(database_url)
+def dispatch_once(engine: Engine, *, limit: int = 16) -> int:
     return dispatch_batch(engine, limit=limit)

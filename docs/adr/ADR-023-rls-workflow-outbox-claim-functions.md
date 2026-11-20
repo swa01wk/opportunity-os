@@ -5,12 +5,12 @@ Status: Accepted    Date: 2026-11-18
 SPEC-04 enables **FORCE ROW LEVEL SECURITY** on every workspace-scoped table. Dispatcher and outbox relay workers poll without `app.workspace_id` set (NFR-04, ADR-006). Under FORCE RLS, `oos_worker` sees no undelivered rows in `app.workflow_request` or `app.outbox_event`, so dispatch and relay cannot run (SPEC-09a blocker).
 
 ## Decision
-- Add two **SECURITY DEFINER** functions in schema `app`, owned by `oos_migrator`, with `SET search_path = pg_catalog, app`:
+- Add two **SECURITY INVOKER** SQL functions in schema `app`, owned by `oos_migrator`, with `SET search_path = pg_catalog, app` (invoker so session `app.claim_bypass` and RLS policies apply; DEFINER hid rows under FORCE RLS in PostgreSQL 17):
   - `app.claim_workflow_requests(p_limit int)` — undelivered requests, oldest `created_at`, `FOR UPDATE SKIP LOCKED`
   - `app.claim_outbox_events(p_limit int)` — undelivered events, ordered by `seq`, `FOR UPDATE SKIP LOCKED`
 - Each returns only `(id, workspace_id)`.
 - `EXECUTE` is revoked from `PUBLIC` and granted only to `oos_worker`.
-- Inside each function, `SET LOCAL row_security = off` so the migrator owner can read all workspaces without bypassing FORCE RLS globally.
+- Companion RLS policies (`claim_poll_*` on `workflow_request` and `outbox_event`) allow the session `oos_worker` to poll only while `app.claim_bypass=1`. The dispatcher and relay set that flag for the claim transaction.
 - After a claim, the worker sets `app.workspace_id` in the same transaction and performs all other reads and writes under normal RLS.
 
 ## Alternatives

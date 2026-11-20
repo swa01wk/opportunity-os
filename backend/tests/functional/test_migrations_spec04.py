@@ -156,12 +156,14 @@ def test_claim_functions_not_executable_by_non_worker_roles(
     role: str,
 ) -> None:
     engine = create_engine(migrated_database[role])
-    with engine.connect() as conn, conn.begin():
-        conn.execute(text(f"SET LOCAL ROLE {role}"))
-        with pytest.raises(Exception, match=r"permission denied|InsufficientPrivilege"):
-            conn.execute(text("SELECT app.claim_workflow_requests(1)"))
-        with pytest.raises(Exception, match=r"permission denied|InsufficientPrivilege"):
-            conn.execute(text("SELECT app.claim_outbox_events(1)"))
+    for stmt in (
+        "SELECT app.claim_workflow_requests(1)",
+        "SELECT app.claim_outbox_events(1)",
+    ):
+        with engine.connect() as conn, conn.begin():
+            conn.execute(text(f"SET LOCAL ROLE {role}"))
+            with pytest.raises(Exception, match=r"permission denied|InsufficientPrivilege"):
+                conn.execute(text(stmt))
 
 
 @pytest.mark.t("T-34")
@@ -169,5 +171,6 @@ def test_claim_functions_executable_by_worker(migrated_database: dict[str, str])
     engine = create_engine(migrated_database["oos_worker"])
     with engine.connect() as conn, conn.begin():
         conn.execute(text("SET LOCAL ROLE oos_worker"))
+        conn.execute(text("SELECT set_config('app.claim_bypass', '1', true)"))
         conn.execute(text("SELECT app.claim_workflow_requests(0)"))
         conn.execute(text("SELECT app.claim_outbox_events(0)"))

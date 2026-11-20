@@ -195,7 +195,7 @@ def _write_workflow_request(
             "id": str(request_id),
             "ws": str(workspace_id),
             "project_id": workflow.project_id,
-            "body": workflow.model_dump_json(by_alias=True),
+            "body": workflow.model_dump_json(by_alias=True, exclude_none=True),
         },
     )
     return request_id
@@ -263,8 +263,10 @@ def execute_write_command(conn: Connection, command: WriteCommand) -> tuple[Comm
         audit=command.audit,
         trace_id=trace_id,
     )
-    _write_outbox(conn, workspace_id=command.workspace_id, event=command.outbox)
+    outbox_id = _write_outbox(conn, workspace_id=command.workspace_id, event=command.outbox)
+    request_id: str | None = None
     if command.workflow is not None:
+        request_id = command.workflow.request_id
         _write_workflow_request(conn, workspace_id=command.workspace_id, workflow=command.workflow)
 
     receipt = CommandReceipt(
@@ -272,6 +274,8 @@ def execute_write_command(conn: Connection, command: WriteCommand) -> tuple[Comm
             "workspaceId": str(command.workspace_id),
             "idempotencyKey": command.idempotency_key,
             "requestSha256": command.request_hash,
+            "requestId": request_id,
+            "eventId": str(outbox_id),
         },
     )
     _finalize_idempotency(
@@ -309,6 +313,6 @@ def build_test_workflow_event(
         subject=DomainEventSubject(type="workflow_request", id=str(request_id)),
         correlation_id=str(request_id),
         project_id=str(project_id),
-        payload=workflow.model_dump(by_alias=True),
+        payload=workflow.model_dump(by_alias=True, exclude_none=True),
     )
     return event, workflow
