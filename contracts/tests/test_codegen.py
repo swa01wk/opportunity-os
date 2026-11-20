@@ -17,6 +17,9 @@ COMMITTED_WORKFLOW = REPO_ROOT / "docs" / "contracts/events/workflow-request.sch
 COMMITTED_DOMAIN = REPO_ROOT / "docs/contracts/events/domain-event.schema.json"
 COMMITTED_AGUI = REPO_ROOT / "docs/contracts/agui/stream.json"
 COMMITTED_ANALYTICS = REPO_ROOT / "docs/contracts/analytics/events.schema.json"
+COMMITTED_TASK_IO = REPO_ROOT / "docs/contracts/agent-tools/task-io.schema.json"
+COMMITTED_EXECUTION = REPO_ROOT / "docs/contracts/agent-tools/execution.schema.json"
+COMMITTED_TOOLS = REPO_ROOT / "docs/contracts/agent-tools/tools.schema.json"
 
 
 def _load_json(path: Path) -> dict:
@@ -30,6 +33,9 @@ def _generated_paths(root: Path) -> tuple[Path, ...]:
         root / "docs/contracts/events/domain-event.schema.json",
         root / "docs/contracts/agui/stream.json",
         root / "docs/contracts/analytics/events.schema.json",
+        root / "docs/contracts/agent-tools/task-io.schema.json",
+        root / "docs/contracts/agent-tools/execution.schema.json",
+        root / "docs/contracts/agent-tools/tools.schema.json",
     )
 
 
@@ -49,12 +55,16 @@ def test_contracts_is_idempotent(tmp_path: Path) -> None:
 @pytest.mark.t("T-33")
 def test_generated_schemas_match_committed_files(tmp_path: Path) -> None:
     generate(tmp_path)
-    common, workflow, domain, agui, analytics = _generated_paths(tmp_path)
+    paths = _generated_paths(tmp_path)
+    common, workflow, domain, agui, analytics, task_io, execution, tools = paths
     assert common.read_bytes() == COMMITTED_COMMON.read_bytes()
     assert workflow.read_bytes() == COMMITTED_WORKFLOW.read_bytes()
     assert domain.read_bytes() == COMMITTED_DOMAIN.read_bytes()
     assert agui.read_bytes() == COMMITTED_AGUI.read_bytes()
     assert analytics.read_bytes() == COMMITTED_ANALYTICS.read_bytes()
+    assert task_io.read_bytes() == COMMITTED_TASK_IO.read_bytes()
+    assert execution.read_bytes() == COMMITTED_EXECUTION.read_bytes()
+    assert tools.read_bytes() == COMMITTED_TOOLS.read_bytes()
 
 
 @pytest.mark.t("T-33")

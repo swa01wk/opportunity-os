@@ -1,0 +1,38 @@
+{
+  "contractVersion": "0.4.0",
+  "taskType": "research",
+  "workspaceId": "00000000-0000-4000-8000-000000000001",
+  "projectId": "00000000-0000-4000-8000-000000000010",
+  "runId": "00000000-0000-4000-8000-000000000020",
+  "attemptId": "00000000-0000-4000-8000-000000000021",
+  "attempt": 1,
+  "idempotencyKey": "run:research:1",
+  "objective": "Synthetic research contract for contract tests",
+  "inputs": [
+    {
+      "role": "brief",
+      "ref": {
+        "id": "00000000-0000-4000-8000-000000000030",
+        "version": 1,
+        "sha256": "e7d5d8290e5e5b5b6c9568292fe50101b7c88baf2bac2241245fe49838b4f6d9"
+      }
+    }
+  ],
+  "permittedTools": ["search_sources"],
+  "budget": {
+    "maxModelCalls": 2,
+    "maxToolCalls": 4,
+    "maxInputTokens": 4000,
+    "maxOutputTokens": 800,
+    "timeoutSec": 120,
+    "retryCeiling": 1,
+    "maxChildren": 0,
+    "reserved": {
+      "amountMinor": 250,
+      "currency": "USD"
+    }
+  },
+  "dataClassification": "internal",
+  "outputDisposition": "draft_version",
+  "reviewGate": "claim_review"
+}

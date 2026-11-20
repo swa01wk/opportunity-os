@@ -9,6 +9,7 @@ from typing import Any
 
 from pydantic import BaseModel, TypeAdapter
 
+from opportunityos_contracts.agent_tools.task_io import TASK_IO_DEF_MODELS
 from opportunityos_contracts.agui.stream import (
     AGUI_DEF_MODELS,
     AGUI_STREAM_DESCRIPTION,
@@ -52,6 +53,9 @@ WORKFLOW_SCHEMA_ID = "https://opportunityos.invalid/contracts/events/workflow-re
 DOMAIN_EVENT_SCHEMA_ID = "https://opportunityos.invalid/contracts/events/domain-event.schema.json"
 AGUI_STREAM_ID = "https://opportunityos.invalid/contracts/agui/stream.json"
 ANALYTICS_SCHEMA_ID = "https://opportunityos.invalid/contracts/analytics/events.schema.json"
+TASK_IO_SCHEMA_ID = "https://opportunityos.invalid/contracts/agent-tools/task-io.schema.json"
+EXECUTION_SCHEMA_ID = "https://opportunityos.invalid/contracts/agent-tools/execution.schema.json"
+TOOLS_SCHEMA_ID = "https://opportunityos.invalid/contracts/agent-tools/tools.schema.json"
 
 BASELINES = REPO_ROOT / "contracts" / "tests" / "baselines"
 
@@ -485,6 +489,80 @@ def _build_agui_stream_document() -> dict[str, Any]:
     }
 
 
+def _patch_execution_for_diagnostic_echo(document: dict[str, Any]) -> None:
+    defs = document["$defs"]
+    task_type = defs["TaskType"]
+    if isinstance(task_type, dict) and "enum" in task_type:
+        values = list(task_type["enum"])
+        if "diagnostic_echo" not in values:
+            values.append("diagnostic_echo")
+            task_type["enum"] = values
+    task_contract = defs["TaskContract"]
+    if not isinstance(task_contract, dict):
+        return
+    properties = task_contract.setdefault("properties", {})
+    if isinstance(properties, dict):
+        draft_only = properties.get("outputDisposition", {})
+        description = draft_only.get("description") if isinstance(draft_only, dict) else None
+        properties["outputDisposition"] = {
+            "enum": ["draft_version", "attempt_only"],
+        }
+        if description:
+            properties["outputDisposition"]["description"] = description
+        review = properties.get("reviewGate", {})
+        if isinstance(review, dict) and "enum" in review:
+            gates = list(review["enum"])
+            if "none" not in gates:
+                gates.append("none")
+            review["enum"] = gates
+    task_contract["allOf"] = [
+        {
+            "if": {"properties": {"taskType": {"const": "diagnostic_echo"}}},
+            "then": {
+                "properties": {
+                    "outputDisposition": {"enum": ["attempt_only"]},
+                    "reviewGate": {"enum": ["none"]},
+                }
+            },
+        },
+        {
+            "if": {
+                "properties": {
+                    "taskType": {"enum": ["research", "script", "storyboard"]},
+                }
+            },
+            "then": {
+                "properties": {
+                    "outputDisposition": {"const": "draft_version"},
+                    "reviewGate": {
+                        "enum": ["claim_review", "B_explanation_script", "C_storyboard"]
+                    },
+                }
+            },
+        },
+    ]
+
+
+def _build_task_io_document() -> dict[str, Any]:
+    document = _load_baseline("task-io.0.4.0.json")
+    defs = dict(document["$defs"])
+    exported = _export_registry_defs(TASK_IO_DEF_MODELS, external=True)
+    for name, schema in exported.items():
+        defs[name] = schema
+    document["$defs"] = defs
+    return document
+
+
+def _build_execution_document() -> dict[str, Any]:
+    document = _load_baseline("execution.0.4.0.json")
+    _patch_execution_for_diagnostic_echo(document)
+    return document
+
+
+def _build_tools_document() -> dict[str, Any]:
+    return _load_baseline("tools.0.2.0.json")
+
+
 def _build_workflow_document() -> dict[str, Any]:
     raw = WorkflowRequest.model_json_schema(mode="serialization", ref_template="#/$defs/{model}")
     local_defs = dict(raw.pop("$defs", {}))
@@ -521,10 +599,14 @@ def generate(output_root: Path | None = None) -> None:
     domain_event_path = root / "docs" / "contracts" / "events" / "domain-event.schema.json"
     agui_path = root / "docs" / "contracts" / "agui" / "stream.json"
     analytics_path = root / "docs" / "contracts" / "analytics" / "events.schema.json"
+    task_io_path = root / "docs" / "contracts" / "agent-tools" / "task-io.schema.json"
+    execution_path = root / "docs" / "contracts" / "agent-tools" / "execution.schema.json"
+    tools_path = root / "docs" / "contracts" / "agent-tools" / "tools.schema.json"
     common_path.parent.mkdir(parents=True, exist_ok=True)
     workflow_path.parent.mkdir(parents=True, exist_ok=True)
     agui_path.parent.mkdir(parents=True, exist_ok=True)
     analytics_path.parent.mkdir(parents=True, exist_ok=True)
+    task_io_path.parent.mkdir(parents=True, exist_ok=True)
     common_doc = _build_common_document()
     common_doc["$defs"] = _polish_schema(common_doc["$defs"])
     workflow_doc = _build_workflow_document()
@@ -537,13 +619,16 @@ def generate(output_root: Path | None = None) -> None:
     domain_event_path.write_text(domain_doc, encoding="utf-8")
     agui_path.write_text(agui_doc, encoding="utf-8")
     analytics_path.write_text(analytics_doc, encoding="utf-8")
+    task_io_path.write_text(_format_json(_build_task_io_document()), encoding="utf-8")
+    execution_path.write_text(_format_json(_build_execution_document()), encoding="utf-8")
+    tools_path.write_text(_format_json(_build_tools_document()), encoding="utf-8")
 
 
 def main() -> None:
     generate()
     print(
         "contracts: regenerated common, workflow-request, domain-event, "
-        "agui/stream and analytics/events schemas"
+        "agui/stream, analytics/events and agent-tools schemas"
     )
 
 

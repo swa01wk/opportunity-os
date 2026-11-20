@@ -1,0 +1,21 @@
+{
+  "contractVersion": "0.4.0",
+  "attemptId": "00000000-0000-4000-8000-000000000021",
+  "status": "failed",
+  "validation": [
+    {
+      "stage": "schema",
+      "passed": false,
+      "failure": "schema_invalid",
+      "detail": "Synthetic failure fixture"
+    }
+  ],
+  "consumed": {
+    "modelCalls": 1,
+    "toolCalls": 0,
+    "inputTokens": 12,
+    "outputTokens": 0
+  },
+  "proposedActions": [],
+  "proposedGraphChanges": []
+}

@@ -1,5 +1,6 @@
 """Canonical Pydantic contract models (ADR-008)."""
 
+from opportunityos_contracts.agent_tools.execution import AgentResult, TaskContract
 from opportunityos_contracts.analytics.events import AnalyticsEvent, AnalyticsEventName
 from opportunityos_contracts.common import (
     Actor,
@@ -20,6 +21,7 @@ from opportunityos_contracts.events.workflow_request import WorkflowRequest, Wor
 
 __all__ = [
     "Actor",
+    "AgentResult",
     "AnalyticsEvent",
     "AnalyticsEventName",
     "BlobRef",
@@ -31,6 +33,7 @@ __all__ = [
     "Money",
     "SemVer",
     "Sha256",
+    "TaskContract",
     "Timestamp",
     "Token",
     "Uuid",

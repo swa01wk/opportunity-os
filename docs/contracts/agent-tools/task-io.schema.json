@@ -1,21 +1,40 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opportunityos.invalid/contracts/agent-tools/task-io.schema.json",
-  "x-version": "0.4.0",
-  "title": "Agent task inputs and outputs",
-  "description": "Input and output schemas for the three bounded model tasks (R-63, PRD §14.1). Outputs are proposals: they become draft records that a member reviews at Gates B and C. Nothing here is an approval.",
   "$defs": {
-    "Series": {
-      "enum": [
-        "what_if",
-        "wait_how_does_that_work",
-        "solve_this",
-        "inside_the_machine"
-      ]
-    },
     "BriefSummary": {
-      "type": "object",
       "additionalProperties": false,
+      "properties": {
+        "audience": {
+          "maxLength": 300,
+          "type": "string"
+        },
+        "contractRef": {
+          "$ref": "../common.schema.json#/$defs/VersionRef"
+        },
+        "promise": {
+          "maxLength": 300,
+          "type": "string"
+        },
+        "proposedFamilies": {
+          "items": {
+            "maxLength": 40,
+            "type": "string"
+          },
+          "maxItems": 6,
+          "type": "array"
+        },
+        "series": {
+          "$ref": "#/$defs/Series"
+        },
+        "targetDurationSec": {
+          "maximum": 90,
+          "minimum": 30,
+          "type": "integer"
+        },
+        "viewerQuestion": {
+          "maxLength": 300,
+          "type": "string"
+        }
+      },
       "required": [
         "contractRef",
         "series",
@@ -23,113 +42,93 @@
         "viewerQuestion",
         "promise"
       ],
+      "type": "object"
+    },
+    "DiagnosticEchoInput": {
+      "additionalProperties": false,
       "properties": {
-        "contractRef": {
-          "$ref": "../common.schema.json#/$defs/VersionRef"
-        },
-        "series": {
-          "$ref": "#/$defs/Series"
-        },
-        "audience": {
-          "type": "string",
-          "maxLength": 300
-        },
-        "viewerQuestion": {
-          "type": "string",
-          "maxLength": 300
-        },
-        "promise": {
-          "type": "string",
-          "maxLength": 300
-        },
-        "proposedFamilies": {
-          "type": "array",
-          "maxItems": 6,
-          "items": {
-            "type": "string",
-            "maxLength": 40
-          }
-        },
-        "targetDurationSec": {
-          "type": "integer",
-          "minimum": 30,
-          "maximum": 90
+        "text": {
+          "description": "Synthetic diagnostic string (A-43).",
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
         }
-      }
+      },
+      "required": [
+        "text"
+      ],
+      "type": "object"
+    },
+    "DiagnosticEchoOutput": {
+      "additionalProperties": false,
+      "properties": {
+        "modelId": {
+          "maxLength": 120,
+          "minLength": 1,
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "modelId"
+      ],
+      "type": "object"
     },
     "ResearchInput": {
-      "type": "object",
       "additionalProperties": false,
-      "required": [
-        "brief"
-      ],
       "properties": {
         "brief": {
           "$ref": "#/$defs/BriefSummary"
         },
-        "operatorSourceUrls": {
-          "type": "array",
-          "maxItems": 20,
-          "items": {
-            "type": "string",
-            "format": "uri",
-            "maxLength": 2000
-          },
-          "description": "Sources the operator supplied; fetched first."
-        },
         "existingClaims": {
-          "type": "array",
-          "maxItems": 100,
           "items": {
-            "type": "object",
             "additionalProperties": false,
-            "required": [
-              "claimId",
-              "text"
-            ],
             "properties": {
               "claimId": {
                 "$ref": "../common.schema.json#/$defs/Uuid"
               },
               "text": {
-                "type": "string",
-                "maxLength": 500
+                "maxLength": 500,
+                "type": "string"
               }
-            }
-          }
+            },
+            "required": [
+              "claimId",
+              "text"
+            ],
+            "type": "object"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "operatorSourceUrls": {
+          "description": "Sources the operator supplied; fetched first.",
+          "items": {
+            "format": "uri",
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array"
         }
-      }
+      },
+      "required": [
+        "brief"
+      ],
+      "type": "object"
     },
     "ResearchOutput": {
-      "type": "object",
       "additionalProperties": false,
-      "required": [
-        "claims",
-        "gaps"
-      ],
       "properties": {
         "claims": {
-          "type": "array",
-          "maxItems": 60,
           "items": {
-            "type": "object",
             "additionalProperties": false,
-            "required": [
-              "localId",
-              "text",
-              "claimType",
-              "materiality",
-              "evidence",
-              "needsSpecialist"
-            ],
             "properties": {
-              "localId": {
-                "$ref": "../common.schema.json#/$defs/LocalId"
-              },
-              "text": {
-                "type": "string",
-                "maxLength": 500
-              },
               "claimType": {
                 "enum": [
                   "fact",
@@ -141,24 +140,20 @@
                   "opinion"
                 ]
               },
-              "materiality": {
-                "enum": [
-                  "material",
-                  "supporting"
-                ]
-              },
               "evidence": {
-                "type": "array",
-                "maxItems": 6,
                 "items": {
-                  "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "sourceId",
-                    "stance",
-                    "locator"
-                  ],
                   "properties": {
+                    "excerpt": {
+                      "description": "Under 25 words (A-25). Checked against the fetched text; a non-matching excerpt marks the citation invalid (R-08 AC2).",
+                      "maxLength": 200,
+                      "type": "string"
+                    },
+                    "locator": {
+                      "description": "Section heading, page, or a quote fragment that locates the text.",
+                      "maxLength": 200,
+                      "type": "string"
+                    },
                     "sourceId": {
                       "$ref": "../common.schema.json#/$defs/Uuid",
                       "description": "Must be a sourceId returned by fetch_source in this task."
@@ -169,146 +164,178 @@
                         "partially_supports",
                         "contradicts"
                       ]
-                    },
-                    "locator": {
-                      "type": "string",
-                      "maxLength": 200,
-                      "description": "Section heading, page, or a quote fragment that locates the text."
-                    },
-                    "excerpt": {
-                      "type": "string",
-                      "maxLength": 200,
-                      "description": "Under 25 words (A-25). Checked against the fetched text; a non-matching excerpt marks the citation invalid (R-08 AC2)."
                     }
-                  }
-                }
+                  },
+                  "required": [
+                    "sourceId",
+                    "stance",
+                    "locator"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 6,
+                "type": "array"
+              },
+              "localId": {
+                "$ref": "../common.schema.json#/$defs/LocalId"
+              },
+              "materiality": {
+                "enum": [
+                  "material",
+                  "supporting"
+                ]
               },
               "needsSpecialist": {
-                "type": "boolean",
-                "description": "Health, finance, advanced science or legal (A-04). Blocks approval until a specialist clears it (R-09)."
+                "description": "Health, finance, advanced science or legal (A-04). Blocks approval until a specialist clears it (R-09).",
+                "type": "boolean"
               },
               "notes": {
-                "type": "string",
-                "maxLength": 500
+                "maxLength": 500,
+                "type": "string"
+              },
+              "text": {
+                "maxLength": 500,
+                "type": "string"
               }
-            }
-          }
+            },
+            "required": [
+              "localId",
+              "text",
+              "claimType",
+              "materiality",
+              "evidence",
+              "needsSpecialist"
+            ],
+            "type": "object"
+          },
+          "maxItems": 60,
+          "type": "array"
         },
         "gaps": {
-          "type": "array",
-          "maxItems": 20,
+          "description": "What could not be supported. Unsupported claims are listed here, not invented.",
           "items": {
-            "type": "string",
-            "maxLength": 300
+            "maxLength": 300,
+            "type": "string"
           },
-          "description": "What could not be supported. Unsupported claims are listed here, not invented."
+          "maxItems": 20,
+          "type": "array"
         },
         "suggestedDemonstration": {
-          "type": "object",
           "additionalProperties": false,
           "properties": {
             "function": {
-              "type": "string",
-              "maxLength": 64
+              "maxLength": 64,
+              "type": "string"
             },
             "params": {
               "type": "object"
             },
             "rationale": {
-              "type": "string",
-              "maxLength": 300
+              "maxLength": 300,
+              "type": "string"
             }
-          }
+          },
+          "type": "object"
         }
-      }
+      },
+      "required": [
+        "claims",
+        "gaps"
+      ],
+      "type": "object"
+    },
+    "RevisionScope": {
+      "additionalProperties": false,
+      "description": "Q-34: redraft only these beats (script) or scenes (storyboard). Anything else must equal the previous version, or the result fails with out_of_scope_change.",
+      "properties": {
+        "revisionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid"
+        },
+        "targetIds": {
+          "items": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "revisionId",
+        "targetIds"
+      ],
+      "type": "object"
     },
     "ScriptInput": {
-      "type": "object",
       "additionalProperties": false,
-      "required": [
-        "brief",
-        "claims"
-      ],
       "properties": {
         "brief": {
           "$ref": "#/$defs/BriefSummary"
         },
         "claims": {
-          "type": "array",
-          "maxItems": 60,
+          "description": "Only approved or accurately qualified claims are given to the script task (R-09).",
           "items": {
-            "type": "object",
             "additionalProperties": false,
-            "required": [
-              "claimId",
-              "text",
-              "reviewStatus"
-            ],
             "properties": {
               "claimId": {
                 "$ref": "../common.schema.json#/$defs/Uuid"
-              },
-              "text": {
-                "type": "string",
-                "maxLength": 500
               },
               "reviewStatus": {
                 "enum": [
                   "approved",
                   "qualified"
                 ]
+              },
+              "text": {
+                "maxLength": 500,
+                "type": "string"
               }
-            }
+            },
+            "required": [
+              "claimId",
+              "text",
+              "reviewStatus"
+            ],
+            "type": "object"
           },
-          "description": "Only approved or accurately qualified claims are given to the script task (R-09)."
+          "maxItems": 60,
+          "type": "array"
         },
         "demonstration": {
           "$ref": "../media/demonstration.schema.json"
         },
-        "revisionRequest": {
-          "type": "string",
-          "maxLength": 1000,
-          "description": "Operator instruction when revising an existing version."
-        },
         "previousScript": {
           "$ref": "#/$defs/ScriptOutput"
+        },
+        "revisionRequest": {
+          "description": "Operator instruction when revising an existing version.",
+          "maxLength": 1000,
+          "type": "string"
         },
         "revisionScope": {
           "$ref": "#/$defs/RevisionScope"
         }
-      }
+      },
+      "required": [
+        "brief",
+        "claims"
+      ],
+      "type": "object"
     },
     "ScriptOutput": {
-      "type": "object",
       "additionalProperties": false,
-      "required": [
-        "series",
-        "beats"
-      ],
       "properties": {
-        "series": {
-          "$ref": "#/$defs/Series"
-        },
-        "title": {
-          "type": "string",
-          "maxLength": 100
-        },
         "beats": {
-          "type": "array",
-          "minItems": 3,
-          "maxItems": 12,
           "items": {
-            "type": "object",
             "additionalProperties": false,
-            "required": [
-              "id",
-              "kind",
-              "intent",
-              "segments"
-            ],
             "properties": {
               "id": {
                 "$ref": "../common.schema.json#/$defs/LocalId"
+              },
+              "intent": {
+                "maxLength": 200,
+                "type": "string"
               },
               "kind": {
                 "enum": [
@@ -320,192 +347,200 @@
                   "closure"
                 ]
               },
-              "intent": {
-                "type": "string",
-                "maxLength": 200
-              },
               "segments": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 10,
                 "items": {
-                  "type": "object",
                   "additionalProperties": false,
+                  "properties": {
+                    "claimIds": {
+                      "items": {
+                        "$ref": "../common.schema.json#/$defs/Uuid"
+                      },
+                      "maxItems": 10,
+                      "type": "array"
+                    },
+                    "id": {
+                      "$ref": "../common.schema.json#/$defs/LocalId"
+                    },
+                    "pronunciationHints": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "say": {
+                            "maxLength": 80,
+                            "type": "string"
+                          },
+                          "text": {
+                            "maxLength": 40,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "text",
+                          "say"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 10,
+                      "type": "array"
+                    },
+                    "text": {
+                      "maxLength": 400,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
                   "required": [
                     "id",
                     "text",
                     "claimIds"
                   ],
-                  "properties": {
-                    "id": {
-                      "$ref": "../common.schema.json#/$defs/LocalId"
-                    },
-                    "text": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 400
-                    },
-                    "claimIds": {
-                      "type": "array",
-                      "maxItems": 10,
-                      "items": {
-                        "$ref": "../common.schema.json#/$defs/Uuid"
-                      }
-                    },
-                    "pronunciationHints": {
-                      "type": "array",
-                      "maxItems": 10,
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                          "text",
-                          "say"
-                        ],
-                        "properties": {
-                          "text": {
-                            "type": "string",
-                            "maxLength": 40
-                          },
-                          "say": {
-                            "type": "string",
-                            "maxLength": 80
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
+                  "type": "object"
+                },
+                "maxItems": 10,
+                "minItems": 1,
+                "type": "array"
               }
-            }
-          }
+            },
+            "required": [
+              "id",
+              "kind",
+              "intent",
+              "segments"
+            ],
+            "type": "object"
+          },
+          "maxItems": 12,
+          "minItems": 3,
+          "type": "array"
         },
         "estimatedWords": {
-          "type": "integer",
+          "maximum": 400,
           "minimum": 0,
-          "maximum": 400
+          "type": "integer"
+        },
+        "series": {
+          "$ref": "#/$defs/Series"
+        },
+        "title": {
+          "maxLength": 100,
+          "type": "string"
         }
-      }
+      },
+      "required": [
+        "series",
+        "beats"
+      ],
+      "type": "object"
+    },
+    "Series": {
+      "enum": [
+        "what_if",
+        "wait_how_does_that_work",
+        "solve_this",
+        "inside_the_machine"
+      ]
     },
     "StoryboardInput": {
-      "type": "object",
       "additionalProperties": false,
-      "required": [
-        "brief",
-        "script",
-        "brandKit",
-        "demonstrations"
-      ],
       "properties": {
+        "brandKit": {
+          "$ref": "../common.schema.json#/$defs/VersionRef"
+        },
         "brief": {
           "$ref": "#/$defs/BriefSummary"
+        },
+        "demonstrations": {
+          "items": {
+            "$ref": "../media/demonstration.schema.json"
+          },
+          "maxItems": 8,
+          "type": "array"
+        },
+        "previousSpec": {
+          "$ref": "../media/video-spec.schema.json"
+        },
+        "revisionRequest": {
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "revisionScope": {
+          "$ref": "#/$defs/RevisionScope"
         },
         "script": {
           "$ref": "#/$defs/ScriptOutput"
         },
         "scriptRef": {
           "$ref": "../common.schema.json#/$defs/VersionRef"
-        },
-        "brandKit": {
-          "$ref": "../common.schema.json#/$defs/VersionRef"
-        },
-        "demonstrations": {
-          "type": "array",
-          "maxItems": 8,
-          "items": {
-            "$ref": "../media/demonstration.schema.json"
-          }
-        },
-        "revisionRequest": {
-          "type": "string",
-          "maxLength": 1000
-        },
-        "previousSpec": {
-          "$ref": "../media/video-spec.schema.json"
-        },
-        "revisionScope": {
-          "$ref": "#/$defs/RevisionScope"
         }
-      }
+      },
+      "required": [
+        "brief",
+        "script",
+        "brandKit",
+        "demonstrations"
+      ],
+      "type": "object"
     },
     "StoryboardOutput": {
-      "type": "object",
       "additionalProperties": false,
-      "required": [
-        "videoSpec",
-        "unsupportedNeeds"
-      ],
       "properties": {
-        "videoSpec": {
-          "$ref": "../media/video-spec.schema.json",
-          "description": "timing.status must be provisional."
-        },
         "sceneNotes": {
-          "type": "array",
-          "maxItems": 24,
           "items": {
-            "type": "object",
             "additionalProperties": false,
+            "properties": {
+              "note": {
+                "maxLength": 300,
+                "type": "string"
+              },
+              "sceneId": {
+                "$ref": "../common.schema.json#/$defs/LocalId"
+              }
+            },
             "required": [
               "sceneId",
               "note"
             ],
-            "properties": {
-              "sceneId": {
-                "$ref": "../common.schema.json#/$defs/LocalId"
-              },
-              "note": {
-                "type": "string",
-                "maxLength": 300
-              }
-            }
-          }
+            "type": "object"
+          },
+          "maxItems": 24,
+          "type": "array"
         },
         "unsupportedNeeds": {
-          "type": "array",
-          "maxItems": 20,
+          "description": "Visual operations the catalogue lacks (R-07). Shown to the operator before any paid production.",
           "items": {
-            "type": "object",
             "additionalProperties": false,
+            "properties": {
+              "description": {
+                "maxLength": 300,
+                "type": "string"
+              },
+              "sceneId": {
+                "$ref": "../common.schema.json#/$defs/LocalId"
+              }
+            },
             "required": [
               "description"
             ],
-            "properties": {
-              "sceneId": {
-                "$ref": "../common.schema.json#/$defs/LocalId"
-              },
-              "description": {
-                "type": "string",
-                "maxLength": 300
-              }
-            }
+            "type": "object"
           },
-          "description": "Visual operations the catalogue lacks (R-07). Shown to the operator before any paid production."
-        }
-      }
-    },
-    "RevisionScope": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "revisionId",
-        "targetIds"
-      ],
-      "description": "Q-34: redraft only these beats (script) or scenes (storyboard). Anything else must equal the previous version, or the result fails with out_of_scope_change.",
-      "properties": {
-        "revisionId": {
-          "$ref": "../common.schema.json#/$defs/Uuid"
+          "maxItems": 20,
+          "type": "array"
         },
-        "targetIds": {
-          "type": "array",
-          "minItems": 1,
-          "maxItems": 12,
-          "items": {
-            "type": "string",
-            "maxLength": 100
-          }
+        "videoSpec": {
+          "$ref": "../media/video-spec.schema.json",
+          "description": "timing.status must be provisional."
         }
-      }
+      },
+      "required": [
+        "videoSpec",
+        "unsupportedNeeds"
+      ],
+      "type": "object"
     }
-  }
+  },
+  "$id": "https://opportunityos.invalid/contracts/agent-tools/task-io.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Input and output schemas for the three bounded model tasks (R-63, PRD §14.1). Outputs are proposals: they become draft records that a member reviews at Gates B and C. Nothing here is an approval.",
+  "title": "Agent task inputs and outputs",
+  "x-version": "0.4.0"
 }
