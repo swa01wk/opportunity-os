@@ -67,7 +67,17 @@
       "type": "table"
     },
     {
-      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Age of the oldest undelivered outbox event (SPEC-09a, NFR-01).",
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "id": 6,
+      "targets": [{ "expr": "oos_outbox_lag_seconds", "legendFormat": "lag" }],
+      "title": "Outbox lag (seconds)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 24 },
       "id": 5,
       "options": {
         "content": "PostgreSQL slow-query threshold: **500 ms** (`log_min_duration_statement=500` on the postgres service). Lines go to the container stdout in M0; they are not shipped to Loki (Q-44).",

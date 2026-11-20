@@ -201,9 +201,17 @@ services:
       dockerfile: docker/api.Dockerfile
       target: runtime
       args: *python-build
-    command: ["alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
+    command:
+      [
+        "sh",
+        "-c",
+        "alembic -c backend/alembic.ini upgrade head && python -m dbos_system",
+      ]
+    working_dir: /repo
     environment:
+      PYTHONPATH: /repo/backend/migrations
       MIGRATE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:?set in .env}:${POSTGRES_PASSWORD:?set in .env}@postgres:5432/${POSTGRES_DB}
+      DBOS_SYSTEM_SCHEMA: ${DBOS_SYSTEM_SCHEMA:-dbos}
       DB_PASSWORD_API: ${DB_PASSWORD_API:?set in .env}
       DB_PASSWORD_WORKER: ${DB_PASSWORD_WORKER:?set in .env}
       DB_PASSWORD_RENDER: ${DB_PASSWORD_RENDER:?set in .env}

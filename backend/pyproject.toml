@@ -5,7 +5,9 @@ description = "OpportunityOS backend: api and worker entry points (ADR-001)"
 requires-python = "==3.13.*"
 dependencies = [
     "alembic>=1.16,<2",
+    "dbos~=3.6.0",
     "fastapi>=0.120,<1",
+    "opportunityos-contracts",
     "opentelemetry-api~=1.45",
     "opentelemetry-exporter-otlp-proto-http~=1.45",
     "opentelemetry-instrumentation-fastapi~=0.66b0",
@@ -27,3 +29,6 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = "opportunityos"
 module-root = ""
+
+[tool.uv.sources]
+opportunityos-contracts = { workspace = true }

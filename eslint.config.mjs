@@ -7,6 +7,7 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
   {
     ignores: [
+      "**/.venv/**",
       "**/node_modules/**",
       "**/.next/**",
       "**/dist/**",
