@@ -16,7 +16,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection, Engine
 
 from opportunityos.workflows.claim import claim_workflow_requests
-from opportunityos.workflows.metrics import DISPATCH_SECONDS
+from opportunityos.workflows.metrics import DISPATCH_FAILED, DISPATCH_SECONDS
 from opportunityos_contracts.events.workflow_request import WorkflowRequest, WorkflowType
 
 _log = structlog.get_logger(__name__)
@@ -106,7 +106,6 @@ def dispatch_batch(engine: Engine, *, limit: int = 16) -> int:
     started = 0
     with engine.connect() as conn, conn.begin():
         conn.execute(text("SET LOCAL ROLE oos_worker"))
-        conn.execute(text("SELECT set_config('app.claim_bypass', '1', true)"))
         claimed = claim_workflow_requests(conn, limit=limit)
         for row in claimed:
             nested = conn.begin_nested()
@@ -119,6 +118,7 @@ def dispatch_batch(engine: Engine, *, limit: int = 16) -> int:
                     try:
                         request = _load_request(conn, row.row_id)
                     except ValidationError:
+                        DISPATCH_FAILED.add(1, {"reason": "invalid_request_body"})
                         _log.error(
                             "workflow.dispatch_failed",
                             workflow_id=str(row.row_id),
@@ -138,6 +138,7 @@ def dispatch_batch(engine: Engine, *, limit: int = 16) -> int:
                         continue
                     starter = _resolve_starter(request.workflow_type)
                     if starter is None:
+                        DISPATCH_FAILED.add(1, {"reason": "unknown_workflow_type"})
                         _log.error(
                             "workflow.dispatch_failed",
                             workflow_id=str(row.row_id),
@@ -186,10 +187,7 @@ def dispatch_batch(engine: Engine, *, limit: int = 16) -> int:
                     reason="start_failed",
                 )
                 continue
-            try:
-                _mark_dispatched(conn, request_id=row.row_id)
-            except Exception:
-                raise
+            _mark_dispatched(conn, request_id=row.row_id)
     return started
 
 

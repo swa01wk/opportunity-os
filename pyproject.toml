@@ -12,6 +12,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "hypothesis>=6.0,<7",
     "diff-cover>=9.2,<10",
     "httpx>=0.28,<1",
     "jsonschema>=4.23,<5",

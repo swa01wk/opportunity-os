@@ -1,28 +1,31 @@
 -- ADR-023: SECURITY DEFINER claim helpers for FORCE RLS tables (SPEC-09a).
--- RLS uses the session user (oos_worker). The caller must set app.claim_bypass=1
--- for the duration of the claim transaction; companion policies gate SELECT/UPDATE.
+-- Role oos_claim is created in the Alembic revision before this script runs.
 
-CREATE POLICY claim_poll_select ON app.workflow_request
-  FOR SELECT TO oos_worker
-  USING (current_setting('app.claim_bypass', true) = '1');
+GRANT SELECT, UPDATE ON app.workflow_request TO oos_claim;
+GRANT SELECT, UPDATE ON app.outbox_event TO oos_claim;
 
-CREATE POLICY claim_poll_update ON app.workflow_request
-  FOR UPDATE TO oos_worker
-  USING (current_setting('app.claim_bypass', true) = '1')
-  WITH CHECK (current_setting('app.claim_bypass', true) = '1');
+CREATE POLICY claim_fn_select ON app.workflow_request
+  FOR SELECT TO oos_claim
+  USING (true);
 
-CREATE POLICY claim_poll_select ON app.outbox_event
-  FOR SELECT TO oos_worker
-  USING (current_setting('app.claim_bypass', true) = '1');
+CREATE POLICY claim_fn_update ON app.workflow_request
+  FOR UPDATE TO oos_claim
+  USING (true)
+  WITH CHECK (true);
 
-CREATE POLICY claim_poll_update ON app.outbox_event
-  FOR UPDATE TO oos_worker
-  USING (current_setting('app.claim_bypass', true) = '1')
-  WITH CHECK (current_setting('app.claim_bypass', true) = '1');
+CREATE POLICY claim_fn_select ON app.outbox_event
+  FOR SELECT TO oos_claim
+  USING (true);
+
+CREATE POLICY claim_fn_update ON app.outbox_event
+  FOR UPDATE TO oos_claim
+  USING (true)
+  WITH CHECK (true);
 
 CREATE OR REPLACE FUNCTION app.claim_workflow_requests(p_limit int)
 RETURNS TABLE (id uuid, workspace_id uuid)
 LANGUAGE sql
+SECURITY DEFINER
 SET search_path = pg_catalog, app
 AS $func$
   SELECT wr.id, wr.workspace_id
@@ -36,6 +39,7 @@ $func$;
 CREATE OR REPLACE FUNCTION app.claim_outbox_events(p_limit int)
 RETURNS TABLE (id uuid, workspace_id uuid)
 LANGUAGE sql
+SECURITY DEFINER
 SET search_path = pg_catalog, app
 AS $func$
   SELECT oe.id, oe.workspace_id
@@ -46,8 +50,8 @@ AS $func$
   LIMIT GREATEST(p_limit, 0);
 $func$;
 
-ALTER FUNCTION app.claim_workflow_requests(int) OWNER TO oos_migrator;
-ALTER FUNCTION app.claim_outbox_events(int) OWNER TO oos_migrator;
+ALTER FUNCTION app.claim_workflow_requests(int) OWNER TO oos_claim;
+ALTER FUNCTION app.claim_outbox_events(int) OWNER TO oos_claim;
 
 REVOKE ALL ON FUNCTION app.claim_workflow_requests(int) FROM PUBLIC;
 REVOKE ALL ON FUNCTION app.claim_outbox_events(int) FROM PUBLIC;

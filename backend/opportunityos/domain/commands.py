@@ -11,10 +11,8 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import text
-from sqlalchemy.engine import Connection
-
 from opportunityos.domain.errors import IdempotencyKeyReused
+from opportunityos.domain.write_path_port import WritePathPort
 from opportunityos.telemetry.business_metrics import record_idempotency_replay
 from opportunityos.telemetry.propagation import current_traceparent
 from opportunityos_contracts.common import Actor
@@ -56,7 +54,7 @@ class WriteCommand:
     audit: AuditRecord
     outbox: DomainEvent
     workflow: WorkflowRequest | None
-    apply_domain_change: Callable[[Connection], None]
+    apply_domain_change: Callable[[WritePathPort], None]
 
 
 def _trace_id_from_traceparent(traceparent: str | None) -> str | None:
@@ -68,175 +66,20 @@ def _trace_id_from_traceparent(traceparent: str | None) -> str | None:
     return None
 
 
-def _insert_idempotency_placeholder(
-    conn: Connection,
-    *,
-    workspace_id: UUID,
-    key: str,
-    request_hash: str,
-) -> None:
-    conn.execute(
-        text(
-            """
-            INSERT INTO app.idempotency_key (key, workspace_id, request_sha256, response)
-            VALUES (:key, :ws, :hash, CAST(:response AS jsonb))
-            ON CONFLICT (workspace_id, key) DO NOTHING
-            """
-        ),
-        {
-            "key": key,
-            "ws": str(workspace_id),
-            "hash": request_hash,
-            "response": json.dumps(PLACEHOLDER_RESPONSE),
-        },
-    )
-
-
-def _lock_idempotency_row(
-    conn: Connection,
-    *,
-    workspace_id: UUID,
-    key: str,
-) -> tuple[str, dict[str, Any]] | None:
-    row = (
-        conn.execute(
-            text(
-                """
-                SELECT request_sha256, response
-                FROM app.idempotency_key
-                WHERE workspace_id = :ws AND key = :key
-                FOR UPDATE
-                """
-            ),
-            {"ws": str(workspace_id), "key": key},
-        )
-        .mappings()
-        .first()
-    )
-    if row is None:
-        return None
-    response = dict(row["response"])
-    return str(row["request_sha256"]), response
-
-
-def _write_audit(
-    conn: Connection,
-    *,
-    workspace_id: UUID,
-    actor: Actor,
-    audit: AuditRecord,
-    trace_id: str | None,
-) -> None:
-    conn.execute(
-        text(
-            """
-            INSERT INTO app.audit_log (
-                workspace_id, actor, action, subject, request_id, trace_id, at
-            )
-            VALUES (
-                :ws,
-                CAST(:actor AS jsonb),
-                :action,
-                CAST(:subject AS jsonb),
-                :request_id,
-                :trace_id,
-                :at
-            )
-            """
-        ),
-        {
-            "ws": str(workspace_id),
-            "actor": actor.model_dump_json(by_alias=True),
-            "action": audit.action,
-            "subject": json.dumps(audit.subject),
-            "request_id": str(audit.request_id) if audit.request_id else None,
-            "trace_id": trace_id,
-            "at": datetime.now(tz=UTC),
-        },
-    )
-
-
-def _write_outbox(conn: Connection, *, workspace_id: UUID, event: DomainEvent) -> uuid.UUID:
-    traceparent = current_traceparent() or event.traceparent
-    event_body = event.model_copy(update={"traceparent": traceparent})
-    outbox_id = uuid.uuid4()
-    conn.execute(
-        text(
-            """
-            INSERT INTO app.outbox_event (id, workspace_id, type, body)
-            VALUES (:id, :ws, :type, CAST(:body AS jsonb))
-            """
-        ),
-        {
-            "id": str(outbox_id),
-            "ws": str(workspace_id),
-            "type": event.type.value,
-            "body": event_body.model_dump_json(by_alias=True),
-        },
-    )
-    return outbox_id
-
-
-def _write_workflow_request(
-    conn: Connection,
-    *,
-    workspace_id: UUID,
-    workflow: WorkflowRequest,
-) -> uuid.UUID:
-    request_id = uuid.UUID(workflow.request_id)
-    conn.execute(
-        text(
-            """
-            INSERT INTO app.workflow_request (id, workspace_id, project_id, body)
-            VALUES (:id, :ws, :project_id, CAST(:body AS jsonb))
-            """
-        ),
-        {
-            "id": str(request_id),
-            "ws": str(workspace_id),
-            "project_id": workflow.project_id,
-            "body": workflow.model_dump_json(by_alias=True, exclude_none=True),
-        },
-    )
-    return request_id
-
-
-def _finalize_idempotency(
-    conn: Connection,
-    *,
-    workspace_id: UUID,
-    key: str,
-    receipt: CommandReceipt,
-) -> None:
-    conn.execute(
-        text(
-            """
-            UPDATE app.idempotency_key
-            SET response = CAST(:response AS jsonb)
-            WHERE workspace_id = :ws AND key = :key
-            """
-        ),
-        {
-            "ws": str(workspace_id),
-            "key": key,
-            "response": json.dumps(receipt.body),
-        },
-    )
-
-
-def execute_write_command(conn: Connection, command: WriteCommand) -> tuple[CommandReceipt, bool]:
+def execute_write_command(
+    port: WritePathPort,
+    command: WriteCommand,
+) -> tuple[CommandReceipt, bool]:
     """Run the write path in an open transaction (caller sets role and workspace).
 
     Returns the receipt and whether this call was a replay of a completed command.
     """
-    _insert_idempotency_placeholder(
-        conn,
+    port.insert_idempotency_placeholder(
         workspace_id=command.workspace_id,
         key=command.idempotency_key,
         request_hash=command.request_hash,
     )
-    locked = _lock_idempotency_row(
-        conn,
+    locked = port.lock_idempotency_row(
         workspace_id=command.workspace_id,
         key=command.idempotency_key,
     )
@@ -255,19 +98,27 @@ def execute_write_command(conn: Connection, command: WriteCommand) -> tuple[Comm
     traceparent = current_traceparent()
     trace_id = _trace_id_from_traceparent(traceparent)
 
-    command.apply_domain_change(conn)
-    _write_audit(
-        conn,
+    command.apply_domain_change(port)
+    port.write_audit(
         workspace_id=command.workspace_id,
         actor=command.actor,
-        audit=command.audit,
+        action=command.audit.action,
+        subject=command.audit.subject,
+        request_id=command.audit.request_id,
         trace_id=trace_id,
     )
-    outbox_id = _write_outbox(conn, workspace_id=command.workspace_id, event=command.outbox)
+    outbox_id = port.write_outbox(
+        workspace_id=command.workspace_id,
+        event=command.outbox,
+        traceparent=traceparent or command.outbox.traceparent,
+    )
     request_id: str | None = None
     if command.workflow is not None:
         request_id = command.workflow.request_id
-        _write_workflow_request(conn, workspace_id=command.workspace_id, workflow=command.workflow)
+        port.write_workflow_request(
+            workspace_id=command.workspace_id,
+            workflow=command.workflow,
+        )
 
     receipt = CommandReceipt(
         body={
@@ -278,11 +129,10 @@ def execute_write_command(conn: Connection, command: WriteCommand) -> tuple[Comm
             "eventId": str(outbox_id),
         },
     )
-    _finalize_idempotency(
-        conn,
+    port.finalize_idempotency(
         workspace_id=command.workspace_id,
         key=command.idempotency_key,
-        receipt=receipt,
+        receipt_body=receipt.body,
     )
     return receipt, False
 

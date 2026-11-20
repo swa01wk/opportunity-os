@@ -31,7 +31,6 @@ def relay_batch(
     delivered = 0
     with engine.connect() as conn, conn.begin():
         conn.execute(text("SET LOCAL ROLE oos_worker"))
-        conn.execute(text("SELECT set_config('app.claim_bypass', '1', true)"))
         claimed = claim_outbox_events(conn, limit=limit)
         for row in claimed:
             nested = conn.begin_nested()

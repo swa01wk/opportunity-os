@@ -24,7 +24,9 @@ from opportunityos.domain.commands import (
     request_body_sha256,
 )
 from opportunityos.domain.errors import IdempotencyKeyReused
+from opportunityos.domain.write_path_port import WritePathPort
 from opportunityos.repo.session import workspace_transaction
+from opportunityos.repo.write_path import SqlWritePathPort
 from opportunityos.workflows import dispatcher, relay
 from opportunityos.workflows.dbos_runtime import init_dbos, launch_dbos
 from opportunityos.workflows.poll import worker_poll_cycle
@@ -125,11 +127,12 @@ def _run_command(
         request_id=request_id,
     )
 
-    def apply(conn) -> None:
+    def apply(port: WritePathPort) -> None:
         if domain_fail:
             msg = "injected domain failure"
             raise RuntimeError(msg)
-        conn.execute(
+        assert isinstance(port, SqlWritePathPort)
+        port.connection.execute(
             text(
                 """
                 UPDATE app.project
@@ -151,7 +154,8 @@ def _run_command(
         apply_domain_change=apply,
     )
     with workspace_transaction(engine, role="oos_worker", workspace_id=WS) as conn:
-        return execute_write_command(conn, command)
+        port = SqlWritePathPort(conn)
+        return execute_write_command(port, command)
 
 
 def _run_state(engine: Engine, request_id: UUID) -> str | None:

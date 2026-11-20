@@ -20,6 +20,7 @@ def _observe_outbox_lag(_: object) -> list[Observation]:
 
 
 DISPATCH_SECONDS = _METER.create_histogram("oos.workflow_request.dispatch_seconds")
+DISPATCH_FAILED = _METER.create_counter("oos.workflow_dispatch_failed_total")
 RELAY_DELIVERED = _METER.create_counter("oos.relay.delivered")
 
 

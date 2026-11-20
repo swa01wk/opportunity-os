@@ -7,6 +7,7 @@ class WritePathError(Exception):
     """Base for write-path failures surfaced as problem responses."""
 
     error_class: str = "conflict"
+    http_status: int = 409
 
     def __init__(self, *, problem_type: str, detail: str) -> None:
         self.problem_type = problem_type
