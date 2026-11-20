@@ -33,3 +33,5 @@ renders/
 *.tsbuildinfo
 next-env.d.ts
 .pnpm-store/
+.coverage
+.coverage.*
